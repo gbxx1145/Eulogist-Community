@@ -1,1 +1,4 @@
+# Debugger exec file
 __*.exe
+# Actually everybody has to change its content
+main.go
