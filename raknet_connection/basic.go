@@ -9,6 +9,8 @@ import (
 	"crypto/rand"
 	"fmt"
 	"net"
+
+	"github.com/pterm/pterm"
 )
 
 // 初始化一个空的 RaknetConnection
@@ -84,6 +86,10 @@ func (r *RaknetConnection) ProcessIncomingPackets() {
 			packetHeader.Read(buffer)
 			packetFunc := packet.ListAllPackets()[packetHeader.PacketID]
 			// get header and packet func
+			if packetFunc == nil {
+				pterm.Warning.Println(fmt.Sprintf("packet %v read an empty result", packetHeader.PacketID))
+				continue
+			}
 			pk := packetFunc()
 			func() {
 				defer func() {
