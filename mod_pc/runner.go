@@ -10,7 +10,7 @@ import (
 // 在 127.0.0.1 运行一个代理服务器以等待
 // Mod PC 连接，
 // 并指定该服务器开放的端口为 runningPort
-func RunServer(runningPort uint16) *Server {
+func RunServer(runningPort uint16) (*Server, error) {
 	var downInitConnect bool
 	server := new(Server)
 	// prepare
@@ -50,12 +50,12 @@ func RunServer(runningPort uint16) *Server {
 		// handle init connection packets
 		select {
 		case <-server.GetContext().Done():
-			return nil
+			return nil, fmt.Errorf("RunServer: Mod PC closed their connection with eulogist")
 		default:
 		}
 		// check connection states
 		if downInitConnect {
-			return server
+			return server, nil
 		}
 		// return
 	}
