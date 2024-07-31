@@ -123,6 +123,6 @@ func (decoder *Decoder) Decode() (packets [][]byte, err error) {
 		return nil, fmt.Errorf("number of packets %v in compressed batch exceeds %v", len(packets), maximumInBatch)
 	}
 
-	fmt.Println(packets)
+	// fmt.Println(packets)
 	return packets, nil
 }

@@ -1,7 +1,8 @@
 package main
 
-import ModPC "Eulogist/mod_pc"
-
 func main() {
-	ModPC.RunServer()
+	err := UnfoldEulogist("48285363", "", `type your fb token`)
+	if err != nil {
+		panic(err)
+	}
 }

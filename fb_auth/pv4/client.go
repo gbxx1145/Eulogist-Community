@@ -200,7 +200,6 @@ func (client *Client) Auth(
 		panic(fmt.Sprintf("Auth: %v", err))
 	}
 	authResponse = assertAndParse[AuthResponse](httpResponse)
-	fmt.Println(authResponse.RentalServerIP)
 	// get response
 	if !authResponse.SuccessStates {
 		failedReason := authResponse.Message

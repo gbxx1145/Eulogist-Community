@@ -7,8 +7,6 @@ import (
 	"crypto/cipher"
 	"fmt"
 	"io"
-
-	"github.com/pterm/pterm"
 )
 
 // Encoder handles the encoding of Minecraft packets that are sent to an io.Writer. The packets are compressed
@@ -45,7 +43,7 @@ func (encoder *Encoder) EnableCompression(compression Compression) {
 // Encode encodes the packets passed. It writes all of them as a single packet which is  compressed and
 // optionally encrypted.
 func (encoder *Encoder) Encode(packets [][]byte) error {
-	pterm.Info.Println(packets)
+	// pterm.Info.Println(packets)
 	buf := internal.BufferPool.Get().(*bytes.Buffer)
 	defer func() {
 		// Reset the buffer, so we can return it to the buffer pool safely.
