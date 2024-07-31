@@ -7,17 +7,18 @@ import (
 	"github.com/pterm/pterm"
 )
 
-// 在 127.0.0.1:19132 运行一个代理服务器，
-// 用于等待 ModPC 连接
+// 在 127.0.0.1 运行一个代理服务器以等待
+// Mod PC 连接，
+// 并指定该服务器开放的端口为 runningPort
 func RunServer(runningPort uint16) *Server {
 	var downInitConnect bool
 	server := new(Server)
 	// prepare
-	err := server.CreateListener(fmt.Sprintf("127.0.0.1:%v", runningPort))
+	err := server.CreateListener(fmt.Sprintf("127.0.0.1:%d", runningPort))
 	if err != nil {
 		panic(fmt.Sprintf("RunServer: %v", err))
 	}
-	pterm.Success.Println(fmt.Sprintf("Server is successful to turn on, now waiting Mod PC to connect.\nServer IP Address: 127.0.0.1:%v", runningPort))
+	pterm.Success.Printf("Server is successful to turn on, now waiting Mod PC to connect.\nServer IP Address: 127.0.0.1:%d\n", runningPort)
 	// open server
 	go func() {
 		err = server.WaitConnect()
