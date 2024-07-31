@@ -61,6 +61,10 @@ func UnfoldEulogist(serverCode string, serverPassword string, token string, auth
 				modPC.SetShieldID(shieldID)
 			}
 			// sync shield id
+			if !botSide.GetShouldDecode() {
+				modPC.SetShouldDecode(false)
+			}
+			// sync should decode states
 			select {
 			case <-botSide.GetContext().Done():
 				return

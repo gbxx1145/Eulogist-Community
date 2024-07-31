@@ -9,6 +9,8 @@ import (
 	"crypto/rand"
 	"fmt"
 	"net"
+
+	"github.com/pterm/pterm"
 )
 
 // 初始化一个空的 RaknetConnection
@@ -26,6 +28,7 @@ func (r *RaknetConnection) SetConnection(connection net.Conn, key *ecdsa.Private
 	r.connection = connection
 	r.encoder = packet.NewEncoder(connection)
 	r.decoder = packet.NewDecoder(connection)
+	r.shouldDecode = true
 	r.packets = make(chan MinecraftPacket, 1024)
 	r.key = key
 	_, _ = rand.Read(r.salt)
@@ -63,6 +66,22 @@ func (r *RaknetConnection) SetShieldID(shieldID int32) {
 	r.shieldID.Store(shieldID)
 }
 
+// 查询解码器的工作状态。
+// 如果返回假，
+// 则数据包不会在传递过程中解码，
+// 否则，将会解码
+func (r *RaknetConnection) GetShouldDecode() bool {
+	return r.shouldDecode
+}
+
+// 设置解码器的工作状态。
+// 如果 states 为假，
+// 则数据包不会在传递过程中解码，
+// 否则，将会解码
+func (r *RaknetConnection) SetShouldDecode(states bool) {
+	r.shouldDecode = states
+}
+
 // 从底层 Raknet 不断地读取多个数据包，
 // 直到底层 Raknet 连接被关闭。
 //
@@ -85,15 +104,19 @@ func (r *RaknetConnection) ProcessIncomingPackets() {
 			packetHeader.Read(buffer)
 			packetFunc := packet.ListAllPackets()[packetHeader.PacketID]
 			// get header and packet func
-			if packetFunc != nil {
-				pk = packetFunc()
-				func() {
-					defer func() {
-						recover()
-					}()
-					pk.Marshal(reader)
+			func() {
+				defer func() {
+					r := recover()
+					if r != nil {
+						pterm.Warning.Printf("ProcessIncomingPackets: %v\n", err)
+					}
 				}()
-			}
+				if !r.shouldDecode && packetHeader.PacketID != packet.IDPyRpc {
+					return
+				}
+				pk = packetFunc()
+				pk.Marshal(reader)
+			}()
 			// marshal
 			select {
 			case <-r.context.Done():

@@ -26,8 +26,9 @@ type RaknetConnection struct {
 	closed     bool
 	closedLock sync.Mutex
 
-	encoder *packet.Encoder
-	decoder *packet.Decoder
+	encoder      *packet.Encoder
+	decoder      *packet.Decoder
+	shouldDecode bool
 
 	key  *ecdsa.PrivateKey
 	salt []byte

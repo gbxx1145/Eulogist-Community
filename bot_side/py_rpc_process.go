@@ -8,6 +8,7 @@ import (
 	"fmt"
 )
 
+// ...
 func (b *BotSide) OnPyRpc(p *packet.PyRpc) (shouldSendCopy bool, err error) {
 	if p.Value == nil {
 		return true, nil
