@@ -20,7 +20,7 @@ func UnfoldEulogist(serverCode string, serverPassword string, token string, auth
 	waitGroup := sync.WaitGroup{}
 	waitGroup.Add(2)
 
-	modPC := ModPC.RunServer(19135)
+	modPC := ModPC.RunServer(19132)
 	pterm.Success.Println("Success to create connection with Mod PC, now we try to communicate with auth server.")
 
 	botSide, err := BotSide.ConnectToServer(serverCode, serverPassword, token, authServer)

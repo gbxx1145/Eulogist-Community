@@ -9,8 +9,6 @@ import (
 	"crypto/rand"
 	"fmt"
 	"net"
-
-	"github.com/pterm/pterm"
 )
 
 // 初始化一个空的 RaknetConnection
@@ -79,6 +77,7 @@ func (r *RaknetConnection) ProcessIncomingPackets() {
 		}
 		// prepare
 		for _, data := range packets {
+			var pk packet.Packet
 			buffer := bytes.NewBuffer(data)
 			reader := protocol.NewReader(buffer, r.shieldID.Load(), false)
 			// prepare
@@ -86,17 +85,15 @@ func (r *RaknetConnection) ProcessIncomingPackets() {
 			packetHeader.Read(buffer)
 			packetFunc := packet.ListAllPackets()[packetHeader.PacketID]
 			// get header and packet func
-			if packetFunc == nil {
-				pterm.Warning.Println(fmt.Sprintf("packet %v read an empty result", packetHeader.PacketID))
-				continue
-			}
-			pk := packetFunc()
-			func() {
-				defer func() {
-					recover()
+			if packetFunc != nil {
+				pk = packetFunc()
+				func() {
+					defer func() {
+						recover()
+					}()
+					pk.Marshal(reader)
 				}()
-				pk.Marshal(reader)
-			}()
+			}
 			// marshal
 			select {
 			case <-r.context.Done():
@@ -130,17 +127,19 @@ func (r *RaknetConnection) WritePacket(pk MinecraftPacket, useBytes bool) error 
 	buffer := bytes.NewBuffer([]byte{})
 	packetHeader := packet.Header{PacketID: pk.Packet.ID()}
 	packetHeader.Write(buffer)
+	// get buffer and write packet header
 	func() {
 		defer func() {
 			recover()
 		}()
 		pk.Packet.Marshal(protocol.NewWriter(buffer, r.shieldID.Load()))
 	}()
+	// marshal
 	err := r.encoder.Encode([][]byte{buffer.Bytes()})
 	if err != nil {
 		r.CloseConnection()
 	}
-	// marshal and write
+	// write packet
 	return nil
 	// return
 }
