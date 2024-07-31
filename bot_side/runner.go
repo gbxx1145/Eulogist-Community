@@ -19,10 +19,10 @@ import (
 // 连接到租赁服号为 serverCode，
 // 服务器密码为 serverPassword 的网易租赁服。
 // token 指代 FB Token
-func ConnectToServer(serverCode string, serverPassword string, token string) (*BotSide, error) {
+func ConnectToServer(serverCode string, serverPassword string, token string, authServer string) (*BotSide, error) {
 	var downInitConnect bool
 	var botSide BotSide
-	botSide.fbClient = fbauth.CreateClient(&fbauth.ClientOptions{AuthServer: "https://user.fastbuilder.pro"})
+	botSide.fbClient = fbauth.CreateClient(&fbauth.ClientOptions{AuthServer: authServer})
 	authenticator := fbauth.NewAccessWrapper(botSide.fbClient, serverCode, serverPassword, token, "", "")
 	ctx, _ := context.WithTimeout(context.Background(), time.Second*30)
 	// prepare

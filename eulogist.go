@@ -16,14 +16,14 @@ import (
 // 分别代表要赞颂的租赁服编号及其密码。
 //
 // token 指代 FB Token
-func UnfoldEulogist(serverCode string, serverPassword string, token string) error {
+func UnfoldEulogist(serverCode string, serverPassword string, token string, authServer string) error {
 	waitGroup := sync.WaitGroup{}
 	waitGroup.Add(2)
 
-	modPC := ModPC.RunServer()
+	modPC := ModPC.RunServer(19135)
 	pterm.Success.Println("Success to create connection with Mod PC, now we try to communicate with auth server.")
 
-	botSide, err := BotSide.ConnectToServer(serverCode, serverPassword, token)
+	botSide, err := BotSide.ConnectToServer(serverCode, serverPassword, token, authServer)
 	if err != nil {
 		return fmt.Errorf("UnfoldEulogist: %v", err)
 	}

@@ -9,15 +9,15 @@ import (
 
 // 在 127.0.0.1:19132 运行一个代理服务器，
 // 用于等待 ModPC 连接
-func RunServer() *Server {
+func RunServer(runningPort uint16) *Server {
 	var downInitConnect bool
 	server := new(Server)
 	// prepare
-	err := server.CreateListener("127.0.0.1:19132")
+	err := server.CreateListener(fmt.Sprintf("127.0.0.1:%v", runningPort))
 	if err != nil {
 		panic(fmt.Sprintf("RunServer: %v", err))
 	}
-	pterm.Success.Println("Server is successful to turn on, now waiting Mod PC to connect.\nServer IP Address: 127.0.0.1:19132")
+	pterm.Success.Println(fmt.Sprintf("Server is successful to turn on, now waiting Mod PC to connect.\nServer IP Address: 127.0.0.1:%v", runningPort))
 	// open server
 	go func() {
 		err = server.WaitConnect()
