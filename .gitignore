@@ -1,4 +1,4 @@
-# Debugger exec file
-__*.exe
-# Actually everybody has to change its content
-main.go
+Eulogist.exe
+eulogist_config.json
+netease.cppconfig
+steve.png

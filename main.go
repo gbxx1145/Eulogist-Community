@@ -1,7 +1,9 @@
 package main
 
+import Eulogist "Eulogist/eulogist"
+
 func main() {
-	err := UnfoldEulogist("server_code", "server_password", `type_your_token`, "https://user.fastbuilder.pro")
+	err := Eulogist.Eulogist()
 	if err != nil {
 		panic(err)
 	}

@@ -3,22 +3,18 @@ package ModPC
 import (
 	"Eulogist/core/minecraft/protocol/packet"
 	"fmt"
-
-	"github.com/pterm/pterm"
 )
 
-// 在 127.0.0.1 运行一个代理服务器以等待
-// Mod PC 连接，
-// 并指定该服务器开放的端口为 runningPort
-func RunServer(runningPort uint16) (*Server, error) {
-	var downInitConnect bool
-	server := new(Server)
+// 在 serverIP 对应的 IP 上运行一个代理服务器以等待
+// Mod PC 连接，并指定该服务器开放的端口为 serverPort。
+// 当 Mod PC 连接时，管道 connected 将收到数据
+func RunServer(serverIP string, serverPort int) (server *Server, connected chan struct{}, err error) {
+	server = new(Server)
 	// prepare
-	err := server.CreateListener(fmt.Sprintf("127.0.0.1:%d", runningPort))
+	err = server.CreateListener(fmt.Sprintf("%s:%d", serverIP, serverPort))
 	if err != nil {
-		panic(fmt.Sprintf("RunServer: %v", err))
+		return nil, nil, fmt.Errorf("RunServer: %v", err)
 	}
-	pterm.Success.Printf("Server is successful to turn on, now waiting Mod PC to connect.\nServer IP Address: 127.0.0.1:%d\n", runningPort)
 	// open server
 	go func() {
 		err = server.WaitConnect()
@@ -27,35 +23,42 @@ func RunServer(runningPort uint16) (*Server, error) {
 		}
 		server.ProcessIncomingPackets()
 	}()
-	<-server.connected
-	close(server.connected)
-	// wait connect and process packets
+	// wait connect and start listening
+	return server, server.connected, nil
+	// return
+}
+
+// 等待 Mod PC 完成与 赞颂者 的基本数据包交换。
+// 此函数应当只被调用一次
+func (s *Server) WaitClientHandshakeDown() error {
+	var downInitConnect bool
+	// prepare
 	for {
-		pk := server.ReadPacket()
+		pk := s.ReadPacket()
 		// read packet
 		switch p := pk.Packet.(type) {
 		case *packet.RequestNetworkSettings:
-			err = server.HandleRequestNetworkSettings(p)
+			err := s.HandleRequestNetworkSettings(p)
 			if err != nil {
-				panic(fmt.Sprintf("RunServer: %v", err))
+				panic(fmt.Sprintf("WaitClientHandshakeDown: %v", err))
 			}
 		case *packet.Login:
-			err = server.HandleLogin(p)
+			err := s.HandleLogin(p)
 			if err != nil {
-				panic(fmt.Sprintf("RunServer: %v", err))
+				panic(fmt.Sprintf("WaitClientHandshakeDown: %v", err))
 			}
 		case *packet.ClientToServerHandshake:
 			downInitConnect = true
 		}
 		// handle init connection packets
 		select {
-		case <-server.GetContext().Done():
-			return nil, fmt.Errorf("RunServer: Mod PC closed their connection to eulogist")
+		case <-s.GetContext().Done():
+			return fmt.Errorf("WaitClientHandshakeDown: Mod PC closed their connection to eulogist")
 		default:
 		}
 		// check connection states
 		if downInitConnect {
-			return server, nil
+			return nil
 		}
 		// return
 	}
