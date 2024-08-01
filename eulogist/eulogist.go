@@ -79,7 +79,7 @@ func Eulogist() error {
 		if err != nil {
 			return fmt.Errorf("Eulogist: %v", err)
 		}
-		pterm.Success.Println("Success to create handshake Mod PC, now we try to communicate with auth server.")
+		pterm.Success.Println("Success to create handshake with Mod PC, now we try to communicate with auth server.")
 		// finish mod pc handshake
 	}
 
