@@ -110,7 +110,7 @@ func Eulogist() error {
 			if err != nil {
 				return
 			}
-			shouldSendCopy, err := server.PacketFilter(pk.Packet)
+			shouldSendCopy, err := server.PacketFilter(pk.Packet, client.WritePacket)
 			if err != nil {
 				pterm.Warning.Printf("Eulogist: %v\n", err)
 				continue

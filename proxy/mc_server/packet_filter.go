@@ -2,14 +2,21 @@ package mc_server
 
 import (
 	"Eulogist/core/minecraft/protocol/packet"
+	RaknetConnection "Eulogist/core/raknet"
 	"fmt"
 )
 
 // 数据包过滤器过滤来自租赁服的数据包，
 // 并根据实际情况由本处的桥接选择是否直接发送回应。
 //
-// shouldSendCopy 指代该数据包是否需要同步到 Client
-func (m *MinecraftServer) PacketFilter(pk packet.Packet) (shouldSendCopy bool, err error) {
+// 如果必要，将使用 writePacketToClient 向已连接的
+// Minecraft 客户端发送新数据包。
+//
+// 返回的 shouldSendCopy 指代该数据包是否需要同步到
+// Minecraft 客户端
+func (m *MinecraftServer) PacketFilter(
+	pk packet.Packet, writePacketToClient func(pk RaknetConnection.MinecraftPacket, useBytes bool) error,
+) (shouldSendCopy bool, err error) {
 	if pk == nil {
 		return true, nil
 	}
@@ -25,7 +32,17 @@ func (m *MinecraftServer) PacketFilter(pk packet.Packet) (shouldSendCopy bool, e
 		m.entityUniqueID = m.HandleStartGame(p)
 		m.SetShouldDecode(false)
 		return true, nil
-	default:
-		return true, nil
+	case *packet.UpdatePlayerGameType:
+		if p.PlayerUniqueID == m.entityUniqueID {
+			err = writePacketToClient(RaknetConnection.MinecraftPacket{
+				Packet: &packet.SetPlayerGameType{GameType: p.GameType},
+			}, false)
+			if err != nil {
+				err = fmt.Errorf("PacketFilter: %v", err)
+			}
+		}
+		return p.PlayerUniqueID != m.entityUniqueID, err
 	}
+
+	return true, nil
 }

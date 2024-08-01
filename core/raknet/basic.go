@@ -111,8 +111,12 @@ func (r *Raknet) ProcessIncomingPackets() {
 						pterm.Warning.Printf("ProcessIncomingPackets: %v\n", err)
 					}
 				}()
-				if !r.shouldDecode && packetHeader.PacketID != packet.IDPyRpc {
-					return
+				if !r.shouldDecode {
+					switch packetHeader.PacketID {
+					case packet.IDPyRpc, packet.IDUpdatePlayerGameType:
+					default:
+						return
+					}
 				}
 				pk = packetFunc()
 				pk.Marshal(reader)
