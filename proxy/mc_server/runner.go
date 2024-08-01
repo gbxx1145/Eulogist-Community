@@ -24,7 +24,8 @@ func ConnectToServer(serverCode string, serverPassword string, token string, aut
 	var mcServer MinecraftServer
 	mcServer.fbClient = fbauth.CreateClient(&fbauth.ClientOptions{AuthServer: authServer})
 	authenticator := fbauth.NewAccessWrapper(mcServer.fbClient, serverCode, serverPassword, token, "", "")
-	ctx, _ := context.WithTimeout(context.Background(), time.Second*30)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
+	defer cancel()
 	// prepare
 	clientkey, _ := ecdsa.GenerateKey(elliptic.P384(), rand.Reader)
 	armoured_key, _ := x509.MarshalPKIXPublicKey(&clientkey.PublicKey)
