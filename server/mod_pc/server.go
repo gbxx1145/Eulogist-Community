@@ -12,8 +12,8 @@ import (
 
 // 在指定的 IP 地址及端口号上创建 Raknet 侦听连接。
 // 任何 Minecraft 客户端都可以连接到该地址
-func (s *Server) CreateListener(address string) error {
-	listener, err := raknet.Listen(address)
+func (s *Server) CreateListener() error {
+	listener, err := raknet.Listen("127.0.0.1:0")
 	if err != nil {
 		return fmt.Errorf("CreateListener: %v", err)
 	}

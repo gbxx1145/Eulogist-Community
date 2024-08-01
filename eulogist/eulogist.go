@@ -34,27 +34,27 @@ func Eulogist() error {
 				return fmt.Errorf("Eulogist: Mod PC not found, maybe you did not download or the the path are incorrect")
 			}
 			// check mod pc is download
-			neteaseConfigPath, err = GenerateNetEaseConfig(config)
-			if err != nil {
-				return fmt.Errorf("Eulogist: %v", err)
-			}
-			// generate netease config
-			modPC, modPCWasConnected, err = ModPC.RunServer(config.ServerIP, config.ServerPort)
+			modPC, modPCWasConnected, err = ModPC.RunServer()
 			if err != nil {
 				return fmt.Errorf("Eulogist: %v", err)
 			}
 			// run server
-			command := exec.Command(config.NEMCPath)
-			command.SysProcAttr = &syscall.SysProcAttr{CmdLine: fmt.Sprintf("%#v config=%#v", config.NEMCPath, neteaseConfigPath)}
-			go command.Run()
-			pterm.Success.Println("Success to turn on Mod PC and Eulogist, now waiting Mod PC to connect.")
-			// launch mod pc
-		} else {
-			modPC, modPCWasConnected, err = ModPC.RunServer(config.ServerIP, config.ServerPort)
+			neteaseConfigPath, err = GenerateNetEaseConfig(config, modPC.IP, modPC.Port)
 			if err != nil {
 				return fmt.Errorf("Eulogist: %v", err)
 			}
-			pterm.Success.Printf("Eulogist is successful to turn on, now waiting Mod PC to connect.\nEulogist Server IP Address: %s:%d\n", config.ServerIP, config.ServerPort)
+			// generate netease config
+			command := exec.Command(config.NEMCPath)
+			command.SysProcAttr = &syscall.SysProcAttr{CmdLine: fmt.Sprintf("%#v config=%#v", config.NEMCPath, neteaseConfigPath)}
+			go command.Run()
+			pterm.Success.Printf("Success to turn on Mod PC and Eulogist, now waiting Mod PC to connect.\nEulogist Server IP Address: %s:%d\n", modPC.IP, modPC.Port)
+			// launch mod pc
+		} else {
+			modPC, modPCWasConnected, err = ModPC.RunServer()
+			if err != nil {
+				return fmt.Errorf("Eulogist: %v", err)
+			}
+			pterm.Success.Printf("Eulogist is successful to turn on, now waiting Mod PC to connect.\nEulogist Server IP Address: %s:%d\n", modPC.IP, modPC.Port)
 		}
 		// run eulogist
 	}

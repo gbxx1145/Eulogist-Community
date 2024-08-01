@@ -15,9 +15,6 @@ type EulogistConfig struct {
 	NEMCPath   string `json:"nemc_program_path"`
 	SkinPath   string `json:"skin_path"`
 
-	ServerIP   string `json:"server_ip"`
-	ServerPort int    `json:"server_port"`
-
 	RentalServerCode     string `json:"rental_server_code"`
 	RentalServerPassword string `json:"rental_server_password"`
 	FBToken              string `json:"fb_token"`
@@ -27,8 +24,6 @@ func DefaultEulogistConfig() EulogistConfig {
 	return EulogistConfig{
 		LaunchType: LaunchTypeNormal,
 		NEMCPath:   `D:\MCLDownload\MinecraftBENetease\windowsmc\Minecraft.Windows.exe`,
-		ServerIP:   "127.0.0.1",
-		ServerPort: 19132,
 	}
 }
 

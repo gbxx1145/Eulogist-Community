@@ -10,5 +10,7 @@ type Server struct {
 	listener  *raknet.Listener
 	connected chan struct{}
 
+	IP   string
+	Port int
 	*RaknetConnection.RaknetConnection
 }

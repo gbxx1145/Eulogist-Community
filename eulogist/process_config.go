@@ -100,11 +100,11 @@ var steveSkin []byte
 // 根据赞颂者的配置 config，
 // 在当前目录下生成用于启动 NEMC PC 的配置文件，
 // 并返回该配置文件的绝对路径
-func GenerateNetEaseConfig(config *EulogistConfig) (configPath string, err error) {
+func GenerateNetEaseConfig(config *EulogistConfig, ip string, port int) (configPath string, err error) {
 	cfg := DefaultNetEaseConfig()
 
-	cfg.RoomInfo.IP = config.ServerIP
-	cfg.RoomInfo.Port = config.ServerPort
+	cfg.RoomInfo.IP = ip
+	cfg.RoomInfo.Port = port
 
 	if !FileExist(config.SkinPath) {
 		currentPath, _ := os.Getwd()

@@ -3,15 +3,16 @@ package ModPC
 import (
 	"Eulogist/core/minecraft/protocol/packet"
 	"fmt"
+	"net"
 )
 
 // 在 serverIP 对应的 IP 上运行一个代理服务器以等待
 // Mod PC 连接，并指定该服务器开放的端口为 serverPort。
 // 当 Mod PC 连接时，管道 connected 将收到数据
-func RunServer(serverIP string, serverPort int) (server *Server, connected chan struct{}, err error) {
+func RunServer() (server *Server, connected chan struct{}, err error) {
 	server = new(Server)
 	// prepare
-	err = server.CreateListener(fmt.Sprintf("%s:%d", serverIP, serverPort))
+	err = server.CreateListener()
 	if err != nil {
 		return nil, nil, fmt.Errorf("RunServer: %v", err)
 	}
@@ -24,6 +25,13 @@ func RunServer(serverIP string, serverPort int) (server *Server, connected chan 
 		server.ProcessIncomingPackets()
 	}()
 	// wait connect and start listening
+	addr, ok := server.listener.Addr().(*net.UDPAddr)
+	if !ok {
+		return nil, nil, fmt.Errorf("RunServer: %v", "failed to get address")
+	}
+	server.IP = addr.IP.String()
+	server.Port = addr.Port
+	// obtain addr and port
 	return server, server.connected, nil
 	// return
 }
