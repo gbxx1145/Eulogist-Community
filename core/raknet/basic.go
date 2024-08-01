@@ -13,10 +13,10 @@ import (
 	"github.com/pterm/pterm"
 )
 
-// 初始化一个空的 RaknetConnection
-func NewRaknetConnection() *RaknetConnection {
+// 初始化一个空的 Raknet
+func NewRaknet() *Raknet {
 	ctx, cancel := context.WithCancel(context.Background())
-	return &RaknetConnection{
+	return &Raknet{
 		context: ctx,
 		cancel:  cancel,
 	}
@@ -24,7 +24,7 @@ func NewRaknetConnection() *RaknetConnection {
 
 // 将底层 Raknet 连接设置为 connection，
 // 并指定 服务器/客户端 私钥为 key
-func (r *RaknetConnection) SetConnection(connection net.Conn, key *ecdsa.PrivateKey) error {
+func (r *Raknet) SetConnection(connection net.Conn, key *ecdsa.PrivateKey) error {
 	r.connection = connection
 	r.encoder = packet.NewEncoder(connection)
 	r.decoder = packet.NewDecoder(connection)
@@ -38,7 +38,7 @@ func (r *RaknetConnection) SetConnection(connection net.Conn, key *ecdsa.Private
 }
 
 // 关闭已建立的 Raknet 底层连接
-func (r *RaknetConnection) CloseConnection() {
+func (r *Raknet) CloseConnection() {
 	r.closedLock.Lock()
 	defer r.closedLock.Unlock()
 
@@ -52,17 +52,17 @@ func (r *RaknetConnection) CloseConnection() {
 }
 
 // ...
-func (r *RaknetConnection) GetContext() context.Context {
+func (r *Raknet) GetContext() context.Context {
 	return r.context
 }
 
 // ...
-func (r *RaknetConnection) GetShieldID() int32 {
+func (r *Raknet) GetShieldID() int32 {
 	return r.shieldID.Load()
 }
 
 // ...
-func (r *RaknetConnection) SetShieldID(shieldID int32) {
+func (r *Raknet) SetShieldID(shieldID int32) {
 	r.shieldID.Store(shieldID)
 }
 
@@ -70,7 +70,7 @@ func (r *RaknetConnection) SetShieldID(shieldID int32) {
 // 如果返回假，
 // 则数据包不会在传递过程中解码，
 // 否则，将会解码
-func (r *RaknetConnection) GetShouldDecode() bool {
+func (r *Raknet) GetShouldDecode() bool {
 	return r.shouldDecode
 }
 
@@ -78,7 +78,7 @@ func (r *RaknetConnection) GetShouldDecode() bool {
 // 如果 states 为假，
 // 则数据包不会在传递过程中解码，
 // 否则，将会解码
-func (r *RaknetConnection) SetShouldDecode(states bool) {
+func (r *Raknet) SetShouldDecode(states bool) {
 	r.shouldDecode = states
 }
 
@@ -86,7 +86,7 @@ func (r *RaknetConnection) SetShouldDecode(states bool) {
 // 直到底层 Raknet 连接被关闭。
 //
 // 此函数应当只被调用一次
-func (r *RaknetConnection) ProcessIncomingPackets() {
+func (r *Raknet) ProcessIncomingPackets() {
 	for {
 		packets, err := r.decoder.Decode()
 		if err != nil {
@@ -133,13 +133,13 @@ func (r *RaknetConnection) ProcessIncomingPackets() {
 // 从已读取且已解码的数据包池中读取一个数据包。
 // 当数据包池没有数据包时，将会阻塞，
 // 直到新的已处理数据包抵达
-func (r *RaknetConnection) ReadPacket() MinecraftPacket {
+func (r *Raknet) ReadPacket() MinecraftPacket {
 	return <-r.packets
 }
 
 // 向底层 Raknet 连接写入 Minecraft 数据包 pk。
 // useBytes 指代是否要直接写入 pk.Bytes 上的二进制负载
-func (r *RaknetConnection) WritePacket(pk MinecraftPacket, useBytes bool) error {
+func (r *Raknet) WritePacket(pk MinecraftPacket, useBytes bool) error {
 	if useBytes {
 		err := r.encoder.Encode([][]byte{pk.Bytes})
 		if err != nil {

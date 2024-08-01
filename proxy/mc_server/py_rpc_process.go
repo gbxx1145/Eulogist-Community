@@ -9,7 +9,7 @@ import (
 )
 
 // ...
-func (b *MCServer) OnPyRpc(p *packet.PyRpc) (shouldSendCopy bool, err error) {
+func (m *MinecraftServer) OnPyRpc(p *packet.PyRpc) (shouldSendCopy bool, err error) {
 	if p.Value == nil {
 		return true, nil
 	}
@@ -21,9 +21,9 @@ func (b *MCServer) OnPyRpc(p *packet.PyRpc) (shouldSendCopy bool, err error) {
 	// unmarshal
 	switch c := content.(type) {
 	case *py_rpc.StartType:
-		c.Content = b.fbClient.TransferData(c.Content)
+		c.Content = m.fbClient.TransferData(c.Content)
 		c.Type = py_rpc.StartTypeResponse
-		err = b.WritePacket(
+		err = m.WritePacket(
 			RaknetConnection.MinecraftPacket{
 				Packet: &packet.PyRpc{
 					Value:         py_rpc.Marshal(c),
@@ -36,7 +36,7 @@ func (b *MCServer) OnPyRpc(p *packet.PyRpc) (shouldSendCopy bool, err error) {
 		}
 		// get data and send packet
 	case *py_rpc.GetMCPCheckNum:
-		if b.getCheckNumEverPassed {
+		if m.getCheckNumEverPassed {
 			break
 		}
 		// if the challenges has been down,
@@ -44,9 +44,9 @@ func (b *MCServer) OnPyRpc(p *packet.PyRpc) (shouldSendCopy bool, err error) {
 		arg, _ := json.Marshal([]any{
 			c.FirstArg,
 			c.SecondArg.Arg,
-			b.entityUniqueID,
+			m.entityUniqueID,
 		})
-		ret := b.fbClient.TransferCheckNum(string(arg))
+		ret := m.fbClient.TransferCheckNum(string(arg))
 		// create request to the auth server and get response
 		ret_p := []any{}
 		json.Unmarshal([]byte(ret), &ret_p)
@@ -57,7 +57,7 @@ func (b *MCServer) OnPyRpc(p *packet.PyRpc) (shouldSendCopy bool, err error) {
 			}
 		}
 		// unmarshal response and adjust the data included
-		err = b.WritePacket(
+		err = m.WritePacket(
 			RaknetConnection.MinecraftPacket{
 				Packet: &packet.PyRpc{
 					Value:         py_rpc.Marshal(&py_rpc.SetMCPCheckNum{ret_p}),
@@ -68,7 +68,7 @@ func (b *MCServer) OnPyRpc(p *packet.PyRpc) (shouldSendCopy bool, err error) {
 		if err != nil {
 			return false, fmt.Errorf("OnPyRpc: %v", err)
 		}
-		b.getCheckNumEverPassed = true
+		m.getCheckNumEverPassed = true
 		// send packet and mark this challenges was finished
 	default:
 		return true, nil

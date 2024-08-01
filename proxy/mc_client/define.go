@@ -2,15 +2,15 @@ package mc_client
 
 import (
 	RaknetConnection "Eulogist/core/raknet"
+	"net"
 
 	"github.com/sandertv/go-raknet"
 )
 
-type MCClient struct {
+type MinecraftClient struct {
 	listener  *raknet.Listener
 	connected chan struct{}
+	address   *net.UDPAddr
 
-	IP   string
-	Port int
-	*RaknetConnection.RaknetConnection
+	*RaknetConnection.Raknet
 }

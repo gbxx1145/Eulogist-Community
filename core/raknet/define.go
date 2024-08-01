@@ -16,7 +16,7 @@ type saltClaims struct {
 	Salt string `json:"salt"`
 }
 
-type RaknetConnection struct {
+type Raknet struct {
 	connection net.Conn
 	shieldID   atomic.Int32
 

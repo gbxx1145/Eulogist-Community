@@ -5,11 +5,11 @@ import (
 	RaknetConnection "Eulogist/core/raknet"
 )
 
-type MCServer struct {
+type MinecraftServer struct {
 	fbClient       *fbauth.Client
 	entityUniqueID int64
 
 	getCheckNumEverPassed bool
 
-	*RaknetConnection.RaknetConnection
+	*RaknetConnection.Raknet
 }

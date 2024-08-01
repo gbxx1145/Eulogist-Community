@@ -19,9 +19,9 @@ import (
 // 连接到租赁服号为 serverCode，
 // 服务器密码为 serverPassword 的网易租赁服。
 // token 指代 FB Token
-func ConnectToServer(serverCode string, serverPassword string, token string, authServer string) (*MCServer, error) {
+func ConnectToServer(serverCode string, serverPassword string, token string, authServer string) (*MinecraftServer, error) {
 	var downInitConnect bool
-	var mcServer MCServer
+	var mcServer MinecraftServer
 	mcServer.fbClient = fbauth.CreateClient(&fbauth.ClientOptions{AuthServer: authServer})
 	authenticator := fbauth.NewAccessWrapper(mcServer.fbClient, serverCode, serverPassword, token, "", "")
 	ctx, _ := context.WithTimeout(context.Background(), time.Second*30)
@@ -38,7 +38,7 @@ func ConnectToServer(serverCode string, serverPassword string, token string, aut
 		return nil, fmt.Errorf("ConnectToServer: %v", err)
 	}
 	// connect to server
-	mcServer.RaknetConnection = RaknetConnection.NewRaknetConnection()
+	mcServer.Raknet = RaknetConnection.NewRaknet()
 	mcServer.SetConnection(connection, clientkey)
 	go mcServer.ProcessIncomingPackets()
 	// set connection

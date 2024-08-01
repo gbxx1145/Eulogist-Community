@@ -19,8 +19,8 @@ func Eulogist() error {
 	var config *EulogistConfig
 	var neteaseConfigPath string
 	var waitGroup sync.WaitGroup
-	var client *Client.MCClient
-	var server *Server.MCServer
+	var client *Client.MinecraftClient
+	var server *Server.MinecraftServer
 	var ClientWasConnected chan struct{}
 
 	{
@@ -39,7 +39,7 @@ func Eulogist() error {
 				return fmt.Errorf("Eulogist: %v", err)
 			}
 			// run server
-			neteaseConfigPath, err = GenerateNetEaseConfig(config, client.IP, client.Port)
+			neteaseConfigPath, err = GenerateNetEaseConfig(config, client.GetServerIP(), client.GetServerPort())
 			if err != nil {
 				return fmt.Errorf("Eulogist: %v", err)
 			}
@@ -47,14 +47,17 @@ func Eulogist() error {
 			command := exec.Command(config.NEMCPath)
 			command.SysProcAttr = &syscall.SysProcAttr{CmdLine: fmt.Sprintf("%#v config=%#v", config.NEMCPath, neteaseConfigPath)}
 			go command.Run()
-			pterm.Success.Printf("Eulogist is ready! Starting Minecraft Client...\nClient proxy address: %s:%d\n", client.IP, client.Port)
+			pterm.Success.Println("Eulogist is ready! Now we are going to start Minecarft Client.\nThen, the Minecraft Client will connect to Eulogist automatically.")
 			// launch Minecraft
 		} else {
 			client, ClientWasConnected, err = Client.RunServer()
 			if err != nil {
 				return fmt.Errorf("Eulogist: %v", err)
 			}
-			pterm.Success.Printf("Eulogist is ready! Starting Minecraft Client...\nClient proxy address: %s:%d\n", client.IP, client.Port)
+			pterm.Success.Printf(
+				"Eulogist is ready! Please connect to Eulogist manually.\nEulogist server address: %s:%d\n",
+				client.GetServerIP(), client.GetServerPort(),
+			)
 		}
 		// run eulogist
 	}
@@ -86,7 +89,7 @@ func Eulogist() error {
 	{
 		server, err = Server.ConnectToServer(config.RentalServerCode, config.RentalServerPassword, config.FBToken, LookUpAuthServerAddress(config.FBToken))
 		if err != nil {
-			return fmt.Errorf("UnfoldEulogist: %v", err)
+			return fmt.Errorf("Eulogist: %v", err)
 		}
 		pterm.Success.Println("Success to create handshake with NetEase Minecraft Rental Server, and then you will login to it.")
 	}
@@ -109,7 +112,7 @@ func Eulogist() error {
 			}
 			shouldSendCopy, err := server.PacketFilter(pk.Packet)
 			if err != nil {
-				pterm.Warning.Printf("UnfoldEulogist: %v\n", err)
+				pterm.Warning.Printf("Eulogist: %v\n", err)
 				continue
 			}
 			// filte the packets

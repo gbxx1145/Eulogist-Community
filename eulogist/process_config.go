@@ -83,7 +83,7 @@ func GenerateEulogistConfig() (config *EulogistConfig, err error) {
 	pterm.Info.Printf("Type your rental server password: ")
 	fmt.Scanln(&cfg.RentalServerPassword)
 
-	pterm.Info.Printf("Type your FB token of FastBuilder Auth Server: ")
+	pterm.Info.Printf("Type your token of PhoenixBuilder's or Liliya233's Auth Server: ")
 	fmt.Scanln(&cfg.FBToken)
 
 	err = WriteJsonFile("eulogist_config.json", cfg)

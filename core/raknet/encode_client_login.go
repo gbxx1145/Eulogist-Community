@@ -22,7 +22,7 @@ var skinResourcePatch []byte
 var skinGeometry []byte
 
 // ...
-func (r *RaknetConnection) EncodeLogin(
+func (r *Raknet) EncodeLogin(
 	authResponse fbauth.AuthResponse, clientKey *ecdsa.PrivateKey,
 ) ([]byte, error) {
 	identityData := login.IdentityData{}

@@ -18,7 +18,7 @@ import (
 // 如果不支持协议版本，它将返回错误。
 // 否则，以 NetworkSettings 作为响应，
 // 并且启用为底层 Raknet 连接启用数据包压缩功能。
-func (r *RaknetConnection) HandleRequestNetworkSettings(pk *packet.RequestNetworkSettings) error {
+func (r *Raknet) HandleRequestNetworkSettings(pk *packet.RequestNetworkSettings) error {
 	if pk.ClientProtocol != protocol.CurrentProtocol {
 		status := packet.PlayStatusLoginFailedClient
 		if pk.ClientProtocol > protocol.CurrentProtocol {
@@ -47,7 +47,7 @@ func (r *RaknetConnection) HandleRequestNetworkSettings(pk *packet.RequestNetwor
 // 处理传入的登录数据包。
 // 它验证并解码数据包中找到的登录请求，
 // 如果无法成功完成，则返回错误
-func (r *RaknetConnection) HandleLogin(pk *packet.Login) error {
+func (r *Raknet) HandleLogin(pk *packet.Login) error {
 	var (
 		err        error
 		authResult login.AuthResult
@@ -65,7 +65,7 @@ func (r *RaknetConnection) HandleLogin(pk *packet.Login) error {
 
 // 为创建的底层 Raknet 连接启用加密。
 // 它向客户端发送未加密的握手数据包，然后启用加密。
-func (r *RaknetConnection) EnableEncryption(clientPublicKey *ecdsa.PublicKey) error {
+func (r *Raknet) EnableEncryption(clientPublicKey *ecdsa.PublicKey) error {
 	signer, _ := jose.NewSigner(jose.SigningKey{Key: r.key, Algorithm: jose.ES384}, &jose.SignerOptions{
 		ExtraHeaders: map[jose.HeaderKey]any{"x5u": login.MarshalPublicKey(&r.key.PublicKey)},
 	})

@@ -18,7 +18,7 @@ import (
 // 处理来自服务器的 HandleNetworkSettings 数据包，
 // 并为后续数据包的传递启用压缩功能，
 // 然后发送 Login 数据包
-func (r *RaknetConnection) HandleNetworkSettings(
+func (r *Raknet) HandleNetworkSettings(
 	pk *packet.NetworkSettings, authResponse fbauth.AuthResponse,
 ) error {
 	alg, ok := packet.CompressionByID(pk.CompressionAlgorithm)
@@ -50,7 +50,7 @@ func (r *RaknetConnection) HandleNetworkSettings(
 // HandleServerToClientHandshake 处理传入的 ServerToClientHandshake 包。
 // 这会使当前与服务器建立的 Raknet 会话被加密。
 // 我们通过使用数据包中公开的服务器的散列和公钥来完成通信加密
-func (r *RaknetConnection) HandleServerToClientHandshake(pk *packet.ServerToClientHandshake) error {
+func (r *Raknet) HandleServerToClientHandshake(pk *packet.ServerToClientHandshake) error {
 	tok, err := jwt.ParseSigned(string(pk.JWT))
 	if err != nil {
 		return fmt.Errorf("HandleServerToClientHandshake: parse server token: %w", err)
@@ -91,7 +91,7 @@ func (r *RaknetConnection) HandleServerToClientHandshake(pk *packet.ServerToClie
 
 // HandleStartGame 处理传入的 StartGame 数据包。
 // 这是玩家已被添加到世界的信号，并且它获得了大部分专用属性
-func (r *RaknetConnection) HandleStartGame(pk *packet.StartGame) (entityUniqueID int64) {
+func (r *Raknet) HandleStartGame(pk *packet.StartGame) (entityUniqueID int64) {
 	entityUniqueID = pk.EntityUniqueID
 
 	for _, item := range pk.Items {
