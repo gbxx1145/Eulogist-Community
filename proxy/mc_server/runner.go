@@ -1,4 +1,4 @@
-package BotSide
+package mc_server
 
 import (
 	fbauth "Eulogist/core/fb_auth/pv4"
@@ -19,11 +19,11 @@ import (
 // 连接到租赁服号为 serverCode，
 // 服务器密码为 serverPassword 的网易租赁服。
 // token 指代 FB Token
-func ConnectToServer(serverCode string, serverPassword string, token string, authServer string) (*BotSide, error) {
+func ConnectToServer(serverCode string, serverPassword string, token string, authServer string) (*MCServer, error) {
 	var downInitConnect bool
-	var botSide BotSide
-	botSide.fbClient = fbauth.CreateClient(&fbauth.ClientOptions{AuthServer: authServer})
-	authenticator := fbauth.NewAccessWrapper(botSide.fbClient, serverCode, serverPassword, token, "", "")
+	var mcServer MCServer
+	mcServer.fbClient = fbauth.CreateClient(&fbauth.ClientOptions{AuthServer: authServer})
+	authenticator := fbauth.NewAccessWrapper(mcServer.fbClient, serverCode, serverPassword, token, "", "")
 	ctx, _ := context.WithTimeout(context.Background(), time.Second*30)
 	// prepare
 	clientkey, _ := ecdsa.GenerateKey(elliptic.P384(), rand.Reader)
@@ -38,11 +38,11 @@ func ConnectToServer(serverCode string, serverPassword string, token string, aut
 		return nil, fmt.Errorf("ConnectToServer: %v", err)
 	}
 	// connect to server
-	botSide.RaknetConnection = RaknetConnection.NewRaknetConnection()
-	botSide.SetConnection(connection, clientkey)
-	go botSide.ProcessIncomingPackets()
+	mcServer.RaknetConnection = RaknetConnection.NewRaknetConnection()
+	mcServer.SetConnection(connection, clientkey)
+	go mcServer.ProcessIncomingPackets()
 	// set connection
-	err = botSide.WritePacket(
+	err = mcServer.WritePacket(
 		RaknetConnection.MinecraftPacket{
 			Packet: &packet.RequestNetworkSettings{ClientProtocol: protocol.CurrentProtocol},
 		}, false,
@@ -52,15 +52,15 @@ func ConnectToServer(serverCode string, serverPassword string, token string, aut
 	}
 	// request network settings
 	for {
-		pk := botSide.ReadPacket()
+		pk := mcServer.ReadPacket()
 		switch p := pk.Packet.(type) {
 		case *packet.NetworkSettings:
-			err = botSide.HandleNetworkSettings(p, authResponse)
+			err = mcServer.HandleNetworkSettings(p, authResponse)
 			if err != nil {
 				return nil, fmt.Errorf("ConnectToServer: %v", err)
 			}
 		case *packet.ServerToClientHandshake:
-			err = botSide.HandleServerToClientHandshake(p)
+			err = mcServer.HandleServerToClientHandshake(p)
 			if err != nil {
 				return nil, fmt.Errorf("ConnectToServer: %v", err)
 			}
@@ -68,13 +68,13 @@ func ConnectToServer(serverCode string, serverPassword string, token string, aut
 		}
 		// handle init connection packets
 		select {
-		case <-botSide.GetContext().Done():
+		case <-mcServer.GetContext().Done():
 			return nil, fmt.Errorf("ConnectToServer: NetEase Minecraft Rental Server closed their connection to eulogist")
 		default:
 		}
 		// check connection states
 		if downInitConnect {
-			return &botSide, nil
+			return &mcServer, nil
 		}
 		// return
 	}

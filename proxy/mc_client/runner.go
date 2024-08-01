@@ -1,4 +1,4 @@
-package ModPC
+package mc_client
 
 import (
 	"Eulogist/core/minecraft/protocol/packet"
@@ -7,38 +7,38 @@ import (
 )
 
 // 在 serverIP 对应的 IP 上运行一个代理服务器以等待
-// Mod PC 连接，并指定该服务器开放的端口为 serverPort。
-// 当 Mod PC 连接时，管道 connected 将收到数据
-func RunServer() (server *Server, connected chan struct{}, err error) {
-	server = new(Server)
+// Minecraft 连接，并指定该服务器开放的端口为 serverPort。
+// 当 Minecraft 连接时，管道 connected 将收到数据
+func RunServer() (client *MCClient, connected chan struct{}, err error) {
+	client = new(MCClient)
 	// prepare
-	err = server.CreateListener()
+	err = client.CreateListener()
 	if err != nil {
 		return nil, nil, fmt.Errorf("RunServer: %v", err)
 	}
-	// open server
+	// open client
 	go func() {
-		err = server.WaitConnect()
+		err = client.WaitConnect()
 		if err != nil {
 			panic(fmt.Sprintf("RunServer: %v", err))
 		}
-		server.ProcessIncomingPackets()
+		client.ProcessIncomingPackets()
 	}()
 	// wait connect and start listening
-	addr, ok := server.listener.Addr().(*net.UDPAddr)
+	addr, ok := client.listener.Addr().(*net.UDPAddr)
 	if !ok {
 		return nil, nil, fmt.Errorf("RunServer: %v", "failed to get address")
 	}
-	server.IP = addr.IP.String()
-	server.Port = addr.Port
+	client.IP = addr.IP.String()
+	client.Port = addr.Port
 	// obtain addr and port
-	return server, server.connected, nil
+	return client, client.connected, nil
 	// return
 }
 
-// 等待 Mod PC 完成与 赞颂者 的基本数据包交换。
+// 等待 Minecraft 完成与 赞颂者 的基本数据包交换。
 // 此函数应当只被调用一次
-func (s *Server) WaitClientHandshakeDown() error {
+func (s *MCClient) WaitClientHandshakeDown() error {
 	var downInitConnect bool
 	// prepare
 	for {
@@ -61,7 +61,7 @@ func (s *Server) WaitClientHandshakeDown() error {
 		// handle init connection packets
 		select {
 		case <-s.GetContext().Done():
-			return fmt.Errorf("WaitClientHandshakeDown: Mod PC closed their connection to eulogist")
+			return fmt.Errorf("WaitClientHandshakeDown: Minecraft closed its connection to eulogist")
 		default:
 		}
 		// check connection states
@@ -70,5 +70,5 @@ func (s *Server) WaitClientHandshakeDown() error {
 		}
 		// return
 	}
-	// process login related packets from mod pc
+	// process login related packets from Minecraft
 }

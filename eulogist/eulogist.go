@@ -2,8 +2,8 @@ package Eulogist
 
 import (
 	RaknetConnection "Eulogist/core/raknet"
-	BotSide "Eulogist/server/bot_side"
-	ModPC "Eulogist/server/mod_pc"
+	Client "Eulogist/proxy/mc_client"
+	Server "Eulogist/proxy/mc_server"
 	"fmt"
 	"os/exec"
 	"sync"
@@ -19,9 +19,9 @@ func Eulogist() error {
 	var config *EulogistConfig
 	var neteaseConfigPath string
 	var waitGroup sync.WaitGroup
-	var modPC *ModPC.Server
-	var botSide *BotSide.BotSide
-	var modPCWasConnected chan struct{}
+	var client *Client.MCClient
+	var server *Server.MCServer
+	var ClientWasConnected chan struct{}
 
 	{
 		config, err = ReadEulogistConfig()
@@ -31,15 +31,15 @@ func Eulogist() error {
 		// read config
 		if config.LaunchType == LaunchTypeNormal {
 			if !FileExist(config.NEMCPath) {
-				return fmt.Errorf("Eulogist: Mod PC not found, maybe you did not download or the the path are incorrect")
+				return fmt.Errorf("Eulogist: Client not found, maybe you did not download or the the path is incorrect")
 			}
-			// check mod pc is download
-			modPC, modPCWasConnected, err = ModPC.RunServer()
+			// check Minecraft is download
+			client, ClientWasConnected, err = Client.RunServer()
 			if err != nil {
 				return fmt.Errorf("Eulogist: %v", err)
 			}
 			// run server
-			neteaseConfigPath, err = GenerateNetEaseConfig(config, modPC.IP, modPC.Port)
+			neteaseConfigPath, err = GenerateNetEaseConfig(config, client.IP, client.Port)
 			if err != nil {
 				return fmt.Errorf("Eulogist: %v", err)
 			}
@@ -47,14 +47,14 @@ func Eulogist() error {
 			command := exec.Command(config.NEMCPath)
 			command.SysProcAttr = &syscall.SysProcAttr{CmdLine: fmt.Sprintf("%#v config=%#v", config.NEMCPath, neteaseConfigPath)}
 			go command.Run()
-			pterm.Success.Printf("Success to turn on Mod PC and Eulogist, now waiting Mod PC to connect.\nEulogist Server IP Address: %s:%d\n", modPC.IP, modPC.Port)
-			// launch mod pc
+			pterm.Success.Printf("Eulogist is ready! Starting Minecraft Client...\nClient proxy address: %s:%d\n", client.IP, client.Port)
+			// launch Minecraft
 		} else {
-			modPC, modPCWasConnected, err = ModPC.RunServer()
+			client, ClientWasConnected, err = Client.RunServer()
 			if err != nil {
 				return fmt.Errorf("Eulogist: %v", err)
 			}
-			pterm.Success.Printf("Eulogist is successful to turn on, now waiting Mod PC to connect.\nEulogist Server IP Address: %s:%d\n", modPC.IP, modPC.Port)
+			pterm.Success.Printf("Eulogist is ready! Starting Minecraft Client...\nClient proxy address: %s:%d\n", client.IP, client.Port)
 		}
 		// run eulogist
 	}
@@ -65,26 +65,26 @@ func Eulogist() error {
 			defer timer.Stop()
 			select {
 			case <-timer.C:
-				return fmt.Errorf("Eulogist: Failed to create connection with Mod PC")
-			case <-modPCWasConnected:
-				close(modPCWasConnected)
+				return fmt.Errorf("Eulogist: Failed to create connection with Minecraft")
+			case <-ClientWasConnected:
+				close(ClientWasConnected)
 			}
 		} else {
-			<-modPCWasConnected
-			close(modPCWasConnected)
+			<-ClientWasConnected
+			close(ClientWasConnected)
 		}
-		pterm.Success.Println("Success to create connection with Mod PC, now we try to create handshake with it.")
-		// waiting mod pc to connect
-		err = modPC.WaitClientHandshakeDown()
+		pterm.Success.Println("Success to create connection with Minecraft Client, now we try to create handshake with it.")
+		// waiting Minecraft to connect
+		err = client.WaitClientHandshakeDown()
 		if err != nil {
 			return fmt.Errorf("Eulogist: %v", err)
 		}
-		pterm.Success.Println("Success to create handshake with Mod PC, now we try to communicate with auth server.")
-		// finish mod pc handshake
+		pterm.Success.Println("Success to create handshake with Minecraft Client, now we try to communicate with auth server.")
+		// finish Minecraft handshake
 	}
 
 	{
-		botSide, err = BotSide.ConnectToServer(config.RentalServerCode, config.RentalServerPassword, config.FBToken, LookUpAuthServerAddress(config.FBToken))
+		server, err = Server.ConnectToServer(config.RentalServerCode, config.RentalServerPassword, config.FBToken, LookUpAuthServerAddress(config.FBToken))
 		if err != nil {
 			return fmt.Errorf("UnfoldEulogist: %v", err)
 		}
@@ -97,41 +97,41 @@ func Eulogist() error {
 
 	go func() {
 		defer func() {
-			botSide.CloseConnection()
-			modPC.CloseConnection()
+			server.CloseConnection()
+			client.CloseConnection()
 			waitGroup.Add(-1)
 		}()
 		// ...
 		for {
-			pk := botSide.ReadPacket()
+			pk := server.ReadPacket()
 			if err != nil {
 				return
 			}
-			shouldSendCopy, err := botSide.PacketFilter(pk.Packet)
+			shouldSendCopy, err := server.PacketFilter(pk.Packet)
 			if err != nil {
 				pterm.Warning.Printf("UnfoldEulogist: %v\n", err)
 				continue
 			}
 			// filte the packets
 			if shouldSendCopy {
-				err = modPC.WritePacket(RaknetConnection.MinecraftPacket{Bytes: pk.Bytes}, true)
+				err = client.WritePacket(RaknetConnection.MinecraftPacket{Bytes: pk.Bytes}, true)
 				if err != nil {
 					return
 				}
 			}
-			// send a copy to mod pc
-			if shieldID := botSide.GetShieldID(); shieldID != 0 {
-				modPC.SetShieldID(shieldID)
+			// send a copy to Minecraft
+			if shieldID := server.GetShieldID(); shieldID != 0 {
+				client.SetShieldID(shieldID)
 			}
 			// sync shield id
-			if !botSide.GetShouldDecode() {
-				modPC.SetShouldDecode(false)
+			if !server.GetShouldDecode() {
+				client.SetShouldDecode(false)
 			}
 			// sync should decode states
 			select {
-			case <-botSide.GetContext().Done():
+			case <-server.GetContext().Done():
 				return
-			case <-modPC.GetContext().Done():
+			case <-client.GetContext().Done():
 				return
 			default:
 			}
@@ -142,30 +142,30 @@ func Eulogist() error {
 
 	go func() {
 		defer func() {
-			modPC.CloseConnection()
-			botSide.CloseConnection()
+			client.CloseConnection()
+			server.CloseConnection()
 			waitGroup.Add(-1)
 		}()
 		// ...
 		for {
-			pk := modPC.ReadPacket()
-			// read packet from mod pc
-			err = botSide.WritePacket(RaknetConnection.MinecraftPacket{Bytes: pk.Bytes}, true)
+			pk := client.ReadPacket()
+			// read packet from Minecraft
+			err = server.WritePacket(RaknetConnection.MinecraftPacket{Bytes: pk.Bytes}, true)
 			if err != nil {
 				return
 			}
 			// sync packet to bot side
 			select {
-			case <-modPC.GetContext().Done():
+			case <-client.GetContext().Done():
 				return
-			case <-botSide.GetContext().Done():
+			case <-server.GetContext().Done():
 				return
 			default:
 			}
 			// check connection states
 		}
 	}()
-	// mod pc <-> eulogist
+	// Minecraft <-> eulogist
 
 	waitGroup.Wait()
 	pterm.Info.Println("Server Down. Now all connection was closed.")

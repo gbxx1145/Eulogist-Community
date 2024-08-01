@@ -1,4 +1,4 @@
-package BotSide
+package mc_server
 
 import (
 	"Eulogist/core/minecraft/protocol/packet"
@@ -8,8 +8,8 @@ import (
 // 数据包过滤器过滤来自租赁服的数据包，
 // 并根据实际情况由本处的桥接选择是否直接发送回应。
 //
-// shouldSendCopy 指代该数据包是否需要同步到 ModPC
-func (b *BotSide) PacketFilter(pk packet.Packet) (shouldSendCopy bool, err error) {
+// shouldSendCopy 指代该数据包是否需要同步到 Client
+func (b *MCServer) PacketFilter(pk packet.Packet) (shouldSendCopy bool, err error) {
 	if pk == nil {
 		return true, nil
 	}

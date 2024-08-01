@@ -1,4 +1,4 @@
-package ModPC
+package mc_client
 
 import (
 	RaknetConnection "Eulogist/core/raknet"
@@ -6,7 +6,7 @@ import (
 	"github.com/sandertv/go-raknet"
 )
 
-type Server struct {
+type MCClient struct {
 	listener  *raknet.Listener
 	connected chan struct{}
 

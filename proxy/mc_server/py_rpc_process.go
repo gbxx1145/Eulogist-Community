@@ -1,4 +1,4 @@
-package BotSide
+package mc_server
 
 import (
 	"Eulogist/core/fb_auth/py_rpc"
@@ -9,7 +9,7 @@ import (
 )
 
 // ...
-func (b *BotSide) OnPyRpc(p *packet.PyRpc) (shouldSendCopy bool, err error) {
+func (b *MCServer) OnPyRpc(p *packet.PyRpc) (shouldSendCopy bool, err error) {
 	if p.Value == nil {
 		return true, nil
 	}
