@@ -84,7 +84,7 @@ func Eulogist() error {
 	}
 
 	{
-		botSide, err = BotSide.ConnectToServer(config.RentalServerCode, config.RentalServerPassword, config.FBToken, LookUpAuthServerAddress(config.AuthServerType))
+		botSide, err = BotSide.ConnectToServer(config.RentalServerCode, config.RentalServerPassword, config.FBToken, LookUpAuthServerAddress(config.FBToken))
 		if err != nil {
 			return fmt.Errorf("UnfoldEulogist: %v", err)
 		}
