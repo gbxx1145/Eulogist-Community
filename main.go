@@ -13,6 +13,6 @@ func main() {
 		pterm.Error.Println(err)
 	}
 
-	pterm.Info.Println("\nProgram running down, now press enter to exit")
+	pterm.Info.Println("\nProgram running down, now press enter to exit.")
 	fmt.Scanln()
 }

@@ -47,7 +47,7 @@ func Eulogist() error {
 			command := exec.Command(config.NEMCPath)
 			command.SysProcAttr = &syscall.SysProcAttr{CmdLine: fmt.Sprintf("%#v config=%#v", config.NEMCPath, neteaseConfigPath)}
 			go command.Run()
-			pterm.Success.Println("Success to turn on Mod PC and Eulogist, now waiting Mod PC to connect")
+			pterm.Success.Println("Success to turn on Mod PC and Eulogist, now waiting Mod PC to connect.")
 			// launch mod pc
 		} else {
 			modPC, modPCWasConnected, err = ModPC.RunServer(config.ServerIP, config.ServerPort)
