@@ -1,9 +1,9 @@
 package main
 
 import (
-	BotSide "Eulogist/bot_side"
-	ModPC "Eulogist/mod_pc"
-	RaknetConnection "Eulogist/raknet_connection"
+	RaknetConnection "Eulogist/core/raknet"
+	BotSide "Eulogist/server/bot_side"
+	ModPC "Eulogist/server/mod_pc"
 	"fmt"
 	"sync"
 
