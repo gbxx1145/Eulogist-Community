@@ -42,13 +42,13 @@ func (r *RaknetConnection) CloseConnection() {
 	r.closedLock.Lock()
 	defer r.closedLock.Unlock()
 
+	r.cancel()
+	r.connection.Close()
+
 	if !r.closed {
 		close(r.packets)
 		r.closed = true
 	}
-
-	r.cancel()
-	r.connection.Close()
 }
 
 // ...
@@ -121,7 +121,8 @@ func (r *RaknetConnection) ProcessIncomingPackets() {
 			select {
 			case <-r.context.Done():
 				return
-			case r.packets <- MinecraftPacket{Packet: pk, Bytes: data}:
+			default:
+				r.packets <- MinecraftPacket{Packet: pk, Bytes: data}
 			}
 			// set value
 		}
