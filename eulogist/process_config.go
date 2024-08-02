@@ -10,9 +10,8 @@ import (
 	"github.com/pterm/pterm"
 )
 
-// 检查 path 对应路径的文件是否存在。
-// 如果不存在，或该路径指向一个文件夹，
-// 则返回假，否则返回真
+// FileExist 检查 path 对应路径的文件是否存在。
+// 如果不存在，或该路径指向一个文件夹，则返回假，否则返回真
 func FileExist(path string) bool {
 	fileInfo, err := os.Stat(path)
 	if os.IsNotExist(err) {
@@ -21,29 +20,28 @@ func FileExist(path string) bool {
 	return !fileInfo.IsDir()
 }
 
-// 将 content 以 JSON 形式写入到 path 指代的文件处
+// WriteJsonFile 将 content 以 JSON
+// 形式写入到 path 指代的文件处
 func WriteJsonFile(path string, content any) error {
 	contentBytes, _ := json.Marshal(content)
-	// marshal
+	// 将内容转换为 JSON 格式
 	buffer := bytes.NewBuffer([]byte{})
 	json.Indent(buffer, contentBytes, "", "	")
-	// indent json
+	// 格式化 JSON
 	err := os.WriteFile(path, buffer.Bytes(), 0600)
 	if err != nil {
 		return fmt.Errorf("WriteJsonFile: %v", err)
 	}
-	// write json to file
+	// 将 JSON 写入文件
 	return nil
-	// return
 }
 
-// 在当前目录读取 赞颂者 的配置文件。
-// 如果没有对应的文件，
-// 则将尝试生成默认配置文件。
+// ReadEulogistConfig 在当前目录读取 赞颂者 的配置文件。
+// 如果没有对应的文件，则将尝试生成默认配置文件。
 //
 // 生成默认配置文件期间需要从控制台读取用户输入，
-// 读取的内容包括需要赞颂的租赁服号及其密码，
-// 以及 FastBuilder 原生验证服务器的 Token
+// 读取的内容包括需要进入的租赁服号及其密码，
+// 以及 FastBuilder 原生验证服务器的 Token。
 func ReadEulogistConfig() (*EulogistConfig, error) {
 	var cfg EulogistConfig
 
@@ -68,11 +66,9 @@ func ReadEulogistConfig() (*EulogistConfig, error) {
 	return &cfg, nil
 }
 
-// 在当前目录生成 赞颂者 的默认配置文件，
-// 并返回该配置文件。
-//
-// 此函数会从控制台读取用户输入，
-// 读取的内容包括需要赞颂的租赁服号及其密码，
+// GenerateEulogistConfig 在当前目录生成 赞颂者 的默认配置文件，
+// 并返回该配置文件。此函数会从控制台读取用户输入，
+// 读取的内容包括需要进入的租赁服号及其密码，
 // 以及 FastBuilder 原生验证服务器的 Token
 func GenerateEulogistConfig() (config *EulogistConfig, err error) {
 	cfg := DefaultEulogistConfig()
@@ -97,7 +93,7 @@ func GenerateEulogistConfig() (config *EulogistConfig, err error) {
 //go:embed steve.png
 var steveSkin []byte
 
-// 根据赞颂者的配置 config，
+// GenerateNetEaseConfig 根据赞颂者的配置 config，
 // 在当前目录下生成用于启动 NEMC PC 的配置文件，
 // 并返回该配置文件的绝对路径
 func GenerateNetEaseConfig(config *EulogistConfig, ip string, port int) (configPath string, err error) {

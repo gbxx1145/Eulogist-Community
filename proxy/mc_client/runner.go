@@ -5,17 +5,18 @@ import (
 	"fmt"
 )
 
-// 在 serverIP 对应的 IP 上运行一个代理服务器以等待
+// RunServer 在 serverIP 对应的 IP 上运行一个代理服务器以等待
 // Minecraft 连接，并指定该服务器开放的端口为 serverPort。
 // 当 Minecraft 连接时，管道 connected 将收到数据
 func RunServer() (client *MinecraftClient, connected chan struct{}, err error) {
-	client = new(MinecraftClient)
 	// prepare
+	client = new(MinecraftClient)
+	// start listening
 	err = client.CreateListener()
 	if err != nil {
 		return nil, nil, fmt.Errorf("RunServer: %v", err)
 	}
-	// open client
+	// wait Minecraft Client to connect
 	go func() {
 		err = client.WaitConnect()
 		if err != nil {
@@ -23,19 +24,21 @@ func RunServer() (client *MinecraftClient, connected chan struct{}, err error) {
 		}
 		client.ProcessIncomingPackets()
 	}()
-	// wait connect and start listening
-	return client, client.connected, nil
 	// return
+	return client, client.connected, nil
 }
 
-// 等待 Minecraft 完成与 赞颂者 的基本数据包交换。
+// WaitClientHandshakeDown 等待 Minecraft
+// 完成与 赞颂者 的基本数据包交换。
 // 此函数应当只被调用一次
 func (m *MinecraftClient) WaitClientHandshakeDown() error {
-	var downInitConnect bool
 	// prepare
+	var downInitConnect bool
+	// process login related packets from Minecraft
 	for {
-		pk := m.ReadPacket()
 		// read packet
+		pk := m.ReadPacket()
+		// handle login related packets
 		switch p := pk.Packet.(type) {
 		case *packet.RequestNetworkSettings:
 			err := m.HandleRequestNetworkSettings(p)
@@ -50,17 +53,15 @@ func (m *MinecraftClient) WaitClientHandshakeDown() error {
 		case *packet.ClientToServerHandshake:
 			downInitConnect = true
 		}
-		// handle init connection packets
+		// check connection states
 		select {
 		case <-m.GetContext().Done():
-			return fmt.Errorf("WaitClientHandshakeDown: Minecraft closed its connection to eulogist")
+			return fmt.Errorf("WaitClientHandshakeDown: Minecraft closed its connection to eulogist") // 如果连接关闭，返回错误
 		default:
 		}
-		// check connection states
+		// return
 		if downInitConnect {
 			return nil
 		}
-		// return
 	}
-	// process login related packets from Minecraft
 }

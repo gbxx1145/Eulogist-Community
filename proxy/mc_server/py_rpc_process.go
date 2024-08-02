@@ -8,17 +8,19 @@ import (
 	"fmt"
 )
 
-// ...
+// OnPyRpc 处理数据包 PyRpc
 func (m *MinecraftServer) OnPyRpc(p *packet.PyRpc) (shouldSendCopy bool, err error) {
+	// 如果请求值为空，
+	// 返回 true 表示需要抄送当前数据包到 Minecraft 客户端
 	if p.Value == nil {
 		return true, nil
 	}
-	// prepare
+	// 解码当前数据包
 	content, err := py_rpc.Unmarshal(p.Value)
 	if err != nil {
 		return true, fmt.Errorf("OnPyRpc: %v", err)
 	}
-	// unmarshal
+	// 根据内容类型处理不同的 PyRpc
 	switch c := content.(type) {
 	case *py_rpc.StartType:
 		c.Content = m.fbClient.TransferData(c.Content)
@@ -34,20 +36,20 @@ func (m *MinecraftServer) OnPyRpc(p *packet.PyRpc) (shouldSendCopy bool, err err
 		if err != nil {
 			return false, fmt.Errorf("OnPyRpc: %v", err)
 		}
-		// get data and send packet
 	case *py_rpc.GetMCPCheckNum:
+		// 如果已完成零知识证明(挑战)，
+		// 则不做任何操作
 		if m.getCheckNumEverPassed {
 			break
 		}
-		// if the challenges has been down,
-		// we do NOTHING
+		// 创建请求并发送到认证服务器并获取响应
 		arg, _ := json.Marshal([]any{
 			c.FirstArg,
 			c.SecondArg.Arg,
 			m.entityUniqueID,
 		})
 		ret := m.fbClient.TransferCheckNum(string(arg))
-		// create request to the auth server and get response
+		// 解码响应并调整数据
 		ret_p := []any{}
 		json.Unmarshal([]byte(ret), &ret_p)
 		if len(ret_p) > 7 {
@@ -56,7 +58,7 @@ func (m *MinecraftServer) OnPyRpc(p *packet.PyRpc) (shouldSendCopy bool, err err
 				ret_p[6] = int64(ret6)
 			}
 		}
-		// unmarshal response and adjust the data included
+		// 完成零知识证明(挑战)
 		err = m.WritePacket(
 			RaknetConnection.MinecraftPacket{
 				Packet: &packet.PyRpc{
@@ -68,12 +70,16 @@ func (m *MinecraftServer) OnPyRpc(p *packet.PyRpc) (shouldSendCopy bool, err err
 		if err != nil {
 			return false, fmt.Errorf("OnPyRpc: %v", err)
 		}
+		// 标记零知识证明(挑战)已在当前会话下永久完成
 		m.getCheckNumEverPassed = true
-		// send packet and mark this challenges was finished
+		// 返回值
+		return false, nil
 	default:
+		// 对于其他种类的 PyRpc 数据包，
+		// 返回 true 表示需要将数据包抄送至
+		// Minecraft 客户端
 		return true, nil
 	}
-	// do some actions for some specific PyRpc packets
+	// 返回值
 	return false, nil
-	// return
 }

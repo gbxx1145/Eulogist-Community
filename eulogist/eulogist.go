@@ -13,7 +13,7 @@ import (
 	"github.com/pterm/pterm"
 )
 
-// 展开 “赞颂者”
+// Eulogist 函数是整个“赞颂者”程序的入口点
 func Eulogist() error {
 	var err error
 	var config *EulogistConfig
@@ -23,33 +23,35 @@ func Eulogist() error {
 	var server *Server.MinecraftServer
 	var ClientWasConnected chan struct{}
 
+	// 读取配置文件
 	{
 		config, err = ReadEulogistConfig()
 		if err != nil {
 			return fmt.Errorf("Eulogist: %v", err)
 		}
-		// read config
+		// 根据配置文件的启动类型决定启动方式
 		if config.LaunchType == LaunchTypeNormal {
+			// 检查 Minecraft 客户端是否存在
 			if !FileExist(config.NEMCPath) {
 				return fmt.Errorf("Eulogist: Client not found, maybe you did not download or the the path is incorrect")
 			}
-			// check Minecraft is download
+			// 启动 Eulogist 服务器
 			client, ClientWasConnected, err = Client.RunServer()
 			if err != nil {
 				return fmt.Errorf("Eulogist: %v", err)
 			}
-			// run server
+			// 生成网易配置文件
 			neteaseConfigPath, err = GenerateNetEaseConfig(config, client.GetServerIP(), client.GetServerPort())
 			if err != nil {
 				return fmt.Errorf("Eulogist: %v", err)
 			}
-			// generate netease config
+			// 启动 Minecraft 客户端
 			command := exec.Command(config.NEMCPath)
 			command.SysProcAttr = &syscall.SysProcAttr{CmdLine: fmt.Sprintf("%#v config=%#v", config.NEMCPath, neteaseConfigPath)}
 			go command.Run()
-			pterm.Success.Println("Eulogist is ready! Now we are going to start Minecarft Client.\nThen, the Minecraft Client will connect to Eulogist automatically.")
-			// launch Minecraft
+			pterm.Success.Println("Eulogist is ready! Now we are going to start Minecraft Client.\nThen, the Minecraft Client will connect to Eulogist automatically.")
 		} else {
+			// 启动 Eulogist 服务器
 			client, ClientWasConnected, err = Client.RunServer()
 			if err != nil {
 				return fmt.Errorf("Eulogist: %v", err)
@@ -59,10 +61,11 @@ func Eulogist() error {
 				client.GetServerIP(), client.GetServerPort(),
 			)
 		}
-		// run eulogist
 	}
 
+	// 等待 Minecraft 客户端与赞颂者完成基本数据包交换
 	{
+		// 等待 Minecraft 客户端连接
 		if config.LaunchType == LaunchTypeNormal {
 			timer := time.NewTimer(time.Second * 120)
 			defer timer.Stop()
@@ -77,15 +80,15 @@ func Eulogist() error {
 			close(ClientWasConnected)
 		}
 		pterm.Success.Println("Success to create connection with Minecraft Client, now we try to create handshake with it.")
-		// waiting Minecraft to connect
+		// 等待 Minecraft 客户端完成握手
 		err = client.WaitClientHandshakeDown()
 		if err != nil {
 			return fmt.Errorf("Eulogist: %v", err)
 		}
 		pterm.Success.Println("Success to create handshake with Minecraft Client, now we try to communicate with auth server.")
-		// finish Minecraft handshake
 	}
 
+	// 使赞颂者连接到网易租赁服
 	{
 		server, err = Server.ConnectToServer(config.RentalServerCode, config.RentalServerPassword, config.FBToken, LookUpAuthServerAddress(config.FBToken))
 		if err != nil {
@@ -93,19 +96,19 @@ func Eulogist() error {
 		}
 		pterm.Success.Println("Success to create handshake with NetEase Minecraft Rental Server, and then you will login to it.")
 	}
-	// create connection with bot side
 
+	// 设置等待队列
 	waitGroup.Add(2)
-	// set wait group
 
+	// 处理网易租赁服到赞颂者的数据包
 	go func() {
 		defer func() {
 			server.CloseConnection()
 			client.CloseConnection()
 			waitGroup.Add(-1)
 		}()
-		// ...
 		for {
+			// 读取和过滤数据包
 			pk := server.ReadPacket()
 			if err != nil {
 				return
@@ -115,22 +118,21 @@ func Eulogist() error {
 				pterm.Warning.Printf("Eulogist: %v\n", err)
 				continue
 			}
-			// filte the packets
+			// 抄送数据包到 Minecraft 客户端
 			if shouldSendCopy {
 				err = client.WritePacket(RaknetConnection.MinecraftPacket{Bytes: pk.Bytes}, true)
 				if err != nil {
 					return
 				}
 			}
-			// send a copy to Minecraft
+			// 同步其他数据到 Minecraft 客户端
 			if shieldID := server.GetShieldID(); shieldID != 0 {
 				client.SetShieldID(shieldID)
 			}
-			// sync shield id
 			if !server.GetShouldDecode() {
 				client.SetShouldDecode(false)
 			}
-			// sync should decode states
+			// 检查连接状态
 			select {
 			case <-server.GetContext().Done():
 				return
@@ -138,26 +140,24 @@ func Eulogist() error {
 				return
 			default:
 			}
-			// check connection states
 		}
 	}()
-	// bot side <-> eulogist
 
+	// 处理 Minecraft 客户端到赞颂者的数据包
 	go func() {
 		defer func() {
 			client.CloseConnection()
 			server.CloseConnection()
 			waitGroup.Add(-1)
 		}()
-		// ...
 		for {
+			// 读取并抄送数据包到网易租赁服
 			pk := client.ReadPacket()
-			// read packet from Minecraft
 			err = server.WritePacket(RaknetConnection.MinecraftPacket{Bytes: pk.Bytes}, true)
 			if err != nil {
 				return
 			}
-			// sync packet to bot side
+			// 检查连接状态
 			select {
 			case <-client.GetContext().Done():
 				return
@@ -165,11 +165,10 @@ func Eulogist() error {
 				return
 			default:
 			}
-			// check connection states
 		}
 	}()
-	// Minecraft <-> eulogist
 
+	// 等待所有 goroutine 完成
 	waitGroup.Wait()
 	pterm.Info.Println("Server Down. Now all connection was closed.")
 	return nil

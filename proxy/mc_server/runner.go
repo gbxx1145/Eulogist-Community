@@ -16,33 +16,35 @@ import (
 	"github.com/sandertv/go-raknet"
 )
 
-// 连接到租赁服号为 serverCode，
+// ConnectToServer 用于连接到租赁服号为 serverCode，
 // 服务器密码为 serverPassword 的网易租赁服。
 // token 指代 FB Token
 func ConnectToServer(serverCode string, serverPassword string, token string, authServer string) (*MinecraftServer, error) {
+	// 准备
 	var downInitConnect bool
 	var mcServer MinecraftServer
 	mcServer.fbClient = fbauth.CreateClient(&fbauth.ClientOptions{AuthServer: authServer})
 	authenticator := fbauth.NewAccessWrapper(mcServer.fbClient, serverCode, serverPassword, token, "", "")
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
-	// prepare
+	// 生成密钥并发送请求到认证服务器
 	clientkey, _ := ecdsa.GenerateKey(elliptic.P384(), rand.Reader)
 	armoured_key, _ := x509.MarshalPKIXPublicKey(&clientkey.PublicKey)
 	authResponse, err := authenticator.GetAccess(ctx, armoured_key)
 	if err != nil {
 		return nil, fmt.Errorf("ConnectToServer: %v", err)
 	}
-	// generate key and send request to auth server
+	// 连接到服务器
 	connection, err := raknet.DialContext(ctx, authResponse.RentalServerIP)
 	if err != nil {
 		return nil, fmt.Errorf("ConnectToServer: %v", err)
 	}
-	// connect to server
+	// 设置底层 Raknet 连接
 	mcServer.Raknet = RaknetConnection.NewRaknet()
 	mcServer.SetConnection(connection, clientkey)
 	go mcServer.ProcessIncomingPackets()
-	// set connection
+	// 向网易租赁服请求网络设置，
+	// 这是赞颂者登录到网易租赁服的第一个数据包
 	err = mcServer.WritePacket(
 		RaknetConnection.MinecraftPacket{
 			Packet: &packet.RequestNetworkSettings{ClientProtocol: protocol.CurrentProtocol},
@@ -51,9 +53,11 @@ func ConnectToServer(serverCode string, serverPassword string, token string, aut
 	if err != nil {
 		return nil, fmt.Errorf("ConnectToServer: %v", err)
 	}
-	// request network settings
+	// 处理来自 bot 端的登录相关数据包
 	for {
+		// 读取数据包
 		pk := mcServer.ReadPacket()
+		// 处理初始连接数据包
 		switch p := pk.Packet.(type) {
 		case *packet.NetworkSettings:
 			err = mcServer.HandleNetworkSettings(p, authResponse)
@@ -67,17 +71,15 @@ func ConnectToServer(serverCode string, serverPassword string, token string, aut
 			}
 			downInitConnect = true
 		}
-		// handle init connection packets
+		// 检查连接状态
 		select {
 		case <-mcServer.GetContext().Done():
 			return nil, fmt.Errorf("ConnectToServer: NetEase Minecraft Rental Server closed their connection to eulogist")
 		default:
 		}
-		// check connection states
+		// 返回 MinecraftServer 实例
 		if downInitConnect {
 			return &mcServer, nil
 		}
-		// return
 	}
-	// process login related packets from bot side
 }

@@ -17,10 +17,13 @@ import (
 func (m *MinecraftServer) PacketFilter(
 	pk packet.Packet, writePacketToClient func(pk RaknetConnection.MinecraftPacket, useBytes bool) error,
 ) (shouldSendCopy bool, err error) {
+	// 如果传入的数据包为空，
+	// 则直接返回 true 表示需要同步到客户端
 	if pk == nil {
 		return true, nil
 	}
 
+	// 根据数据包的类型进行不同的处理
 	switch p := pk.(type) {
 	case *packet.PyRpc:
 		shouldSendCopy, err = m.OnPyRpc(p)
@@ -34,6 +37,11 @@ func (m *MinecraftServer) PacketFilter(
 		return true, nil
 	case *packet.UpdatePlayerGameType:
 		if p.PlayerUniqueID == m.entityUniqueID {
+			// 如果玩家的唯一 ID 与数据包中记录的值匹配，
+			// 则向客户端发送 SetPlayerGameType 数据包，
+			// 并放弃当前数据包的发送，
+			// 以确保 Minecraft 客户端可以正常同步游戏模式更改。
+			// 否则，按原样抄送当前数据包
 			err = writePacketToClient(RaknetConnection.MinecraftPacket{
 				Packet: &packet.SetPlayerGameType{GameType: p.GameType},
 			}, false)
@@ -41,8 +49,10 @@ func (m *MinecraftServer) PacketFilter(
 				err = fmt.Errorf("PacketFilter: %v", err)
 			}
 		}
+		// 返回是否需要同步到客户端
 		return p.PlayerUniqueID != m.entityUniqueID, err
 	}
 
+	// 默认情况下，返回 true 表示需要同步到客户端
 	return true, nil
 }
