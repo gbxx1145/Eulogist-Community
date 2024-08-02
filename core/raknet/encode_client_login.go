@@ -29,7 +29,10 @@ func (r *Raknet) EncodeLogin(
 	clientData := login.ClientData{}
 
 	defaultIdentityData(&identityData)
-	defaultClientData(&clientData, authResponse)
+	err := defaultClientData(&clientData, authResponse)
+	if err != nil {
+		return nil, fmt.Errorf("EncodeLogin: %v", err)
+	}
 
 	var request []byte
 	// We login as an Android device and this will show up in the 'titleId' field in the JWT chain, which
@@ -37,7 +40,7 @@ func (r *Raknet) EncodeLogin(
 	setAndroidData(&clientData)
 
 	request = login.Encode(authResponse.ChainInfo, clientData, clientKey)
-	identityData, _, _, err := login.Parse(request)
+	identityData, _, _, err = login.Parse(request)
 	if err != nil {
 		return nil, fmt.Errorf("EncodeLogin: WARNING: Identity data parsing error: %v", err)
 	}
@@ -57,7 +60,7 @@ func defaultIdentityData(data *login.IdentityData) {
 }
 
 // defaultClientData edits the ClientData passed to have defaults set to all fields that were left unchanged.
-func defaultClientData(d *login.ClientData, authResponse fbauth.AuthResponse) {
+func defaultClientData(d *login.ClientData, authResponse fbauth.AuthResponse) error {
 	rand.Seed(time.Now().Unix())
 
 	d.ServerAddress = authResponse.RentalServerIP
@@ -102,10 +105,31 @@ func defaultClientData(d *login.ClientData, authResponse fbauth.AuthResponse) {
 	if d.SkinID == "" {
 		d.SkinID = uuid.New().String()
 	}
+	if d.SkinItemID == "" {
+		d.SkinItemID = authResponse.SkinInfo.ItemID
+	}
 	if d.SkinData == "" {
-		d.SkinData = base64.StdEncoding.EncodeToString(bytes.Repeat([]byte{0, 0, 0, 255}, 32*64))
-		d.SkinImageHeight = 32
-		d.SkinImageWidth = 64
+		if url := authResponse.SkinInfo.SkinDownloadURL; len(url) > 0 {
+			imageBytes, err := DownloadImage(url)
+			if err != nil {
+				return fmt.Errorf("defaultClientData: %v", err)
+			}
+			img, err := ConvertToPNG(imageBytes)
+			if err != nil {
+				return fmt.Errorf("defaultClientData: %v", err)
+			}
+			d.SkinData = base64.StdEncoding.EncodeToString(EncodeImageToBytes(img))
+			d.SkinGeometryVersion = "MC4wLjA="
+			d.PremiumSkin = true
+			d.SkinImageHeight = img.Bounds().Dy()
+			d.SkinImageWidth = img.Bounds().Dx()
+			d.SkinResourcePatch = base64.StdEncoding.EncodeToString(skinResourcePatch)
+			d.SkinGeometry = base64.StdEncoding.EncodeToString(skinGeometry)
+		} else {
+			d.SkinData = base64.StdEncoding.EncodeToString(bytes.Repeat([]byte{0, 0, 0, 255}, 32*64))
+			d.SkinImageHeight = 32
+			d.SkinImageWidth = 64
+		}
 	}
 	if d.SkinResourcePatch == "" {
 		d.SkinResourcePatch = base64.StdEncoding.EncodeToString(skinResourcePatch)
@@ -113,6 +137,8 @@ func defaultClientData(d *login.ClientData, authResponse fbauth.AuthResponse) {
 	if d.SkinGeometry == "" {
 		d.SkinGeometry = base64.StdEncoding.EncodeToString(skinGeometry)
 	}
+
+	return nil
 }
 
 // setAndroidData ensures the login.ClientData passed matches settings you would see on an Android device.
