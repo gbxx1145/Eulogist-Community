@@ -31,7 +31,6 @@ func ConnectToServer(serverCode string, serverPassword string, token string, aut
 	clientkey, _ := ecdsa.GenerateKey(elliptic.P384(), rand.Reader)
 	armoured_key, _ := x509.MarshalPKIXPublicKey(&clientkey.PublicKey)
 	authResponse, err := authenticator.GetAccess(ctx, armoured_key)
-	fmt.Printf("%#v\n", authResponse)
 	if err != nil {
 		return nil, fmt.Errorf("ConnectToServer: %v", err)
 	}
