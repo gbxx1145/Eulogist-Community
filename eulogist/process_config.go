@@ -94,7 +94,7 @@ func GenerateEulogistConfig() (config *EulogistConfig, err error) {
 var steveSkin []byte
 
 // GenerateNetEaseConfig 根据赞颂者的配置 config，
-// 在当前目录下生成用于启动 NEMC PC 的配置文件，
+// 在当前目录下生成用于启动 Minecraft 客户端的配置文件，
 // 并返回该配置文件的绝对路径
 func GenerateNetEaseConfig(config *EulogistConfig, ip string, port int) (configPath string, err error) {
 	cfg := DefaultNetEaseConfig()

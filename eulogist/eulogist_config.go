@@ -20,10 +20,10 @@ const (
 // EulogistConfig 结构体定义了 Eulogist 的配置信息
 type EulogistConfig struct {
 	LaunchType int    `json:"launch_type"`       // 启动类型
-	NEMCPath   string `json:"nemc_program_path"` // NEMC PC 程序路径
+	NEMCPath   string `json:"nemc_program_path"` // Minecraft 客户端的程序路径
 
 	// 自定义皮肤路径。
-	// 目的仅在于在 NEMC PC 处使用并显示该皮肤，
+	// 目的仅在于在 Minecraft 客户端处使用并显示该皮肤，
 	// 但此皮肤数据实际上并没有被同步到租赁服，
 	// 因此实际的皮肤表现，请以实际情况为准
 	SkinPath string `json:"skin_path"`

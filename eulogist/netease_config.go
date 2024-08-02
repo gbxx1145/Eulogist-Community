@@ -1,7 +1,7 @@
 package Eulogist
 
 // NetEaseConfig 结构体定义了一个可以允许
-// NEMC PC 自动进入特定服务器地址的配置文件字段
+// Minecraft 客户端自动进入特定服务器地址的配置文件字段
 type NetEaseConfig struct {
 	RoomInfo   RoomInfo   `json:"room_info"`   // 房间信息
 	PlayerInfo PlayerInfo `json:"player_info"` // 玩家信息
