@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"os/exec"
 	"sync"
-	"syscall"
 	"time"
 
 	"github.com/pterm/pterm"
@@ -46,8 +45,7 @@ func Eulogist() error {
 				return fmt.Errorf("Eulogist: %v", err)
 			}
 			// 启动 Minecraft 客户端
-			command := exec.Command(config.NEMCPath)
-			command.SysProcAttr = &syscall.SysProcAttr{CmdLine: fmt.Sprintf("%#v config=%#v", config.NEMCPath, neteaseConfigPath)}
+			command := exec.Command(config.NEMCPath, fmt.Sprintf("config=%s", neteaseConfigPath))
 			go command.Run()
 			pterm.Success.Println("Eulogist is ready! Now we are going to start Minecraft Client.\nThen, the Minecraft Client will connect to Eulogist automatically.")
 		} else {
