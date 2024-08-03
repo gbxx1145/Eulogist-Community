@@ -78,7 +78,7 @@ func ProcessFileToSkin(url string) (
 		return nil, nil, 0, 0, fmt.Errorf("ProcessFileToSkin: %v", err)
 	}
 	// encode to pixels and return
-	return EncodeImageToBytes(img), skinGeometryData, img.Bounds().Dx(), img.Bounds().Dy(), nil
+	return img.(*image.NRGBA).Pix, skinGeometryData, img.Bounds().Dx(), img.Bounds().Dy(), nil
 }
 
 // 从 zipData 指代的 ZIP 二进制数据负载提取皮肤数据。
@@ -144,22 +144,4 @@ func ConvertToPNG(imageData []byte) (image.Image, error) {
 		return nil, fmt.Errorf("ConvertToPNG: %v", err)
 	}
 	return img, nil
-}
-
-// 将 img 指代的图像编码为一维密集像素矩阵
-func EncodeImageToBytes(img image.Image) []byte {
-	result := make([]byte, 0)
-	dx := img.Bounds().Dx()
-	dy := img.Bounds().Dy()
-	for y := 0; y < dy; y++ {
-		for x := 0; x < dx; x++ {
-			pix := img.(*image.NRGBA).Pix
-			index := (y*dy + x) * 4
-			result = append(
-				result,
-				pix[index], pix[index+1], pix[index+2], pix[index+3],
-			)
-		}
-	}
-	return result
 }
