@@ -27,9 +27,8 @@ type Raknet struct {
 	closed     bool
 	closedLock sync.Mutex
 
-	encoder      *packet.Encoder
-	decoder      *packet.Decoder
-	shouldDecode bool
+	encoder *packet.Encoder
+	decoder *packet.Decoder
 
 	key  *ecdsa.PrivateKey
 	salt []byte

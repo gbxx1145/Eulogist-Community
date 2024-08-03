@@ -28,7 +28,6 @@ func (r *Raknet) SetConnection(connection net.Conn, key *ecdsa.PrivateKey) error
 	r.connection = connection
 	r.encoder = packet.NewEncoder(connection)
 	r.decoder = packet.NewDecoder(connection)
-	r.shouldDecode = true
 	r.packets = make(chan MinecraftPacket, 1024)
 	r.key = key
 	_, _ = rand.Read(r.salt)
@@ -66,22 +65,6 @@ func (r *Raknet) SetShieldID(shieldID int32) {
 	r.shieldID.Store(shieldID)
 }
 
-// 查询解码器的工作状态。
-// 如果返回假，
-// 则数据包不会在传递过程中解码，
-// 否则，将会解码
-func (r *Raknet) GetShouldDecode() bool {
-	return r.shouldDecode
-}
-
-// 设置解码器的工作状态。
-// 如果 states 为假，
-// 则数据包不会在传递过程中解码，
-// 否则，将会解码
-func (r *Raknet) SetShouldDecode(states bool) {
-	r.shouldDecode = states
-}
-
 // 从底层 Raknet 不断地读取多个数据包，
 // 直到底层 Raknet 连接被关闭。
 //
@@ -111,12 +94,14 @@ func (r *Raknet) ProcessIncomingPackets() {
 						pterm.Warning.Printf("ProcessIncomingPackets: %v\n", err)
 					}
 				}()
-				if !r.shouldDecode {
-					switch packetHeader.PacketID {
-					case packet.IDPyRpc, packet.IDUpdatePlayerGameType:
-					default:
-						return
-					}
+				switch packetHeader.PacketID {
+				case packet.IDRequestNetworkSettings, packet.IDNetworkSettings:
+				case packet.IDLogin:
+				case packet.IDServerToClientHandshake, packet.IDClientToServerHandshake:
+				case packet.IDStartGame, packet.IDPyRpc:
+				case packet.IDUpdatePlayerGameType:
+				default:
+					return
 				}
 				pk = packetFunc()
 				pk.Marshal(reader)

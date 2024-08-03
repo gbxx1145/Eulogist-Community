@@ -151,12 +151,9 @@ func Eulogist() error {
 					return
 				}
 			}
-			// 同步其他数据到 Minecraft 客户端
+			// 同步 Shield ID 到 Minecraft 客户端
 			if shieldID := server.GetShieldID(); shieldID != 0 {
 				client.SetShieldID(shieldID)
-			}
-			if !server.GetShouldDecode() {
-				client.SetShouldDecode(false)
 			}
 			// 检查连接状态
 			select {

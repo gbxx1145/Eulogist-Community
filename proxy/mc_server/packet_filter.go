@@ -33,7 +33,6 @@ func (m *MinecraftServer) PacketFilter(
 		return shouldSendCopy, err
 	case *packet.StartGame:
 		m.entityUniqueID = m.HandleStartGame(p)
-		m.SetShouldDecode(false)
 		return true, nil
 	case *packet.UpdatePlayerGameType:
 		if p.PlayerUniqueID == m.entityUniqueID {
