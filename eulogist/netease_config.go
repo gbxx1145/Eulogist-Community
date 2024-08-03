@@ -15,7 +15,7 @@ type RoomInfo struct {
 	Port int    `json:"port"` // 房间的端口号
 }
 
-// 玩家信息s
+// 玩家信息
 type PlayerInfo struct {
 	UserID   int    `json:"user_id"`   // 玩家的用户 ID
 	UserName string `json:"user_name"` // 玩家的用户名

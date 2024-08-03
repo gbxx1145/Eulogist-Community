@@ -5,6 +5,7 @@ import (
 	Client "Eulogist/proxy/mc_client"
 	Server "Eulogist/proxy/mc_server"
 	"fmt"
+	"os"
 	"os/exec"
 	"sync"
 	"time"
@@ -28,40 +29,76 @@ func Eulogist() error {
 		if err != nil {
 			return fmt.Errorf("Eulogist: %v", err)
 		}
-		// 根据配置文件的启动类型决定启动方式
-		if config.LaunchType == LaunchTypeNormal {
-			// 检查 Minecraft 客户端是否存在
-			if !FileExist(config.NEMCPath) {
-				return fmt.Errorf("Eulogist: Client not found, maybe you did not download or the the path is incorrect")
-			}
-			// 启动 Eulogist 服务器
-			client, ClientWasConnected, err = Client.RunServer()
-			if err != nil {
-				return fmt.Errorf("Eulogist: %v", err)
-			}
-			// 生成网易配置文件
-			neteaseConfigPath, err = GenerateNetEaseConfig(config, client.GetServerIP(), client.GetServerPort())
-			if err != nil {
-				return fmt.Errorf("Eulogist: %v", err)
-			}
-			// 启动 Minecraft 客户端
-			command := exec.Command(config.NEMCPath, fmt.Sprintf("config=%s", neteaseConfigPath))
-			go command.Run()
-			pterm.Success.Println("Eulogist is ready! Now we are going to start Minecraft Client.\nThen, the Minecraft Client will connect to Eulogist automatically.")
-		} else {
-			// 启动 Eulogist 服务器
-			client, ClientWasConnected, err = Client.RunServer()
-			if err != nil {
-				return fmt.Errorf("Eulogist: %v", err)
-			}
-			pterm.Success.Printf(
-				"Eulogist is ready! Please connect to Eulogist manually.\nEulogist server address: %s:%d\n",
-				client.GetServerIP(), client.GetServerPort(),
-			)
-		}
 	}
 
-	// 等待 Minecraft 客户端与赞颂者完成基本数据包交换
+	// 使 赞颂者 连接到 网易租赁服
+	{
+		pterm.Info.Println("Now we try to communicate with Auth Server.")
+
+		server, err = Server.ConnectToServer(
+			Server.BasicConfig{
+				ServerCode:     config.RentalServerCode,
+				ServerPassword: config.RentalServerPassword,
+				Token:          config.FBToken,
+				AuthServer:     LookUpAuthServerAddress(config.FBToken),
+			},
+		)
+		if err != nil {
+			return fmt.Errorf("Eulogist: %v", err)
+		}
+
+		pterm.Success.Println("Success to create connection with NetEase Minecraft Bedrock Rental Server, now we try to create handshake with it.")
+
+		err = server.WaitClientHandshakeDown()
+		if err != nil {
+			return fmt.Errorf("Eulogist: %v", err)
+		}
+
+		pterm.Success.Println("Success to create handshake with NetEase Minecraft Bedrock Rental Server.")
+	}
+
+	// 根据配置文件的启动类型决定启动方式
+	if config.LaunchType == LaunchTypeNormal {
+		// 检查 Minecraft 客户端是否存在
+		if !FileExist(config.NEMCPath) {
+			return fmt.Errorf("Eulogist: Client not found, maybe you did not download or the the path is incorrect")
+		}
+		// 设置皮肤信息
+		if playerSkin := server.GetPlayerSkin(); !FileExist(config.SkinPath) && playerSkin != nil {
+			err = os.WriteFile("skin.png", playerSkin.SkinImageData, 0600)
+			if err != nil {
+				return fmt.Errorf("Eulogist: %v", err)
+			}
+			currentPath, _ := os.Getwd()
+			config.SkinPath = fmt.Sprintf(`%s\skin.png`, currentPath)
+		}
+		// 启动 Eulogist 服务器
+		client, ClientWasConnected, err = Client.RunServer()
+		if err != nil {
+			return fmt.Errorf("Eulogist: %v", err)
+		}
+		// 生成网易配置文件
+		neteaseConfigPath, err = GenerateNetEaseConfig(config, client.GetServerIP(), client.GetServerPort())
+		if err != nil {
+			return fmt.Errorf("Eulogist: %v", err)
+		}
+		// 启动 Minecraft 客户端
+		command := exec.Command(config.NEMCPath, fmt.Sprintf("config=%s", neteaseConfigPath))
+		go command.Run()
+		pterm.Success.Println("Eulogist is ready! Now we are going to start Minecraft Client.\nThen, the Minecraft Client will connect to Eulogist automatically.")
+	} else {
+		// 启动 Eulogist 服务器
+		client, ClientWasConnected, err = Client.RunServer()
+		if err != nil {
+			return fmt.Errorf("Eulogist: %v", err)
+		}
+		pterm.Success.Printf(
+			"Eulogist is ready! Please connect to Eulogist manually.\nEulogist server address: %s:%d\n",
+			client.GetServerIP(), client.GetServerPort(),
+		)
+	}
+
+	// 等待 Minecraft 客户端与 赞颂者 完成基本数据包交换
 	{
 		// 等待 Minecraft 客户端连接
 		if config.LaunchType == LaunchTypeNormal {
@@ -83,16 +120,7 @@ func Eulogist() error {
 		if err != nil {
 			return fmt.Errorf("Eulogist: %v", err)
 		}
-		pterm.Success.Println("Success to create handshake with Minecraft Client, now we try to communicate with auth server.")
-	}
-
-	// 使赞颂者连接到网易租赁服
-	{
-		server, err = Server.ConnectToServer(config.RentalServerCode, config.RentalServerPassword, config.FBToken, LookUpAuthServerAddress(config.FBToken))
-		if err != nil {
-			return fmt.Errorf("Eulogist: %v", err)
-		}
-		pterm.Success.Println("Success to create handshake with NetEase Minecraft Rental Server, and then you will login to it.")
+		pterm.Success.Println("Success to create handshake with Minecraft Client, and then you will login to NetEase Minecraft Bedrock Rental Server.")
 	}
 
 	// 设置等待队列

@@ -30,12 +30,6 @@ func NewAccessWrapper(Client *Client, ServerCode, ServerPassword, Token, usernam
 }
 
 func (aw *AccessWrapper) GetAccess(ctx context.Context, publicKey []byte) (authResponse AuthResponse, err error) {
-	/*
-		if aw.ServerCode != "68497817" && aw.ServerCode != "48285363" {
-			return AuthResponse{}, fmt.Errorf("GetAccess: Server code not match, and it only could be 68497817 or 48285363")
-		}
-	*/
-	// pre check
 	pubKeyData := base64.StdEncoding.EncodeToString(publicKey)
 	authResponse, err = aw.Client.Auth(ctx, aw.ServerCode, aw.ServerPassword, pubKeyData, aw.Token, aw.Username, aw.Password)
 	if err != nil {

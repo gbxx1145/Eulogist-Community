@@ -19,7 +19,9 @@ import (
 // 并为后续数据包的传递启用压缩功能，
 // 然后发送 Login 数据包
 func (r *Raknet) HandleNetworkSettings(
-	pk *packet.NetworkSettings, authResponse fbauth.AuthResponse,
+	pk *packet.NetworkSettings,
+	authResponse fbauth.AuthResponse,
+	skin *Skin,
 ) error {
 	alg, ok := packet.CompressionByID(pk.CompressionAlgorithm)
 	if !ok {
@@ -29,7 +31,7 @@ func (r *Raknet) HandleNetworkSettings(
 	r.encoder.EnableCompression(alg)
 	r.decoder.EnableCompression(alg)
 	// enable compression
-	loginRequest, err := r.EncodeLogin(authResponse, r.key)
+	loginRequest, err := r.EncodeLogin(authResponse, r.key, skin)
 	if err != nil {
 		return fmt.Errorf("HandleNetworkSettings: %v", err)
 	}

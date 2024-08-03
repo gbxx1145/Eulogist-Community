@@ -37,26 +37,28 @@ func DownloadFile(url string) (result []byte, err error) {
 	return
 }
 
-// 从 url 指定的网址下载文件，
-// 并处理为有效的皮肤数据。
-//
-// skinData 指代皮肤的一维的密集像素矩阵，
-// skinGeometryData 指代皮肤的骨架信息，
-// skinWidth 和 skinHight 则分别指代皮肤的
-// 宽度和高度。
-//
-// TODO: 支持 4D 皮肤
-func ProcessFileToSkin(url string) (
+/*
+从 url 指定的网址下载文件，
+并处理为有效的皮肤数据。
+
+skinImageData 指代皮肤的 PNG 二进制形式，
+skinData 指代皮肤的一维的密集像素矩阵，
+skinGeometryData 指代皮肤的骨架信息，
+skinWidth 和 skinHight 则分别指代皮肤的
+宽度和高度。
+
+TODO: 支持 4D 皮肤
+*/
+func ProcessURLToSkin(url string) (
+	skinImageData []byte,
 	skinData []byte, skinGeometryData []byte,
 	skinWidth int, skinHight int,
 	err error,
 ) {
-	// prepare
-	var skinImageData []byte
 	// download skin file from remote server
 	res, err := DownloadFile(url)
 	if err != nil {
-		return nil, nil, 0, 0, fmt.Errorf("ProcessFileToSkin: %v", err)
+		return nil, nil, nil, 0, 0, fmt.Errorf("ProcessURLToSkin: %v", err)
 	}
 	// get skin data
 	if len(res) >= 4 && bytes.Equal(res[0:4], []byte("PK\x03\x04")) {
@@ -65,7 +67,7 @@ func ProcessFileToSkin(url string) (
 			// skinImageData, skinGeometryData, err = ConvertZIPToSkin(res)
 			skinImageData, _, err = ConvertZIPToSkin(res)
 			if err != nil {
-				return nil, nil, 0, 0, fmt.Errorf("ProcessFileToSkin: %v", err)
+				return nil, nil, nil, 0, 0, fmt.Errorf("ProcessURLToSkin: %v", err)
 			}
 			skinGeometryData = skinGeometry
 		}
@@ -75,10 +77,10 @@ func ProcessFileToSkin(url string) (
 	// decode to image
 	img, err := ConvertToPNG(skinImageData)
 	if err != nil {
-		return nil, nil, 0, 0, fmt.Errorf("ProcessFileToSkin: %v", err)
+		return nil, nil, nil, 0, 0, fmt.Errorf("ProcessURLToSkin: %v", err)
 	}
 	// encode to pixels and return
-	return img.(*image.NRGBA).Pix, skinGeometryData, img.Bounds().Dx(), img.Bounds().Dy(), nil
+	return skinImageData, img.(*image.NRGBA).Pix, skinGeometryData, img.Bounds().Dx(), img.Bounds().Dy(), nil
 }
 
 // 从 zipData 指代的 ZIP 二进制数据负载提取皮肤数据。

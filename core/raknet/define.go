@@ -16,6 +16,7 @@ type saltClaims struct {
 	Salt string `json:"salt"`
 }
 
+// ...
 type Raknet struct {
 	connection net.Conn
 	shieldID   atomic.Int32
@@ -36,7 +37,17 @@ type Raknet struct {
 	packets chan (MinecraftPacket)
 }
 
+// ...
 type MinecraftPacket struct {
 	Packet packet.Packet
 	Bytes  []byte
+}
+
+// ...
+type Skin struct {
+	SkinImageData []byte
+	SkinPixels    []byte
+	SkinGeometry  []byte
+	SkinWidth     int
+	SkinHight     int
 }

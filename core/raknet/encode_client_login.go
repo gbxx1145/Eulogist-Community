@@ -16,13 +16,15 @@ import (
 
 // ...
 func (r *Raknet) EncodeLogin(
-	authResponse fbauth.AuthResponse, clientKey *ecdsa.PrivateKey,
+	authResponse fbauth.AuthResponse,
+	clientKey *ecdsa.PrivateKey,
+	skin *Skin,
 ) ([]byte, error) {
 	identityData := login.IdentityData{}
 	clientData := login.ClientData{}
 
 	defaultIdentityData(&identityData)
-	err := defaultClientData(&clientData, authResponse)
+	err := defaultClientData(&clientData, authResponse, skin)
 	if err != nil {
 		return nil, fmt.Errorf("EncodeLogin: %v", err)
 	}
@@ -53,7 +55,11 @@ func defaultIdentityData(data *login.IdentityData) {
 }
 
 // defaultClientData edits the ClientData passed to have defaults set to all fields that were left unchanged.
-func defaultClientData(d *login.ClientData, authResponse fbauth.AuthResponse) error {
+func defaultClientData(
+	d *login.ClientData,
+	authResponse fbauth.AuthResponse,
+	skin *Skin,
+) error {
 	rand.Seed(time.Now().Unix())
 
 	d.ServerAddress = authResponse.RentalServerIP
@@ -102,14 +108,10 @@ func defaultClientData(d *login.ClientData, authResponse fbauth.AuthResponse) er
 		d.SkinItemID = authResponse.SkinInfo.ItemID
 	}
 	if d.SkinData == "" {
-		if url := authResponse.SkinInfo.SkinDownloadURL; len(url) > 0 {
-			skinData, skinGeometryData, skinWidth, skinHight, err := ProcessFileToSkin(url)
-			if err != nil {
-				return fmt.Errorf("defaultClientData: %v", err)
-			}
-			d.SkinData = base64.StdEncoding.EncodeToString(skinData)
-			d.SkinImageHeight, d.SkinImageWidth = skinHight, skinWidth
-			d.SkinGeometry = base64.StdEncoding.EncodeToString(skinGeometryData)
+		if skin != nil {
+			d.SkinData = base64.StdEncoding.EncodeToString(skin.SkinPixels)
+			d.SkinImageHeight, d.SkinImageWidth = skin.SkinHight, skin.SkinWidth
+			d.SkinGeometry = base64.StdEncoding.EncodeToString(skin.SkinGeometry)
 			d.SkinGeometryVersion = base64.StdEncoding.EncodeToString([]byte("0.0.0"))
 			d.SkinResourcePatch = base64.StdEncoding.EncodeToString(skinResourcePatch)
 			d.PremiumSkin = true
