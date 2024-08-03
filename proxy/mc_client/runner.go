@@ -5,8 +5,9 @@ import (
 	"fmt"
 )
 
-// RunServer 在 serverIP 对应的 IP 上运行一个代理服务器以等待
-// Minecraft 连接，并指定该服务器开放的端口为 serverPort。
+// RunServer 在 127.0.0.1 上运行一个代理服务器以等待
+// Minecraft 连接。服务器开放的端口将被自动设置，
+// 您可以使用 client.GetServerPort() 来取得开放的端口。
 // 当 Minecraft 连接时，管道 connected 将收到数据
 func RunServer() (client *MinecraftClient, connected chan struct{}, err error) {
 	// prepare

@@ -6,7 +6,6 @@ import (
 	"Eulogist/core/minecraft/protocol/login"
 	"bytes"
 	"crypto/ecdsa"
-	_ "embed"
 	"encoding/base64"
 	"fmt"
 	"math/rand"
@@ -14,12 +13,6 @@ import (
 
 	"github.com/google/uuid"
 )
-
-//go:embed skin_resource_patch.json
-var skinResourcePatch []byte
-
-//go:embed skin_geometry.json
-var skinGeometry []byte
 
 // ...
 func (r *Raknet) EncodeLogin(
@@ -110,21 +103,16 @@ func defaultClientData(d *login.ClientData, authResponse fbauth.AuthResponse) er
 	}
 	if d.SkinData == "" {
 		if url := authResponse.SkinInfo.SkinDownloadURL; len(url) > 0 {
-			imageBytes, err := DownloadImage(url)
+			skinData, skinGeometryData, skinWidth, skinHight, err := ProcessFileToSkin(url)
 			if err != nil {
 				return fmt.Errorf("defaultClientData: %v", err)
 			}
-			img, err := ConvertToPNG(imageBytes)
-			if err != nil {
-				return fmt.Errorf("defaultClientData: %v", err)
-			}
-			d.SkinData = base64.StdEncoding.EncodeToString(EncodeImageToBytes(img))
-			d.SkinGeometryVersion = "MC4wLjA="
-			d.PremiumSkin = true
-			d.SkinImageHeight = img.Bounds().Dy()
-			d.SkinImageWidth = img.Bounds().Dx()
+			d.SkinData = base64.StdEncoding.EncodeToString(skinData)
+			d.SkinImageHeight, d.SkinImageWidth = skinHight, skinWidth
+			d.SkinGeometry = base64.StdEncoding.EncodeToString(skinGeometryData)
+			d.SkinGeometryVersion = base64.StdEncoding.EncodeToString([]byte("0.0.0"))
 			d.SkinResourcePatch = base64.StdEncoding.EncodeToString(skinResourcePatch)
-			d.SkinGeometry = base64.StdEncoding.EncodeToString(skinGeometry)
+			d.PremiumSkin = true
 		} else {
 			d.SkinData = base64.StdEncoding.EncodeToString(bytes.Repeat([]byte{0, 0, 0, 255}, 32*64))
 			d.SkinImageHeight = 32
