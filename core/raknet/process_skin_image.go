@@ -219,9 +219,9 @@ func ProcessGeometry(skin *Skin, rawData []byte) (err error) {
 		geometry.Bones = append(geometry.Bones, &SkinGeometryBone{
 			Name: "root",
 			Pivot: []json.Number{
-				json.Number("0"),
-				json.Number("0"),
-				json.Number("0"),
+				json.Number("0.0"),
+				json.Number("0.0"),
+				json.Number("0.0"),
 			},
 		})
 	}
