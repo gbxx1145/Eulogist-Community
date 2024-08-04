@@ -44,9 +44,10 @@ type MinecraftPacket struct {
 
 // ...
 type Skin struct {
-	SkinImageData []byte
-	SkinPixels    []byte
-	SkinGeometry  []byte
-	SkinWidth     int
-	SkinHight     int
+	SkinImageData     []byte
+	SkinPixels        []byte
+	SkinGeometry      []byte
+	SkinResourcePatch []byte
+	SkinWidth         int
+	SkinHight         int
 }

@@ -59,13 +59,8 @@ func ProcessURLToSkin(url string) (skin *Skin, err error) {
 	// get skin data
 	if len(res) >= 4 && bytes.Equal(res[0:4], []byte("PK\x03\x04")) {
 		// TODO: 支持 4D 皮肤
-		{
-			// skin.SkinImageData, skin.SkinGeometry, err = ConvertZIPToSkin(res)
-			skin.SkinImageData, _, err = ConvertZIPToSkin(res)
-			if err != nil {
-				return nil, fmt.Errorf("ProcessURLToSkin: %v", err)
-			}
-			skin.SkinGeometry = defaultSkinGeometry
+		if err = ConvertZIPToSkin(skin, res); err != nil {
+			return nil, fmt.Errorf("ProcessURLToSkin: %v", err)
 		}
 	} else {
 		skin.SkinImageData, skin.SkinGeometry = res, defaultSkinGeometry
@@ -86,54 +81,48 @@ func ProcessURLToSkin(url string) (skin *Skin, err error) {
 // skinGeometry 代表皮肤的骨架信息。
 //
 // TODO: 支持 4D 皮肤
-func ConvertZIPToSkin(zipData []byte) (skinImageData []byte, skinGeometryData []byte, err error) {
+func ConvertZIPToSkin(skin *Skin, zipData []byte) (err error) {
 	// prepare
 	skinImageBuffer := bytes.NewBuffer([]byte{})
 	skinGeometryBuffer := bytes.NewBuffer([]byte{})
 	// create reader
 	reader, err := zip.NewReader(bytes.NewReader(zipData), int64(len(zipData)))
 	if err != nil {
-		return nil, nil, fmt.Errorf("ConvertZIPToSkin: %v", err)
+		return fmt.Errorf("ConvertZIPToSkin: %v", err)
 	}
+	// set default resource patch
+	skin.SkinResourcePatch = defaultSkinResourcePatch
 	// find skin contents
 	for _, file := range reader.File {
 		// skin data
 		if strings.HasSuffix(file.Name, ".png") && !strings.HasSuffix(file.Name, "_bloom.png") {
 			r, err := file.Open()
 			if err != nil {
-				return nil, nil, fmt.Errorf("ConvertZIPToSkin: %v", err)
+				return fmt.Errorf("ConvertZIPToSkin: %v", err)
 			}
-			defer func() {
-				err = r.Close()
-				if err != nil {
-					skinImageData, skinGeometryData, err = nil, nil, fmt.Errorf("ConvertZIPToSkin: %v", err)
-				}
-			}()
+			defer r.Close()
 			_, err = io.Copy(skinImageBuffer, r)
 			if err != nil {
-				return nil, nil, fmt.Errorf("ConvertZIPToSkin: %v", err)
+				return fmt.Errorf("ConvertZIPToSkin: %v", err)
 			}
 		}
 		// skin geometry
 		if strings.HasSuffix(file.Name, "geometry.json") {
 			r, err := file.Open()
 			if err != nil {
-				return nil, nil, fmt.Errorf("ConvertZIPToSkin: %v", err)
+				return fmt.Errorf("ConvertZIPToSkin: %v", err)
 			}
-			defer func() {
-				err = r.Close()
-				if err != nil {
-					skinImageData, skinGeometryData, err = nil, nil, fmt.Errorf("ConvertZIPToSkin: %v", err)
-				}
-			}()
+			defer r.Close()
 			_, err = io.Copy(skinGeometryBuffer, r)
 			if err != nil {
-				return nil, nil, fmt.Errorf("ConvertZIPToSkin: %v", err)
+				return fmt.Errorf("ConvertZIPToSkin: %v", err)
 			}
 		}
 	}
 	// return
-	return skinImageBuffer.Bytes(), skinGeometryBuffer.Bytes(), nil
+	skin.SkinImageData = skinImageBuffer.Bytes()
+	skin.SkinGeometry = skinGeometryBuffer.Bytes()
+	return
 }
 
 // 将 imageData 解析为 PNG 图片
