@@ -113,7 +113,7 @@ func defaultClientData(
 			d.SkinImageHeight, d.SkinImageWidth = skin.SkinHight, skin.SkinWidth
 			d.SkinGeometry = base64.StdEncoding.EncodeToString(skin.SkinGeometry)
 			d.SkinGeometryVersion = base64.StdEncoding.EncodeToString([]byte("0.0.0"))
-			d.SkinResourcePatch = base64.StdEncoding.EncodeToString(skinResourcePatch)
+			d.SkinResourcePatch = base64.StdEncoding.EncodeToString(defaultSkinResourcePatch)
 			d.PremiumSkin = true
 		} else {
 			d.SkinData = base64.StdEncoding.EncodeToString(bytes.Repeat([]byte{0, 0, 0, 255}, 32*64))
@@ -122,10 +122,10 @@ func defaultClientData(
 		}
 	}
 	if d.SkinResourcePatch == "" {
-		d.SkinResourcePatch = base64.StdEncoding.EncodeToString(skinResourcePatch)
+		d.SkinResourcePatch = base64.StdEncoding.EncodeToString(defaultSkinResourcePatch)
 	}
 	if d.SkinGeometry == "" {
-		d.SkinGeometry = base64.StdEncoding.EncodeToString(skinGeometry)
+		d.SkinGeometry = base64.StdEncoding.EncodeToString(defaultSkinGeometry)
 	}
 
 	return nil

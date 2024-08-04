@@ -13,11 +13,11 @@ import (
 	_ "embed"
 )
 
-//go:embed skin_resource_patch.json
-var skinResourcePatch []byte
+//go:embed default_skin_resource_patch.json
+var defaultSkinResourcePatch []byte
 
-//go:embed skin_geometry.json
-var skinGeometry []byte
+//go:embed default_skin_geometry.json
+var defaultSkinGeometry []byte
 
 // 从 url 指定的网址下载文件，
 // 并返回该文件的二进制形式
@@ -49,38 +49,36 @@ skinWidth 和 skinHight 则分别指代皮肤的
 
 TODO: 支持 4D 皮肤
 */
-func ProcessURLToSkin(url string) (
-	skinImageData []byte,
-	skinData []byte, skinGeometryData []byte,
-	skinWidth int, skinHight int,
-	err error,
-) {
+func ProcessURLToSkin(url string) (skin *Skin, err error) {
+	skin = &Skin{}
 	// download skin file from remote server
 	res, err := DownloadFile(url)
 	if err != nil {
-		return nil, nil, nil, 0, 0, fmt.Errorf("ProcessURLToSkin: %v", err)
+		return nil, fmt.Errorf("ProcessURLToSkin: %v", err)
 	}
 	// get skin data
 	if len(res) >= 4 && bytes.Equal(res[0:4], []byte("PK\x03\x04")) {
 		// TODO: 支持 4D 皮肤
 		{
-			// skinImageData, skinGeometryData, err = ConvertZIPToSkin(res)
-			skinImageData, _, err = ConvertZIPToSkin(res)
+			// skin.SkinImageData, skin.SkinGeometry, err = ConvertZIPToSkin(res)
+			skin.SkinImageData, _, err = ConvertZIPToSkin(res)
 			if err != nil {
-				return nil, nil, nil, 0, 0, fmt.Errorf("ProcessURLToSkin: %v", err)
+				return nil, fmt.Errorf("ProcessURLToSkin: %v", err)
 			}
-			skinGeometryData = skinGeometry
+			skin.SkinGeometry = defaultSkinGeometry
 		}
 	} else {
-		skinImageData, skinGeometryData = res, skinGeometry
+		skin.SkinImageData, skin.SkinGeometry = res, defaultSkinGeometry
 	}
 	// decode to image
-	img, err := ConvertToPNG(skinImageData)
+	img, err := ConvertToPNG(skin.SkinImageData)
 	if err != nil {
-		return nil, nil, nil, 0, 0, fmt.Errorf("ProcessURLToSkin: %v", err)
+		return nil, fmt.Errorf("ProcessURLToSkin: %v", err)
 	}
 	// encode to pixels and return
-	return skinImageData, img.(*image.NRGBA).Pix, skinGeometryData, img.Bounds().Dx(), img.Bounds().Dy(), nil
+	skin.SkinPixels = img.(*image.NRGBA).Pix
+	skin.SkinWidth, skin.SkinHight = img.Bounds().Dx(), img.Bounds().Dy()
+	return
 }
 
 // 从 zipData 指代的 ZIP 二进制数据负载提取皮肤数据。
@@ -100,7 +98,7 @@ func ConvertZIPToSkin(zipData []byte) (skinImageData []byte, skinGeometryData []
 	// find skin contents
 	for _, file := range reader.File {
 		// skin data
-		if strings.Contains(file.Name, ".png") {
+		if strings.HasSuffix(file.Name, ".png") && !strings.HasSuffix(file.Name, "_bloom.png") {
 			r, err := file.Open()
 			if err != nil {
 				return nil, nil, fmt.Errorf("ConvertZIPToSkin: %v", err)
@@ -117,7 +115,7 @@ func ConvertZIPToSkin(zipData []byte) (skinImageData []byte, skinGeometryData []
 			}
 		}
 		// skin geometry
-		if strings.Contains(file.Name, "geometry.json") {
+		if strings.HasSuffix(file.Name, "geometry.json") {
 			r, err := file.Open()
 			if err != nil {
 				return nil, nil, fmt.Errorf("ConvertZIPToSkin: %v", err)
