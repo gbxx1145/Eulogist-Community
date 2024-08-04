@@ -7,7 +7,6 @@ import (
 	"context"
 	"crypto/ecdsa"
 	"crypto/rand"
-	"fmt"
 	"net"
 
 	"github.com/pterm/pterm"
@@ -24,16 +23,13 @@ func NewRaknet() *Raknet {
 
 // 将底层 Raknet 连接设置为 connection，
 // 并指定 服务器/客户端 私钥为 key
-func (r *Raknet) SetConnection(connection net.Conn, key *ecdsa.PrivateKey) error {
+func (r *Raknet) SetConnection(connection net.Conn, key *ecdsa.PrivateKey) {
 	r.connection = connection
 	r.encoder = packet.NewEncoder(connection)
 	r.decoder = packet.NewDecoder(connection)
 	r.packets = make(chan MinecraftPacket, 1024)
 	r.key = key
 	_, _ = rand.Read(r.salt)
-	// set value
-	return nil
-	// return
 }
 
 // 关闭已建立的 Raknet 底层连接
@@ -50,17 +46,17 @@ func (r *Raknet) CloseConnection() {
 	}
 }
 
-// ...
+// 获取当前的上下文
 func (r *Raknet) GetContext() context.Context {
 	return r.context
 }
 
-// ...
+// 获取当前的 Shield ID
 func (r *Raknet) GetShieldID() int32 {
 	return r.shieldID.Load()
 }
 
-// ...
+// 设置 Shield ID
 func (r *Raknet) SetShieldID(shieldID int32) {
 	r.shieldID.Store(shieldID)
 }
@@ -71,22 +67,25 @@ func (r *Raknet) SetShieldID(shieldID int32) {
 // 此函数应当只被调用一次
 func (r *Raknet) ProcessIncomingPackets() {
 	for {
+		// 从底层 Raknet 连接读取数据包
 		packets, err := r.decoder.Decode()
 		if err != nil {
+			// 此时从底层 Raknet 连接读取数据包遭遇了错误，
+			// 因此我们认为连接已被关闭
 			r.CloseConnection()
 			return
-			// connection was closed
 		}
-		// prepare
+		// 处理每个数据包
 		for _, data := range packets {
+			// 准备读取数据包
 			var pk packet.Packet
 			buffer := bytes.NewBuffer(data)
 			reader := protocol.NewReader(buffer, r.shieldID.Load(), false)
-			// prepare
+			// 获取数据包头和数据包处理函数
 			packetHeader := packet.Header{}
 			packetHeader.Read(buffer)
 			packetFunc := packet.ListAllPackets()[packetHeader.PacketID]
-			// get header and packet func
+			// 序列化数据包
 			func() {
 				defer func() {
 					r := recover()
@@ -106,16 +105,14 @@ func (r *Raknet) ProcessIncomingPackets() {
 				pk = packetFunc()
 				pk.Marshal(reader)
 			}()
-			// marshal
+			// 同步数据包到待存区
 			select {
 			case <-r.context.Done():
 				return
 			default:
 				r.packets <- MinecraftPacket{Packet: pk, Bytes: data}
 			}
-			// set value
 		}
-		// process each packet
 	}
 }
 
@@ -129,30 +126,34 @@ func (r *Raknet) ReadPacket() MinecraftPacket {
 // 向底层 Raknet 连接写入 Minecraft 数据包 pk。
 // useBytes 指代是否要直接写入 pk.Bytes 上的二进制负载
 func (r *Raknet) WritePacket(pk MinecraftPacket, useBytes bool) error {
+	// 如果考虑使用字节直接写入
 	if useBytes {
 		err := r.encoder.Encode([][]byte{pk.Bytes})
 		if err != nil {
-			return fmt.Errorf("WritePacket: %v", err)
+			// 此时向底层 Raknet 连接写入数据包遭遇了错误，
+			// 因此我们认为连接已被关闭
+			r.CloseConnection()
 		}
 		return nil
 	}
-	// use bytes to write
+	// 获取缓冲区并写入数据包头
 	buffer := bytes.NewBuffer([]byte{})
 	packetHeader := packet.Header{PacketID: pk.Packet.ID()}
 	packetHeader.Write(buffer)
-	// get buffer and write packet header
+	// 序列化数据包
 	func() {
 		defer func() {
 			recover()
 		}()
 		pk.Packet.Marshal(protocol.NewWriter(buffer, r.shieldID.Load()))
 	}()
-	// marshal
+	// 写入数据包
 	err := r.encoder.Encode([][]byte{buffer.Bytes()})
 	if err != nil {
+		// 此时向底层 Raknet 连接写入数据包遭遇了错误，
+		// 因此我们认为连接已被关闭
 		r.CloseConnection()
 	}
-	// write packet
+	// 返回值
 	return nil
-	// return
 }

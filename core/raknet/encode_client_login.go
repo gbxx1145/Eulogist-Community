@@ -14,7 +14,9 @@ import (
 	"github.com/google/uuid"
 )
 
-// ...
+// EncodeLogin 编码登录请求。
+// 它使用提供的身份验证响应、
+// 客户端密钥和皮肤信息生成登录请求数据包
 func (r *Raknet) EncodeLogin(
 	authResponse fbauth.AuthResponse,
 	clientKey *ecdsa.PrivateKey,
@@ -23,18 +25,22 @@ func (r *Raknet) EncodeLogin(
 	identityData := login.IdentityData{}
 	clientData := login.ClientData{}
 
+	// 设置默认的身份数据
 	defaultIdentityData(&identityData)
+	// 设置默认的客户端数据
 	err := defaultClientData(&clientData, authResponse, skin)
 	if err != nil {
 		return nil, fmt.Errorf("EncodeLogin: %v", err)
 	}
 
 	var request []byte
-	// We login as an Android device and this will show up in the 'titleId' field in the JWT chain, which
-	// we can't edit. We just enforce Android data for logging in.
+	// 我们以 Android 设备登录，这将在 JWT 链中的 titleId 字段中显示。
+	// 这些字段无法被编辑，而我们也仅仅是强制以 Android 数据进行登录
 	setAndroidData(&clientData)
 
+	// 编码登录请求
 	request = login.Encode(authResponse.ChainInfo, clientData, clientKey)
+	// 解析身份数据以确保其有效
 	identityData, _, _, err = login.Parse(request)
 	if err != nil {
 		return nil, fmt.Errorf("EncodeLogin: WARNING: Identity data parsing error: %v", err)
@@ -43,8 +49,8 @@ func (r *Raknet) EncodeLogin(
 	return request, nil
 }
 
-// defaultIdentityData edits the IdentityData passed to have defaults set to all fields that were left
-// unchanged.
+// defaultIdentityData 编辑传入的 IdentityData，
+// 为所有未更改的字段设置默认值
 func defaultIdentityData(data *login.IdentityData) {
 	if data.Identity == "" {
 		data.Identity = uuid.New().String()
@@ -54,7 +60,8 @@ func defaultIdentityData(data *login.IdentityData) {
 	}
 }
 
-// defaultClientData edits the ClientData passed to have defaults set to all fields that were left unchanged.
+// defaultClientData 编辑传入的 ClientData，
+// 为所有未更改的字段设置默认值
 func defaultClientData(
 	d *login.ClientData,
 	authResponse fbauth.AuthResponse,
@@ -131,7 +138,8 @@ func defaultClientData(
 	return nil
 }
 
-// setAndroidData ensures the login.ClientData passed matches settings you would see on an Android device.
+// setAndroidData 确保传入的 login.ClientData
+// 匹配您在 Android 设备上看到的设置
 func setAndroidData(data *login.ClientData) {
 	data.DeviceOS = protocol.DeviceAndroid
 	data.GameVersion = protocol.CurrentVersion
