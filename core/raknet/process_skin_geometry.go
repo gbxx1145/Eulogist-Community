@@ -45,7 +45,6 @@ func ProcessGeometry(skin *Skin, rawData []byte) (err error) {
 	// setup resource patch and get geometry data
 	var skinGeometry json.RawMessage
 	var geometryName string
-
 	for k, v := range geometryMap {
 		if strings.HasPrefix(k, "geometry.") {
 			geometryName = k

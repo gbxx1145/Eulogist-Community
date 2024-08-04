@@ -46,8 +46,6 @@ skinData 指代皮肤的一维的密集像素矩阵，
 skinGeometryData 指代皮肤的骨架信息，
 skinWidth 和 skinHight 则分别指代皮肤的
 宽度和高度。
-
-TODO: 支持 4D 皮肤
 */
 func ProcessURLToSkin(url string) (skin *Skin, err error) {
 	skin = &Skin{}
@@ -57,13 +55,11 @@ func ProcessURLToSkin(url string) (skin *Skin, err error) {
 		return nil, fmt.Errorf("ProcessURLToSkin: %v", err)
 	}
 	// get skin data
+	skin.SkinImageData, skin.SkinGeometry = res, defaultSkinGeometry
 	if len(res) >= 4 && bytes.Equal(res[0:4], []byte("PK\x03\x04")) {
-		// TODO: 支持 4D 皮肤
 		if err = ConvertZIPToSkin(skin, res); err != nil {
 			return nil, fmt.Errorf("ProcessURLToSkin: %v", err)
 		}
-	} else {
-		skin.SkinImageData, skin.SkinGeometry = res, defaultSkinGeometry
 	}
 	// decode to image
 	img, err := ConvertToPNG(skin.SkinImageData)
@@ -82,8 +78,6 @@ func ProcessURLToSkin(url string) (skin *Skin, err error) {
 //
 // TODO: 支持 4D 皮肤
 func ConvertZIPToSkin(skin *Skin, zipData []byte) (err error) {
-	// prepare
-	skinImageBuffer := bytes.NewBuffer([]byte{})
 	// create reader
 	reader, err := zip.NewReader(bytes.NewReader(zipData), int64(len(zipData)))
 	if err != nil {
@@ -100,7 +94,7 @@ func ConvertZIPToSkin(skin *Skin, zipData []byte) (err error) {
 				return fmt.Errorf("ConvertZIPToSkin: %v", err)
 			}
 			defer r.Close()
-			_, err = io.Copy(skinImageBuffer, r)
+			skin.SkinImageData, err = io.ReadAll(r)
 			if err != nil {
 				return fmt.Errorf("ConvertZIPToSkin: %v", err)
 			}
@@ -119,8 +113,6 @@ func ConvertZIPToSkin(skin *Skin, zipData []byte) (err error) {
 			ProcessGeometry(skin, geometryData)
 		}
 	}
-	// return
-	skin.SkinImageData = skinImageBuffer.Bytes()
 	return
 }
 
