@@ -24,8 +24,13 @@ type PlayerInfo struct {
 
 // 皮肤信息
 type SkinInfo struct {
-	SkinPath string `json:"skin"` // 皮肤的路径
-	Slim     bool   `json:"slim"` // 是否为 slim 版本的皮肤
+	// 皮肤的路径。
+	// 对于普通皮肤，这指向一个 PNG 文件，
+	// 对于高级皮肤(如 4D 皮肤)，
+	// 这指向一个 ZIP 压缩包
+	SkinPath string `json:"skin"`
+	// 是否为 slim 版本的皮肤
+	Slim bool `json:"slim"`
 }
 
 // 杂项信息

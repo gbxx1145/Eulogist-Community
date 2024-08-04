@@ -18,6 +18,7 @@ func Eulogist() error {
 	var err error
 	var config *EulogistConfig
 	var neteaseConfigPath string
+	var neteaseSkinFileName string
 	var waitGroup sync.WaitGroup
 	var client *Client.MinecraftClient
 	var server *Server.MinecraftServer
@@ -65,12 +66,17 @@ func Eulogist() error {
 		}
 		// 设置皮肤信息
 		if playerSkin := server.GetPlayerSkin(); !FileExist(config.SkinPath) && playerSkin != nil {
-			err = os.WriteFile("skin.png", playerSkin.SkinImageData, 0600)
+			if RaknetConnection.IsZIPFile(playerSkin.FullSkinData) {
+				neteaseSkinFileName = "skin.zip"
+			} else {
+				neteaseSkinFileName = "skin.png"
+			}
+			err = os.WriteFile(neteaseSkinFileName, playerSkin.FullSkinData, 0600)
 			if err != nil {
 				return fmt.Errorf("Eulogist: %v", err)
 			}
 			currentPath, _ := os.Getwd()
-			config.SkinPath = fmt.Sprintf(`%s\skin.png`, currentPath)
+			config.SkinPath = fmt.Sprintf(`%s\%s`, currentPath, neteaseSkinFileName)
 		}
 		// 启动 Eulogist 服务器
 		client, ClientWasConnected, err = Client.RunServer()
