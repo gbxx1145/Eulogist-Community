@@ -38,7 +38,7 @@ func ConnectToServer(basicConfig BasicConfig) (*MinecraftServer, error) {
 	}
 	// 初始化皮肤信息
 	if url := authResponse.SkinInfo.SkinDownloadURL; len(url) > 0 {
-		mcServer.playerSkin, err = RaknetConnection.ProcessURLToSkin(authResponse.SkinInfo.SkinDownloadURL)
+		mcServer.playerSkin, err = RaknetConnection.ProcessURLToSkin(url)
 		if err != nil {
 			return nil, fmt.Errorf("ConnectToServer: %v", err)
 		}
