@@ -179,15 +179,18 @@ func ProcessGeometry(skin *Skin, rawData []byte) (err error) {
 	if err = json.Unmarshal(rawData, &geometryMap); err != nil {
 		return fmt.Errorf("ProcessGeometry: %v", err)
 	}
-	if len(geometryMap) != 1 {
-		return fmt.Errorf("ProcessGeometry: invaild len in geometry map")
-	}
 	// setup resource patch and get geometry data
 	var skinGeometry json.RawMessage
 	var geometryName string
 	for k, v := range geometryMap {
-		geometryName = k
-		skinGeometry = v
+		if strings.HasPrefix(k, "geometry.") {
+			geometryName = k
+			skinGeometry = v
+			break
+		}
+	}
+	if geometryName == "" {
+		return fmt.Errorf("ProcessGeometry: lack of geometry data")
 	}
 	skin.SkinResourcePatch = bytes.ReplaceAll(
 		skin.SkinResourcePatch,
