@@ -11,8 +11,8 @@ import (
 )
 
 type SkinCube struct {
-	Inflate json.Number   `json:"inflate,omitempty"`
-	Mirror  bool          `json:"mirror,omitempty"`
+	Inflate *json.Number  `json:"inflate,omitempty"`
+	Mirror  *bool         `json:"mirror,omitempty"`
 	Origin  []json.Number `json:"origin"`
 	Size    []json.Number `json:"size"`
 	Uv      []json.Number `json:"uv"`
@@ -34,7 +34,6 @@ type SkinGeometry struct {
 	VisibleBoundsHeight json.Number         `json:"visible_bounds_height,omitempty"`
 	VisibleBoundsOffset []json.Number       `json:"visible_bounds_offset,omitempty"`
 	VisibleBoundsWidth  json.Number         `json:"visible_bounds_width,omitempty"`
-	MetaModelVersion    string              `json:"META_ModelVersion,omitempty"`
 }
 
 func ProcessGeometry(skin *Skin, rawData []byte) (err error) {
@@ -67,10 +66,6 @@ func ProcessGeometry(skin *Skin, rawData []byte) (err error) {
 	if err = json.Unmarshal(skinGeometry, geometry); err != nil {
 		return fmt.Errorf("ProcessGeometry: %v", err)
 	}
-	if geometry.MetaModelVersion == "1.0.6" {
-		return ProcessOldGeometry(skin, geometryName, skinGeometry)
-	}
-	geometry.MetaModelVersion = "" // remove meta model version
 	// handle bones
 	hasRoot := false
 	renderGroupNames := []string{"leftArm", "rightArm"}
