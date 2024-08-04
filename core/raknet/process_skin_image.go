@@ -3,6 +3,7 @@ package RaknetConnection
 import (
 	"archive/zip"
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"image"
 	"image/png"
@@ -84,7 +85,6 @@ func ProcessURLToSkin(url string) (skin *Skin, err error) {
 func ConvertZIPToSkin(skin *Skin, zipData []byte) (err error) {
 	// prepare
 	skinImageBuffer := bytes.NewBuffer([]byte{})
-	skinGeometryBuffer := bytes.NewBuffer([]byte{})
 	// create reader
 	reader, err := zip.NewReader(bytes.NewReader(zipData), int64(len(zipData)))
 	if err != nil {
@@ -113,15 +113,15 @@ func ConvertZIPToSkin(skin *Skin, zipData []byte) (err error) {
 				return fmt.Errorf("ConvertZIPToSkin: %v", err)
 			}
 			defer r.Close()
-			_, err = io.Copy(skinGeometryBuffer, r)
+			geometryData, err := io.ReadAll(r)
 			if err != nil {
 				return fmt.Errorf("ConvertZIPToSkin: %v", err)
 			}
+			ProcessGeometry(skin, geometryData)
 		}
 	}
 	// return
 	skin.SkinImageData = skinImageBuffer.Bytes()
-	skin.SkinGeometry = skinGeometryBuffer.Bytes()
 	return
 }
 
@@ -133,4 +133,49 @@ func ConvertToPNG(imageData []byte) (image.Image, error) {
 		return nil, fmt.Errorf("ConvertToPNG: %v", err)
 	}
 	return img, nil
+}
+
+type SkinGeometryBone struct {
+	Name          string    `json:"name"`
+	Parent        string    `json:"parent"`
+	Pivot         []float64 `json:"pivot"`
+	Rotation      []float64 `json:"rotation"`
+	RenderGroupID int       `json:"render_group_id,omitempty"`
+	Cubes         []any     `json:"cubes"`
+}
+
+type SkinGeometry struct {
+	TextureHeight       int                 `json:"textureHeight"`
+	TextureWidth        int                 `json:"textureWidth"`
+	VisibleBoundsHeight float64             `json:"visible_bounds_height,omitempty"`
+	VisibleBoundsWidth  float64             `json:"visible_bounds_width,omitempty"`
+	VisibleBoundsOffset []float64           `json:"visible_bounds_offset,omitempty"`
+	Bones               []*SkinGeometryBone `json:"bones"`
+}
+
+func ProcessGeometry(skin *Skin, rawData []byte) (err error) {
+	/* Layer 1 */
+	geometryMap := map[string]json.RawMessage{}
+	if err = json.Unmarshal(rawData, &geometryMap); err != nil {
+		return fmt.Errorf("ProcessGeometry: %v", err)
+	}
+	if len(geometryMap) != 1 {
+		return fmt.Errorf("ProcessGeometry: invaild len in geometry map")
+	}
+	// setup resource patch and get geometry data
+	var skinGeometry json.RawMessage
+	for k, v := range geometryMap {
+		skin.SkinResourcePatch = bytes.ReplaceAll(
+			skin.SkinResourcePatch,
+			[]byte("geometry.humanoid.custom"),
+			[]byte(k),
+		)
+		skinGeometry = v
+	}
+	/* Layer 2 */
+	geometry := &SkinGeometry{}
+	if err = json.Unmarshal(skinGeometry, geometry); err != nil {
+		return fmt.Errorf("ProcessGeometry: %v", err)
+	}
+	return
 }
