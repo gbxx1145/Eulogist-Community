@@ -16,7 +16,7 @@ type saltClaims struct {
 	Salt string `json:"salt"`
 }
 
-// ...
+// 描述一个基本的 Raknet 连接实例
 type Raknet struct {
 	connection net.Conn
 	shieldID   atomic.Int32
@@ -36,18 +36,18 @@ type Raknet struct {
 	packets chan (MinecraftPacket)
 }
 
-// ...
+// 描述 Minecraft 数据包
 type MinecraftPacket struct {
 	Packet packet.Packet
 	Bytes  []byte
 }
 
-// ...
+// 描述皮肤信息
 type Skin struct {
-	SkinImageData     []byte
-	SkinPixels        []byte
-	SkinGeometry      []byte
-	SkinResourcePatch []byte
-	SkinWidth         int
-	SkinHight         int
+	SkinImageData     []byte // 皮肤的 PNG 二进制形式
+	SkinPixels        []byte // 皮肤的一维密集像素矩阵
+	SkinGeometry      []byte // 皮肤的骨架信息
+	SkinResourcePatch []byte // ...
+	SkinWidth         int    // 皮肤的宽度
+	SkinHight         int    // 皮肤的高度
 }
