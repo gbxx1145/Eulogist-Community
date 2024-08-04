@@ -136,41 +136,30 @@ func ConvertToPNG(imageData []byte) (image.Image, error) {
 	return img, nil
 }
 
-type SkinFloat64 float64
-
-func (f *SkinFloat64) MarshalJSON() ([]byte, error) {
-	str := fmt.Sprintf("%v", *f)
-	if !strings.Contains(str, ".") {
-		str += "."
-	}
-	str += "0"
-	return []byte(str), nil
-}
-
 type SkinCube struct {
-	Inflate SkinFloat64   `json:"inflate"`
-	Mirror  bool          `json:"mirror"`
-	Origin  []SkinFloat64 `json:"origin"`
-	Size    []SkinFloat64 `json:"size"`
-	Uv      []SkinFloat64 `json:"uv"`
+	Inflate json.Number   `json:"inflate,omitempty"`
+	Mirror  bool          `json:"mirror,omitempty"`
+	Origin  []json.Number `json:"origin"`
+	Size    []json.Number `json:"size"`
+	Uv      []json.Number `json:"uv"`
 }
 
 type SkinGeometryBone struct {
 	Cubes         *[]SkinCube   `json:"cubes,omitempty"`
 	Name          string        `json:"name"`
 	Parent        string        `json:"parent,omitempty"`
-	Pivot         []SkinFloat64 `json:"pivot"`
+	Pivot         []json.Number `json:"pivot"`
 	RenderGroupID int           `json:"render_group_id,omitempty"`
-	Rotation      []SkinFloat64 `json:"rotation,omitempty"`
+	Rotation      []json.Number `json:"rotation,omitempty"`
 }
 
 type SkinGeometry struct {
 	Bones               []*SkinGeometryBone `json:"bones"`
 	TextureHeight       int                 `json:"textureheight"`
 	TextureWidth        int                 `json:"texturewidth"`
-	VisibleBoundsHeight SkinFloat64         `json:"visible_bounds_height,omitempty"`
-	VisibleBoundsOffset []SkinFloat64       `json:"visible_bounds_offset,omitempty"`
-	VisibleBoundsWidth  SkinFloat64         `json:"visible_bounds_width,omitempty"`
+	VisibleBoundsHeight json.Number         `json:"visible_bounds_height,omitempty"`
+	VisibleBoundsOffset []json.Number       `json:"visible_bounds_offset,omitempty"`
+	VisibleBoundsWidth  json.Number         `json:"visible_bounds_width,omitempty"`
 }
 
 func ProcessGeometry(skin *Skin, rawData []byte) (err error) {
@@ -228,8 +217,12 @@ func ProcessGeometry(skin *Skin, rawData []byte) (err error) {
 	}
 	if !hasRoot {
 		geometry.Bones = append(geometry.Bones, &SkinGeometryBone{
-			Name:  "root",
-			Pivot: []SkinFloat64{0, 0, 0},
+			Name: "root",
+			Pivot: []json.Number{
+				json.Number("0"),
+				json.Number("0"),
+				json.Number("0"),
+			},
 		})
 	}
 	// return
