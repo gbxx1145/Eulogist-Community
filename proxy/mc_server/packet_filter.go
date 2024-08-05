@@ -1,6 +1,7 @@
 package mc_server
 
 import (
+	"Eulogist/core/fb_auth/py_rpc"
 	"Eulogist/core/minecraft/protocol/packet"
 	RaknetConnection "Eulogist/core/raknet"
 	"fmt"
@@ -32,7 +33,35 @@ func (m *MinecraftServer) PacketFilter(
 		}
 		return shouldSendCopy, err
 	case *packet.StartGame:
+		// 保存 entityUniqueID
 		m.entityUniqueID = m.HandleStartGame(p)
+		// 发送简要身份证明
+		err = m.WritePacket(RaknetConnection.MinecraftPacket{
+			Packet: &packet.NeteaseJson{
+				Data: []byte(fmt.Sprintf(`{"eventName":"LOGIN_UID","resid":"","uid":"%s"}`, m.fbClient.ClientInfo.Uid)),
+			},
+		}, false)
+		if err != nil {
+			return true, fmt.Errorf("PacketFilter: %v", err)
+		}
+		// 发送当前使用的 Mod
+		syncUsingMod := py_rpc.SyncUsingMod([]any{
+			[]any{},
+			m.GetPlayerSkin().SkinUUID,
+			m.GetPlayerSkin().SkinItemID,
+			true,
+			map[string]any{},
+		})
+		err = m.WritePacket(RaknetConnection.MinecraftPacket{
+			Packet: &packet.PyRpc{
+				Value:         py_rpc.Marshal(&syncUsingMod),
+				OperationType: packet.PyRpcOperationTypeSend,
+			},
+		}, false)
+		if err != nil {
+			return true, fmt.Errorf("PacketFilter: %v", err)
+		}
+		// 返回值
 		return true, nil
 	case *packet.UpdatePlayerGameType:
 		if p.PlayerUniqueID == m.entityUniqueID {
@@ -48,7 +77,7 @@ func (m *MinecraftServer) PacketFilter(
 				err = fmt.Errorf("PacketFilter: %v", err)
 			}
 		}
-		// 返回是否需要同步到客户端
+		// 返回值
 		return p.PlayerUniqueID != m.entityUniqueID, err
 	}
 

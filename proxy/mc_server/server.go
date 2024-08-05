@@ -16,3 +16,13 @@ func (m *MinecraftServer) GetPlayerSkin() *RaknetConnection.Skin {
 func (m *MinecraftServer) SetPlayerSkin(skin *RaknetConnection.Skin) {
 	m.playerSkin = skin
 }
+
+// ...
+func (m *MinecraftServer) GetEntityUniqueID() int64 {
+	return m.entityUniqueID
+}
+
+// ...
+func (m *MinecraftServer) SetEntityUniqueID(entityUniqueID int64) {
+	m.entityUniqueID = entityUniqueID
+}

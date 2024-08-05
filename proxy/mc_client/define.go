@@ -17,5 +17,7 @@ type MinecraftClient struct {
 	clientData   *login.ClientData
 	playerSkin   *RaknetConnection.Skin
 
+	entityUniqueID int64
+
 	*RaknetConnection.Raknet
 }

@@ -161,9 +161,12 @@ func Eulogist() error {
 					return
 				}
 			}
-			// 同步 Shield ID 到 Minecraft 客户端
+			// 同步数据到 Minecraft 客户端
 			if shieldID := server.GetShieldID(); shieldID != 0 {
 				client.SetShieldID(shieldID)
+			}
+			if entityUniqueID := server.GetEntityUniqueID(); entityUniqueID != 0 {
+				client.SetEntityUniqueID(entityUniqueID)
 			}
 			// 检查连接状态
 			select {
@@ -184,19 +187,11 @@ func Eulogist() error {
 			waitGroup.Add(-1)
 		}()
 		for {
-			// 读取和过滤数据包
+			// 读取和抄送数据包
 			pk := client.ReadPacket()
-			shouldSendCopy, err := client.PacketFilter(pk.Packet, server.WritePacket)
+			err = server.WritePacket(RaknetConnection.MinecraftPacket{Bytes: pk.Bytes}, true)
 			if err != nil {
-				pterm.Warning.Printf("Eulogist: %v\n", err)
-				continue
-			}
-			// 抄送数据包到 网易租赁服
-			if shouldSendCopy {
-				err = server.WritePacket(RaknetConnection.MinecraftPacket{Bytes: pk.Bytes}, true)
-				if err != nil {
-					return
-				}
+				return
 			}
 			// 检查连接状态
 			select {
