@@ -8,14 +8,8 @@ import (
 	"fmt"
 )
 
-// OnPyRpc 处理数据包 PyRpc。
-//
-// 如果必要，将使用 writePacketToClient
-// 向 Minecraft 客户端发送新数据包
-func (m *MinecraftServer) OnPyRpc(
-	p *packet.PyRpc,
-	writePacketToClient func(pk RaknetConnection.MinecraftPacket, useBytes bool) error,
-) (shouldSendCopy bool, err error) {
+// OnPyRpc 处理数据包 PyRpc
+func (m *MinecraftServer) OnPyRpc(p *packet.PyRpc) (shouldSendCopy bool, err error) {
 	// 解码 PyRpc
 	if p.Value == nil {
 		return true, nil
@@ -29,7 +23,7 @@ func (m *MinecraftServer) OnPyRpc(
 	case *py_rpc.StartType:
 		c.Content = m.fbClient.TransferData(c.Content)
 		c.Type = py_rpc.StartTypeResponse
-		err = m.WritePacket(
+		m.WriteSinglePacket(
 			RaknetConnection.MinecraftPacket{
 				Packet: &packet.PyRpc{
 					Value:         py_rpc.Marshal(c),
@@ -37,9 +31,6 @@ func (m *MinecraftServer) OnPyRpc(
 				},
 			}, false,
 		)
-		if err != nil {
-			return false, fmt.Errorf("OnPyRpc: %v", err)
-		}
 	case *py_rpc.GetMCPCheckNum:
 		// 如果已完成零知识证明(挑战)，
 		// 则不做任何操作
@@ -63,7 +54,7 @@ func (m *MinecraftServer) OnPyRpc(
 			}
 		}
 		// 完成零知识证明(挑战)
-		err = m.WritePacket(
+		m.WriteSinglePacket(
 			RaknetConnection.MinecraftPacket{
 				Packet: &packet.PyRpc{
 					Value:         py_rpc.Marshal(&py_rpc.SetMCPCheckNum{ret_p}),
@@ -71,9 +62,6 @@ func (m *MinecraftServer) OnPyRpc(
 				},
 			}, false,
 		)
-		if err != nil {
-			return false, fmt.Errorf("OnPyRpc: %v", err)
-		}
 		// 标记零知识证明(挑战)已在当前会话下永久完成
 		m.getCheckNumEverPassed = true
 		// 返回值

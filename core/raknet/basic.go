@@ -27,7 +27,7 @@ func (r *Raknet) SetConnection(connection net.Conn, key *ecdsa.PrivateKey) {
 	r.connection = connection
 	r.encoder = packet.NewEncoder(connection)
 	r.decoder = packet.NewDecoder(connection)
-	r.packets = make(chan MinecraftPacket, 1024)
+	r.packets = make(chan []MinecraftPacket, 255)
 	r.key = key
 	_, _ = rand.Read(r.salt)
 }
@@ -76,7 +76,8 @@ func (r *Raknet) ProcessIncomingPackets() {
 			return
 		}
 		// 处理每个数据包
-		for _, data := range packets {
+		packetSlice := make([]MinecraftPacket, len(packets))
+		for index, data := range packets {
 			// 准备读取数据包
 			var pk packet.Packet
 			buffer := bytes.NewBuffer(data)
@@ -110,50 +111,66 @@ func (r *Raknet) ProcessIncomingPackets() {
 			case <-r.context.Done():
 				return
 			default:
-				r.packets <- MinecraftPacket{Packet: pk, Bytes: data}
+				packetSlice[index] = MinecraftPacket{Packet: pk, Bytes: data}
 			}
 		}
+		// 提交
+		r.packets <- packetSlice
 	}
 }
 
-// 从已读取且已解码的数据包池中读取一个数据包。
+// 从已读取且已解码的数据包池中读取多个数据包。
 // 当数据包池没有数据包时，将会阻塞，
 // 直到新的已处理数据包抵达
-func (r *Raknet) ReadPacket() MinecraftPacket {
+func (r *Raknet) ReadPackets() []MinecraftPacket {
 	return <-r.packets
 }
 
-// 向底层 Raknet 连接写入 Minecraft 数据包 pk。
-// useBytes 指代是否要直接写入 pk.Bytes 上的二进制负载
-func (r *Raknet) WritePacket(pk MinecraftPacket, useBytes bool) error {
+// 向底层 Raknet 连接写多个 Minecraft 数据包 pk。
+// useBytes 指代是否要直接采用这些数据包的二进制负载，
+// 然后写入到底层 Raknet 连接
+func (r *Raknet) WritePackets(pk []MinecraftPacket, useBytes bool) {
+	// 准备
+	packetBytes := make([][]byte, len(pk))
 	// 如果考虑使用字节直接写入
 	if useBytes {
-		err := r.encoder.Encode([][]byte{pk.Bytes})
+		for index, singlePacket := range pk {
+			packetBytes[index] = singlePacket.Bytes
+		}
+		err := r.encoder.Encode(packetBytes)
 		if err != nil {
 			// 此时向底层 Raknet 连接写入数据包遭遇了错误，
 			// 因此我们认为连接已被关闭
 			r.CloseConnection()
 		}
-		return nil
+		return
 	}
-	// 获取缓冲区并写入数据包头
-	buffer := bytes.NewBuffer([]byte{})
-	packetHeader := packet.Header{PacketID: pk.Packet.ID()}
-	packetHeader.Write(buffer)
-	// 序列化数据包
-	func() {
-		defer func() {
-			recover()
+	// 处理多个数据包
+	for index, singlePacket := range pk {
+		// 获取缓冲区并写入数据包头
+		buffer := bytes.NewBuffer([]byte{})
+		packetHeader := packet.Header{PacketID: singlePacket.Packet.ID()}
+		packetHeader.Write(buffer)
+		// 序列化数据包
+		func() {
+			defer func() {
+				recover()
+			}()
+			singlePacket.Packet.Marshal(protocol.NewWriter(buffer, r.shieldID.Load()))
 		}()
-		pk.Packet.Marshal(protocol.NewWriter(buffer, r.shieldID.Load()))
-	}()
+		packetBytes[index] = buffer.Bytes()
+	}
 	// 写入数据包
-	err := r.encoder.Encode([][]byte{buffer.Bytes()})
+	err := r.encoder.Encode(packetBytes)
 	if err != nil {
 		// 此时向底层 Raknet 连接写入数据包遭遇了错误，
 		// 因此我们认为连接已被关闭
 		r.CloseConnection()
 	}
-	// 返回值
-	return nil
+}
+
+// 向底层 Raknet 连接写单个 Minecraft 数据包 pk。
+// useBytes 指代是否要直接写入 pk.Bytes 上的二进制负载
+func (r *Raknet) WriteSinglePacket(pk MinecraftPacket, useBytes bool) {
+	r.WritePackets([]MinecraftPacket{pk}, useBytes)
 }

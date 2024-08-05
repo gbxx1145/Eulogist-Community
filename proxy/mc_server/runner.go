@@ -64,44 +64,42 @@ func ConnectToServer(basicConfig BasicConfig) (*MinecraftServer, error) {
 func (m *MinecraftServer) WaitClientHandshakeDown() error {
 	// 准备
 	var downInitConnect bool
+	var err error
 	// 向网易租赁服请求网络设置，
 	// 这是赞颂者登录到网易租赁服的第一个数据包
-	err := m.WritePacket(
+	m.WriteSinglePacket(
 		RaknetConnection.MinecraftPacket{
 			Packet: &packet.RequestNetworkSettings{ClientProtocol: protocol.CurrentProtocol},
 		}, false,
 	)
-	if err != nil {
-		return fmt.Errorf("ConnectToServer: %v", err)
-	}
 	// 处理来自 bot 端的登录相关数据包
 	for {
-		// 读取数据包
-		pk := m.ReadPacket()
-		// 处理初始连接数据包
-		switch p := pk.Packet.(type) {
-		case *packet.NetworkSettings:
-			m.identityData, m.clientData, err = m.HandleNetworkSettings(p, m.authResponse, m.playerSkin)
-			if err != nil {
-				return fmt.Errorf("ConnectToServer: %v", err)
+		for _, pk := range m.ReadPackets() {
+			// 处理初始连接数据包
+			switch p := pk.Packet.(type) {
+			case *packet.NetworkSettings:
+				m.identityData, m.clientData, err = m.HandleNetworkSettings(p, m.authResponse, m.playerSkin)
+				if err != nil {
+					return fmt.Errorf("ConnectToServer: %v", err)
+				}
+			case *packet.ServerToClientHandshake:
+				err = m.HandleServerToClientHandshake(p)
+				if err != nil {
+					return fmt.Errorf("ConnectToServer: %v", err)
+				}
+				downInitConnect = true
 			}
-		case *packet.ServerToClientHandshake:
-			err = m.HandleServerToClientHandshake(p)
-			if err != nil {
-				return fmt.Errorf("ConnectToServer: %v", err)
+			// 检查连接状态
+			select {
+			case <-m.GetContext().Done():
+				return fmt.Errorf("ConnectToServer: NetEase Minecraft Rental Server closed their connection to eulogist")
+			default:
 			}
-			downInitConnect = true
-		}
-		// 检查连接状态
-		select {
-		case <-m.GetContext().Done():
-			return fmt.Errorf("ConnectToServer: NetEase Minecraft Rental Server closed their connection to eulogist")
-		default:
-		}
-		// 连接已完成初始化，
-		// 于是我们返回值
-		if downInitConnect {
-			return nil
+			// 连接已完成初始化，
+			// 于是我们返回值
+			if downInitConnect {
+				return nil
+			}
 		}
 	}
 }

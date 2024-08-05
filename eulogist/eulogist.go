@@ -144,21 +144,12 @@ func Eulogist() error {
 			waitGroup.Add(-1)
 		}()
 		for {
-			// 读取和过滤数据包
-			pk := server.ReadPacket()
-			if err != nil {
-				return
-			}
-			shouldSendCopy, err := server.PacketFilter(pk.Packet, client.WritePacket)
-			if err != nil {
-				pterm.Warning.Printf("Eulogist: %v\n", err)
-				continue
-			}
-			// 抄送数据包到 Minecraft 客户端
-			if shouldSendCopy {
-				err = client.WritePacket(RaknetConnection.MinecraftPacket{Bytes: pk.Bytes}, true)
+			// 读取、过滤数据包，
+			// 然后抄送其到 Minecraft 客户端
+			errList := server.FiltePacketsAndSendCopy(server.ReadPackets(), client.WritePackets)
+			for _, err = range errList {
 				if err != nil {
-					return
+					pterm.Warning.Printf("Eulogist: %v\n", err)
 				}
 			}
 			// 同步数据到 Minecraft 客户端
@@ -187,13 +178,7 @@ func Eulogist() error {
 			waitGroup.Add(-1)
 		}()
 		for {
-			// 读取和抄送数据包
-			pk := client.ReadPacket()
-			err = server.WritePacket(RaknetConnection.MinecraftPacket{Bytes: pk.Bytes}, true)
-			if err != nil {
-				return
-			}
-			// 检查连接状态
+			server.WritePackets(client.ReadPackets(), true)
 			select {
 			case <-client.GetContext().Done():
 				return

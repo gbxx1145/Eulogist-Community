@@ -33,7 +33,7 @@ type Raknet struct {
 	key  *ecdsa.PrivateKey
 	salt []byte
 
-	packets chan (MinecraftPacket)
+	packets chan ([]MinecraftPacket)
 }
 
 // 描述 Minecraft 数据包

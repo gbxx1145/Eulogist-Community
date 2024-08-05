@@ -38,32 +38,32 @@ func (m *MinecraftClient) WaitClientHandshakeDown() error {
 	var err error
 	// process login related packets from Minecraft
 	for {
-		// read packet
-		pk := m.ReadPacket()
-		// handle login related packets
-		switch p := pk.Packet.(type) {
-		case *packet.RequestNetworkSettings:
-			err = m.HandleRequestNetworkSettings(p)
-			if err != nil {
-				panic(fmt.Sprintf("WaitClientHandshakeDown: %v", err))
+		for _, pk := range m.ReadPackets() {
+			// handle login related packets
+			switch p := pk.Packet.(type) {
+			case *packet.RequestNetworkSettings:
+				err = m.HandleRequestNetworkSettings(p)
+				if err != nil {
+					panic(fmt.Sprintf("WaitClientHandshakeDown: %v", err))
+				}
+			case *packet.Login:
+				m.identityData, m.clientData, err = m.HandleLogin(p)
+				if err != nil {
+					panic(fmt.Sprintf("WaitClientHandshakeDown: %v", err))
+				}
+			case *packet.ClientToServerHandshake:
+				downInitConnect = true
 			}
-		case *packet.Login:
-			m.identityData, m.clientData, err = m.HandleLogin(p)
-			if err != nil {
-				panic(fmt.Sprintf("WaitClientHandshakeDown: %v", err))
+			// check connection states
+			select {
+			case <-m.GetContext().Done():
+				return fmt.Errorf("WaitClientHandshakeDown: Minecraft closed its connection to eulogist")
+			default:
 			}
-		case *packet.ClientToServerHandshake:
-			downInitConnect = true
-		}
-		// check connection states
-		select {
-		case <-m.GetContext().Done():
-			return fmt.Errorf("WaitClientHandshakeDown: Minecraft closed its connection to eulogist")
-		default:
-		}
-		// return
-		if downInitConnect {
-			return nil
+			// return
+			if downInitConnect {
+				return nil
+			}
 		}
 	}
 }

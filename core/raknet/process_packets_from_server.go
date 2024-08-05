@@ -40,15 +40,12 @@ func (r *Raknet) HandleNetworkSettings(
 		return nil, nil, fmt.Errorf("HandleNetworkSettings: %v", err)
 	}
 	// 发送登录请求
-	err = r.WritePacket(MinecraftPacket{
+	r.WriteSinglePacket(MinecraftPacket{
 		Packet: &packet.Login{
 			ClientProtocol:    protocol.CurrentProtocol,
 			ConnectionRequest: loginRequest,
 		},
 	}, false)
-	if err != nil {
-		return nil, nil, fmt.Errorf("HandleNetworkSettings: %v", err)
-	}
 	// 返回值
 	return
 }
@@ -87,7 +84,7 @@ func (r *Raknet) HandleServerToClientHandshake(pk *packet.ServerToClientHandshak
 	r.encoder.EnableEncryption(keyBytes)
 	r.decoder.EnableEncryption(keyBytes)
 	// 发送回应的 ClientToServerHandshake 包
-	_ = r.WritePacket(MinecraftPacket{Packet: &packet.ClientToServerHandshake{}}, false)
+	r.WriteSinglePacket(MinecraftPacket{Packet: &packet.ClientToServerHandshake{}}, false)
 	// 返回值
 	return nil
 }
