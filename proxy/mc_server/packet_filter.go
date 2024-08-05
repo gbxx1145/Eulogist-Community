@@ -33,7 +33,6 @@ func (m *MinecraftServer) FiltePacketsAndSendCopy(
 		pk := minecraftPacket.Packet
 		if pk == nil {
 			shouldSendCopy[index] = true
-			errResults[index] = nil
 			continue
 		}
 		// 根据数据包的类型进行不同的处理
@@ -60,7 +59,6 @@ func (m *MinecraftServer) FiltePacketsAndSendCopy(
 			playerSkin := m.GetPlayerSkin()
 			if playerSkin == nil {
 				shouldSendCopy[index] = true
-				errResults[index] = nil
 				break
 			}
 			m.WriteSinglePacket(RaknetConnection.MinecraftPacket{
@@ -77,7 +75,6 @@ func (m *MinecraftServer) FiltePacketsAndSendCopy(
 			}, false)
 			// 设置数据包抄送状态
 			shouldSendCopy[index] = true
-			errResults[index] = nil
 		case *packet.UpdatePlayerGameType:
 			if p.PlayerUniqueID == m.entityUniqueID {
 				// 如果玩家的唯一 ID 与数据包中记录的值匹配，
@@ -91,12 +88,10 @@ func (m *MinecraftServer) FiltePacketsAndSendCopy(
 			}
 			// 设置数据包抄送状态
 			shouldSendCopy[index] = p.PlayerUniqueID != m.entityUniqueID
-			errResults[index] = nil
 		default:
 			// 默认情况下，
 			// 我们需要将数据包同步到客户端
 			shouldSendCopy[index] = true
-			errResults[index] = nil
 		}
 	}
 	// 抄送数据包
