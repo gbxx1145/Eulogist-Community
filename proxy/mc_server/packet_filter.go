@@ -48,13 +48,17 @@ func (m *MinecraftServer) PacketFilter(
 		if err != nil {
 			return true, fmt.Errorf("PacketFilter: %v", err)
 		}
-		// 发送当前使用的 Mod
+		// 皮肤特效处理
+		playerSkin := m.GetPlayerSkin()
+		if playerSkin == nil {
+			return true, nil
+		}
 		err = m.WritePacket(RaknetConnection.MinecraftPacket{
 			Packet: &packet.PyRpc{
 				Value: py_rpc.Marshal(&py_rpc.SyncUsingMod{
 					[]any{},
-					m.GetPlayerSkin().SkinUUID,
-					m.GetPlayerSkin().SkinItemID,
+					playerSkin.SkinUUID,
+					playerSkin.SkinItemID,
 					true,
 					map[string]any{},
 				}),
