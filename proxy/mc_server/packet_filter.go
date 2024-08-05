@@ -38,23 +38,28 @@ func (m *MinecraftServer) PacketFilter(
 		// 发送简要身份证明
 		err = m.WritePacket(RaknetConnection.MinecraftPacket{
 			Packet: &packet.NeteaseJson{
-				Data: []byte(fmt.Sprintf(`{"eventName":"LOGIN_UID","resid":"","uid":"%s"}`, m.fbClient.ClientInfo.Uid)),
+				Data: []byte(
+					fmt.Sprintf(`{"eventName":"LOGIN_UID","resid":"","uid":"%s"}`,
+						m.fbClient.ClientInfo.Uid,
+					),
+				),
 			},
 		}, false)
 		if err != nil {
 			return true, fmt.Errorf("PacketFilter: %v", err)
 		}
 		// 发送当前使用的 Mod
-		syncUsingMod := py_rpc.SyncUsingMod([]any{
-			[]any{},
-			m.GetPlayerSkin().SkinUUID,
-			m.GetPlayerSkin().SkinItemID,
-			true,
-			map[string]any{},
-		})
 		err = m.WritePacket(RaknetConnection.MinecraftPacket{
 			Packet: &packet.PyRpc{
-				Value:         py_rpc.Marshal(&syncUsingMod),
+				Value: py_rpc.Marshal(&py_rpc.SyncUsingMod{
+					[]any{
+						[]any{},
+						m.GetPlayerSkin().SkinUUID,
+						m.GetPlayerSkin().SkinItemID,
+						true,
+						map[string]any{},
+					},
+				}),
 				OperationType: packet.PyRpcOperationTypeSend,
 			},
 		}, false)
