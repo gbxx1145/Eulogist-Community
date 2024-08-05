@@ -128,9 +128,11 @@ func defaultClientData(
 	}
 	if d.SkinID == "" {
 		d.SkinID = uuid.New().String()
-		skin.SkinUUID = d.SkinID
+		if skin != nil {
+			skin.SkinUUID = d.SkinID
+		}
 	}
-	if d.SkinItemID == "" {
+	if d.SkinItemID == "" && skin != nil {
 		d.SkinItemID = skin.SkinItemID
 	}
 	if d.SkinResourcePatch == "" {
