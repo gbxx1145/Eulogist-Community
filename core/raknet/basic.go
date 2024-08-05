@@ -107,16 +107,16 @@ func (r *Raknet) ProcessIncomingPackets() {
 				pk.Marshal(reader)
 			}()
 			// 同步数据包到待存区
-			select {
-			case <-r.context.Done():
-				r.CloseConnection()
-				return
-			default:
-				packetSlice[index] = MinecraftPacket{Packet: pk, Bytes: data}
-			}
+			packetSlice[index] = MinecraftPacket{Packet: pk, Bytes: data}
 		}
 		// 提交
-		r.packets <- packetSlice
+		select {
+		case <-r.context.Done():
+			r.CloseConnection()
+			return
+		default:
+			r.packets <- packetSlice
+		}
 	}
 }
 
