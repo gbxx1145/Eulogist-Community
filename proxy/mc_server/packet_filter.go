@@ -52,13 +52,11 @@ func (m *MinecraftServer) PacketFilter(
 		err = m.WritePacket(RaknetConnection.MinecraftPacket{
 			Packet: &packet.PyRpc{
 				Value: py_rpc.Marshal(&py_rpc.SyncUsingMod{
-					[]any{
-						[]any{},
-						m.GetPlayerSkin().SkinUUID,
-						m.GetPlayerSkin().SkinItemID,
-						true,
-						map[string]any{},
-					},
+					[]any{},
+					m.GetPlayerSkin().SkinUUID,
+					m.GetPlayerSkin().SkinItemID,
+					true,
+					map[string]any{},
 				}),
 				OperationType: packet.PyRpcOperationTypeSend,
 			},
