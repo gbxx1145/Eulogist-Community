@@ -109,6 +109,7 @@ func (r *Raknet) ProcessIncomingPackets() {
 			// 同步数据包到待存区
 			select {
 			case <-r.context.Done():
+				r.CloseConnection()
 				return
 			default:
 				packetSlice[index] = MinecraftPacket{Packet: pk, Bytes: data}
