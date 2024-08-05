@@ -21,32 +21,35 @@ func (r *Raknet) EncodeLogin(
 	authResponse fbauth.AuthResponse,
 	clientKey *ecdsa.PrivateKey,
 	skin *Skin,
-) ([]byte, error) {
-	identityData := login.IdentityData{}
-	clientData := login.ClientData{}
+) (
+	request []byte,
+	identityData *login.IdentityData, clientData *login.ClientData,
+	err error,
+) {
+	identity := login.IdentityData{}
+	client := login.ClientData{}
 
 	// 设置默认的身份数据
-	defaultIdentityData(&identityData)
+	defaultIdentityData(&identity)
 	// 设置默认的客户端数据
-	err := defaultClientData(&clientData, authResponse, skin)
+	err = defaultClientData(&client, authResponse, skin)
 	if err != nil {
-		return nil, fmt.Errorf("EncodeLogin: %v", err)
+		return nil, nil, nil, fmt.Errorf("EncodeLogin: %v", err)
 	}
 
-	var request []byte
 	// 我们以 Android 设备登录，这将在 JWT 链中的 titleId 字段中显示。
 	// 这些字段无法被编辑，而我们也仅仅是强制以 Android 数据进行登录
-	setAndroidData(&clientData)
+	setAndroidData(&client)
 
 	// 编码登录请求
-	request = login.Encode(authResponse.ChainInfo, clientData, clientKey)
+	request = login.Encode(authResponse.ChainInfo, client, clientKey)
 	// 解析身份数据以确保其有效
-	identityData, _, _, err = login.Parse(request)
+	identity, client, _, err = login.Parse(request)
 	if err != nil {
-		return nil, fmt.Errorf("EncodeLogin: WARNING: Identity data parsing error: %v", err)
+		return nil, nil, nil, fmt.Errorf("EncodeLogin: WARNING: Identity data parsing error: %v", err)
 	}
 
-	return request, nil
+	return request, &identity, &client, nil
 }
 
 // defaultIdentityData 编辑传入的 IdentityData，
@@ -108,14 +111,9 @@ func defaultClientData(
 	if d.SelfSignedID == "" {
 		d.SelfSignedID = uuid.New().String()
 	}
-	if d.SkinID == "" {
-		d.SkinID = uuid.New().String()
-	}
-	if d.SkinItemID == "" {
-		d.SkinItemID = authResponse.SkinInfo.ItemID
-	}
 	if d.SkinData == "" {
 		if skin != nil {
+			d.SkinID = skin.SkinUUID
 			d.SkinData = base64.StdEncoding.EncodeToString(skin.SkinPixels)
 			d.SkinImageHeight, d.SkinImageWidth = skin.SkinHight, skin.SkinWidth
 			d.SkinGeometry = base64.StdEncoding.EncodeToString(skin.SkinGeometry)
@@ -127,6 +125,13 @@ func defaultClientData(
 			d.SkinImageHeight = 32
 			d.SkinImageWidth = 64
 		}
+	}
+	if d.SkinID == "" {
+		d.SkinID = uuid.New().String()
+		skin.SkinUUID = d.SkinID
+	}
+	if d.SkinItemID == "" {
+		d.SkinItemID = skin.SkinItemID
 	}
 	if d.SkinResourcePatch == "" {
 		d.SkinResourcePatch = base64.StdEncoding.EncodeToString(defaultSkinResourcePatch)

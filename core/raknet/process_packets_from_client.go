@@ -49,23 +49,25 @@ func (r *Raknet) HandleRequestNetworkSettings(pk *packet.RequestNetworkSettings)
 // 处理传入的登录数据包。
 // 它验证并解码数据包中找到的登录请求，
 // 如果无法成功完成，则返回错误
-func (r *Raknet) HandleLogin(pk *packet.Login) error {
+func (r *Raknet) HandleLogin(pk *packet.Login) (*login.IdentityData, *login.ClientData, error) {
 	// 准备
 	var (
-		err        error
-		authResult login.AuthResult
+		identityData login.IdentityData
+		clientData   login.ClientData
+		err          error
+		authResult   login.AuthResult
 	)
 	// 解析登录请求
-	_, _, authResult, err = login.Parse(pk.ConnectionRequest)
+	identityData, clientData, authResult, err = login.Parse(pk.ConnectionRequest)
 	if err != nil {
-		return fmt.Errorf("HandleLogin: parse login request: %w", err)
+		return nil, nil, fmt.Errorf("HandleLogin: parse login request: %w", err)
 	}
 	// 启用加密
 	if err := r.EnableEncryption(authResult.PublicKey); err != nil {
-		return fmt.Errorf("HandleLogin: error enabling encryption: %v", err)
+		return nil, nil, fmt.Errorf("HandleLogin: error enabling encryption: %v", err)
 	}
 	// 返回值
-	return nil
+	return &identityData, &clientData, nil
 }
 
 // 为创建的底层 Raknet 连接启用加密。

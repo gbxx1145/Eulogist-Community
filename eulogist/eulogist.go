@@ -64,7 +64,7 @@ func Eulogist() error {
 		if !FileExist(config.NEMCPath) {
 			return fmt.Errorf("Eulogist: Client not found, maybe you did not download or the the path is incorrect")
 		}
-		// 设置皮肤信息
+		// 生成皮肤文件
 		if playerSkin := server.GetPlayerSkin(); !FileExist(config.SkinPath) && playerSkin != nil {
 			if RaknetConnection.IsZIPFile(playerSkin.FullSkinData) {
 				neteaseSkinFileName = "skin.zip"
@@ -83,6 +83,7 @@ func Eulogist() error {
 		if err != nil {
 			return fmt.Errorf("Eulogist: %v", err)
 		}
+		client.SetPlayerSkin(server.GetPlayerSkin())
 		// 生成网易配置文件
 		neteaseConfigPath, err = GenerateNetEaseConfig(config, client.GetServerIP(), client.GetServerPort())
 		if err != nil {
@@ -91,6 +92,7 @@ func Eulogist() error {
 		// 启动 Minecraft 客户端
 		command := exec.Command(config.NEMCPath, fmt.Sprintf("config=%s", neteaseConfigPath))
 		go command.Run()
+		// 打印准备完成的信息
 		pterm.Success.Println("Eulogist is ready! Now we are going to start Minecraft Client.\nThen, the Minecraft Client will connect to Eulogist automatically.")
 	} else {
 		// 启动 Eulogist 服务器
@@ -98,6 +100,8 @@ func Eulogist() error {
 		if err != nil {
 			return fmt.Errorf("Eulogist: %v", err)
 		}
+		client.SetPlayerSkin(server.GetPlayerSkin())
+		// 打印 赞颂者 准备完成的信息
 		pterm.Success.Printf(
 			"Eulogist is ready! Please connect to Eulogist manually.\nEulogist server address: %s:%d\n",
 			client.GetServerIP(), client.GetServerPort(),
@@ -180,11 +184,19 @@ func Eulogist() error {
 			waitGroup.Add(-1)
 		}()
 		for {
-			// 读取并抄送数据包到网易租赁服
+			// 读取和过滤数据包
 			pk := client.ReadPacket()
-			err = server.WritePacket(RaknetConnection.MinecraftPacket{Bytes: pk.Bytes}, true)
+			shouldSendCopy, err := client.PacketFilter(pk.Packet, server.WritePacket)
 			if err != nil {
-				return
+				pterm.Warning.Printf("Eulogist: %v\n", err)
+				continue
+			}
+			// 抄送数据包到 网易租赁服
+			if shouldSendCopy {
+				err = server.WritePacket(RaknetConnection.MinecraftPacket{Bytes: pk.Bytes}, true)
+				if err != nil {
+					return
+				}
 			}
 			// 检查连接状态
 			select {

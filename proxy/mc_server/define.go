@@ -2,6 +2,7 @@ package mc_server
 
 import (
 	fbauth "Eulogist/core/fb_auth/pv4"
+	"Eulogist/core/minecraft/protocol/login"
 	RaknetConnection "Eulogist/core/raknet"
 )
 
@@ -10,8 +11,11 @@ type MinecraftServer struct {
 	authResponse          fbauth.AuthResponse
 	getCheckNumEverPassed bool
 
+	identityData *login.IdentityData
+	clientData   *login.ClientData
+	playerSkin   *RaknetConnection.Skin
+
 	entityUniqueID int64
-	playerSkin     *RaknetConnection.Skin
 
 	*RaknetConnection.Raknet
 }

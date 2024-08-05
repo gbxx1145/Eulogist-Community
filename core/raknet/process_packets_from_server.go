@@ -24,18 +24,20 @@ func (r *Raknet) HandleNetworkSettings(
 	pk *packet.NetworkSettings,
 	authResponse fbauth.AuthResponse,
 	skin *Skin,
-) error {
+) (identityData *login.IdentityData, clientData *login.ClientData, err error) {
+	// 准备
+	var loginRequest []byte
 	// 为底层 Raknet 连接启用数据包压缩
 	alg, ok := packet.CompressionByID(pk.CompressionAlgorithm)
 	if !ok {
-		return fmt.Errorf("HandleNetworkSettings: unknown compression algorithm: %v", pk.CompressionAlgorithm)
+		return nil, nil, fmt.Errorf("HandleNetworkSettings: unknown compression algorithm: %v", pk.CompressionAlgorithm)
 	}
 	r.encoder.EnableCompression(alg)
 	r.decoder.EnableCompression(alg)
 	// 编码登录请求
-	loginRequest, err := r.EncodeLogin(authResponse, r.key, skin)
+	loginRequest, identityData, clientData, err = r.EncodeLogin(authResponse, r.key, skin)
 	if err != nil {
-		return fmt.Errorf("HandleNetworkSettings: %v", err)
+		return nil, nil, fmt.Errorf("HandleNetworkSettings: %v", err)
 	}
 	// 发送登录请求
 	err = r.WritePacket(MinecraftPacket{
@@ -45,10 +47,10 @@ func (r *Raknet) HandleNetworkSettings(
 		},
 	}, false)
 	if err != nil {
-		return fmt.Errorf("HandleNetworkSettings: %v", err)
+		return nil, nil, fmt.Errorf("HandleNetworkSettings: %v", err)
 	}
 	// 返回值
-	return nil
+	return
 }
 
 // HandleServerToClientHandshake

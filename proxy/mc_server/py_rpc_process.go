@@ -8,14 +8,18 @@ import (
 	"fmt"
 )
 
-// OnPyRpc 处理数据包 PyRpc
-func (m *MinecraftServer) OnPyRpc(p *packet.PyRpc) (shouldSendCopy bool, err error) {
-	// 如果请求值为空，
-	// 返回 true 表示需要抄送当前数据包到 Minecraft 客户端
+// OnPyRpc 处理数据包 PyRpc。
+//
+// 如果必要，将使用 writePacketToClient
+// 向 Minecraft 客户端发送新数据包
+func (m *MinecraftServer) OnPyRpc(
+	p *packet.PyRpc,
+	writePacketToClient func(pk RaknetConnection.MinecraftPacket, useBytes bool) error,
+) (shouldSendCopy bool, err error) {
+	// 解码 PyRpc
 	if p.Value == nil {
 		return true, nil
 	}
-	// 解码当前数据包
 	content, err := py_rpc.Unmarshal(p.Value)
 	if err != nil {
 		return true, fmt.Errorf("OnPyRpc: %v", err)

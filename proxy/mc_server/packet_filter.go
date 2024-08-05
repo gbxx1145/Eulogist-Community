@@ -26,7 +26,7 @@ func (m *MinecraftServer) PacketFilter(
 	// 根据数据包的类型进行不同的处理
 	switch p := pk.(type) {
 	case *packet.PyRpc:
-		shouldSendCopy, err = m.OnPyRpc(p)
+		shouldSendCopy, err = m.OnPyRpc(p, writePacketToClient)
 		if err != nil {
 			err = fmt.Errorf("PacketFilter: %v", err)
 		}

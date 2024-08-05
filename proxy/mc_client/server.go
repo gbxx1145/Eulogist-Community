@@ -58,3 +58,18 @@ func (m *MinecraftClient) GetServerIP() string {
 func (m *MinecraftClient) GetServerPort() int {
 	return m.address.Port
 }
+
+// ...
+func (m *MinecraftClient) InitPlayerSkin() {
+	m.playerSkin = &RaknetConnection.Skin{}
+}
+
+// ...
+func (m *MinecraftClient) SetPlayerSkin(skin *RaknetConnection.Skin) {
+	m.playerSkin = skin
+}
+
+// ...
+func (m *MinecraftClient) GetPlayerSkin() *RaknetConnection.Skin {
+	return m.playerSkin
+}

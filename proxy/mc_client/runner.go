@@ -35,6 +35,7 @@ func RunServer() (client *MinecraftClient, connected chan struct{}, err error) {
 func (m *MinecraftClient) WaitClientHandshakeDown() error {
 	// prepare
 	var downInitConnect bool
+	var err error
 	// process login related packets from Minecraft
 	for {
 		// read packet
@@ -42,12 +43,12 @@ func (m *MinecraftClient) WaitClientHandshakeDown() error {
 		// handle login related packets
 		switch p := pk.Packet.(type) {
 		case *packet.RequestNetworkSettings:
-			err := m.HandleRequestNetworkSettings(p)
+			err = m.HandleRequestNetworkSettings(p)
 			if err != nil {
 				panic(fmt.Sprintf("WaitClientHandshakeDown: %v", err))
 			}
 		case *packet.Login:
-			err := m.HandleLogin(p)
+			m.identityData, m.clientData, err = m.HandleLogin(p)
 			if err != nil {
 				panic(fmt.Sprintf("WaitClientHandshakeDown: %v", err))
 			}
@@ -57,7 +58,7 @@ func (m *MinecraftClient) WaitClientHandshakeDown() error {
 		// check connection states
 		select {
 		case <-m.GetContext().Done():
-			return fmt.Errorf("WaitClientHandshakeDown: Minecraft closed its connection to eulogist") // 如果连接关闭，返回错误
+			return fmt.Errorf("WaitClientHandshakeDown: Minecraft closed its connection to eulogist")
 		default:
 		}
 		// return

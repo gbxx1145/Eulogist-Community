@@ -37,8 +37,9 @@ func ConnectToServer(basicConfig BasicConfig) (*MinecraftServer, error) {
 		return nil, fmt.Errorf("ConnectToServer: %v", err)
 	}
 	// 初始化皮肤信息
-	if url := authResponse.SkinInfo.SkinDownloadURL; len(url) > 0 {
-		mcServer.playerSkin, err = RaknetConnection.ProcessURLToSkin(url)
+	if len(authResponse.SkinInfo.SkinDownloadURL) > 0 {
+		mcServer.InitPlayerSkin()
+		err = RaknetConnection.GetSkinFromAuthResponse(authResponse, mcServer.GetPlayerSkin())
 		if err != nil {
 			return nil, fmt.Errorf("ConnectToServer: %v", err)
 		}
@@ -80,7 +81,7 @@ func (m *MinecraftServer) WaitClientHandshakeDown() error {
 		// 处理初始连接数据包
 		switch p := pk.Packet.(type) {
 		case *packet.NetworkSettings:
-			err = m.HandleNetworkSettings(p, m.authResponse, m.playerSkin)
+			m.identityData, m.clientData, err = m.HandleNetworkSettings(p, m.authResponse, m.playerSkin)
 			if err != nil {
 				return fmt.Errorf("ConnectToServer: %v", err)
 			}
@@ -103,8 +104,4 @@ func (m *MinecraftServer) WaitClientHandshakeDown() error {
 			return nil
 		}
 	}
-}
-
-func (m *MinecraftServer) GetPlayerSkin() *RaknetConnection.Skin {
-	return m.playerSkin
 }
