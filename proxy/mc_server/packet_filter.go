@@ -33,6 +33,7 @@ func (m *MinecraftServer) FiltePacketsAndSendCopy(
 		pk := minecraftPacket.Packet
 		if pk == nil {
 			shouldSendCopy[index] = true
+			errResults[index] = nil
 			continue
 		}
 		// 根据数据包的类型进行不同的处理
