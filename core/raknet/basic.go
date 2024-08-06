@@ -91,7 +91,7 @@ func (r *Raknet) ProcessIncomingPackets() {
 				defer func() {
 					r := recover()
 					if r != nil {
-						pterm.Warning.Printf("ProcessIncomingPackets: %v\n", err)
+						pterm.Warning.Printf("ProcessIncomingPackets: %v\n", r)
 					}
 				}()
 				switch packetHeader.PacketID {
@@ -100,6 +100,7 @@ func (r *Raknet) ProcessIncomingPackets() {
 				case packet.IDServerToClientHandshake, packet.IDClientToServerHandshake:
 				case packet.IDStartGame, packet.IDPyRpc:
 				case packet.IDUpdatePlayerGameType:
+				case packet.IDItemStackRequest, packet.IDItemStackResponse, packet.IDPlayerEnchantOptions:
 				default:
 					return
 				}
