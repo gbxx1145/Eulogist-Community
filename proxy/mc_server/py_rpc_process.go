@@ -29,7 +29,7 @@ func (m *MinecraftServer) OnPyRpc(p *packet.PyRpc) (shouldSendCopy bool, err err
 					Value:         py_rpc.Marshal(c),
 					OperationType: packet.PyRpcOperationTypeSend,
 				},
-			}, false,
+			},
 		)
 	case *py_rpc.GetMCPCheckNum:
 		// 如果已完成零知识证明(挑战)，
@@ -60,7 +60,7 @@ func (m *MinecraftServer) OnPyRpc(p *packet.PyRpc) (shouldSendCopy bool, err err
 					Value:         py_rpc.Marshal(&py_rpc.SetMCPCheckNum{ret_p}),
 					OperationType: packet.PyRpcOperationTypeSend,
 				},
-			}, false,
+			},
 		)
 		// 标记零知识证明(挑战)已在当前会话下永久完成
 		m.getCheckNumEverPassed = true

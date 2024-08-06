@@ -45,7 +45,7 @@ func (r *Raknet) HandleNetworkSettings(
 			ClientProtocol:    protocol.CurrentProtocol,
 			ConnectionRequest: loginRequest,
 		},
-	}, false)
+	})
 	// 返回值
 	return
 }
@@ -84,7 +84,7 @@ func (r *Raknet) HandleServerToClientHandshake(pk *packet.ServerToClientHandshak
 	r.encoder.EnableEncryption(keyBytes)
 	r.decoder.EnableEncryption(keyBytes)
 	// 发送回应的 ClientToServerHandshake 包
-	r.WriteSinglePacket(MinecraftPacket{Packet: &packet.ClientToServerHandshake{}}, false)
+	r.WriteSinglePacket(MinecraftPacket{Packet: &packet.ClientToServerHandshake{}})
 	// 返回值
 	return nil
 }

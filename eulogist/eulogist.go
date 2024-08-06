@@ -178,7 +178,7 @@ func Eulogist() error {
 			waitGroup.Add(-1)
 		}()
 		for {
-			server.WritePackets(client.ReadPackets(), true)
+			server.WritePackets(client.ReadPackets())
 			select {
 			case <-client.GetContext().Done():
 				return

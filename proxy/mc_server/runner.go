@@ -70,7 +70,7 @@ func (m *MinecraftServer) WaitClientHandshakeDown() error {
 	m.WriteSinglePacket(
 		RaknetConnection.MinecraftPacket{
 			Packet: &packet.RequestNetworkSettings{ClientProtocol: protocol.CurrentProtocol},
-		}, false,
+		},
 	)
 	// 处理来自 bot 端的登录相关数据包
 	for {

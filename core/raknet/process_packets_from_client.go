@@ -26,7 +26,7 @@ func (r *Raknet) HandleRequestNetworkSettings(pk *packet.RequestNetworkSettings)
 			// 此时服务器已过期，所以我们需要更新 status 的值
 			status = packet.PlayStatusLoginFailedServer
 		}
-		r.WriteSinglePacket(MinecraftPacket{Packet: &packet.PlayStatus{Status: status}}, false)
+		r.WriteSinglePacket(MinecraftPacket{Packet: &packet.PlayStatus{Status: status}})
 		return fmt.Errorf("HandleRequestNetworkSettings: Connected with an incompatible protocol: expected protocol = %v, client protocol = %v", protocol.CurrentProtocol, pk.ClientProtocol)
 	}
 	// 发送 NetworkSettings 数据包以响应客户端
@@ -36,7 +36,7 @@ func (r *Raknet) HandleRequestNetworkSettings(pk *packet.RequestNetworkSettings)
 		ClientThrottle:          false,
 		ClientThrottleThreshold: 0,
 		ClientThrottleScalar:    0,
-	}}, false)
+	}})
 	// 为数据包传输启用压缩
 	r.encoder.EnableCompression(packet.DefaultCompression)
 	r.decoder.EnableCompression(packet.DefaultCompression)
@@ -84,7 +84,7 @@ func (r *Raknet) EnableEncryption(clientPublicKey *ecdsa.PublicKey) error {
 	// 发送 ServerToClientHandshake 数据包
 	r.WriteSinglePacket(MinecraftPacket{
 		Packet: &packet.ServerToClientHandshake{JWT: []byte(serverJWT)},
-	}, false)
+	})
 	// 计算公钥
 	x, _ := clientPublicKey.Curve.ScalarMult(clientPublicKey.X, clientPublicKey.Y, r.key.D.Bytes())
 	sharedSecret := append(bytes.Repeat([]byte{0}, 48-len(x.Bytes())), x.Bytes()...)

@@ -13,14 +13,14 @@ import (
 // 如果需要，
 // 将根据实际情况由本处的桥接直接发送回应。
 //
-// writePacketToClient 指代
+// writeSinglePacketToClient 指代
 // 用于向客户端抄送数据包的函数。
 //
 // 返回的 []error 是一个列表，
 // 分别对应 packets 中每一个数据包的处理成功情况
 func (m *MinecraftServer) FiltePacketsAndSendCopy(
 	packets []RaknetConnection.MinecraftPacket,
-	writePacketsToClient func(packets []RaknetConnection.MinecraftPacket, useBytes bool),
+	writePacketsToClient func(packets []RaknetConnection.MinecraftPacket),
 ) []error {
 	// 初始化
 	sendCopy := make([]RaknetConnection.MinecraftPacket, 0)
@@ -54,7 +54,7 @@ func (m *MinecraftServer) FiltePacketsAndSendCopy(
 						),
 					),
 				},
-			}, false)
+			})
 			// 皮肤特效处理
 			playerSkin := m.GetPlayerSkin()
 			if playerSkin == nil {
@@ -72,7 +72,7 @@ func (m *MinecraftServer) FiltePacketsAndSendCopy(
 					}),
 					OperationType: packet.PyRpcOperationTypeSend,
 				},
-			}, false)
+			})
 			// 设置数据包抄送状态
 			shouldSendCopy[index] = true
 		case *packet.UpdatePlayerGameType:
@@ -83,8 +83,10 @@ func (m *MinecraftServer) FiltePacketsAndSendCopy(
 				// 以确保 Minecraft 客户端可以正常同步游戏模式更改。
 				// 否则，按原样抄送当前数据包
 				writePacketsToClient([]RaknetConnection.MinecraftPacket{
-					{Packet: &packet.SetPlayerGameType{GameType: p.GameType}},
-				}, false)
+					{
+						Packet: &packet.SetPlayerGameType{GameType: p.GameType},
+					},
+				})
 			}
 			// 设置数据包抄送状态
 			shouldSendCopy[index] = p.PlayerUniqueID != m.entityUniqueID
@@ -101,7 +103,7 @@ func (m *MinecraftServer) FiltePacketsAndSendCopy(
 		}
 		sendCopy = append(sendCopy, pk)
 	}
-	writePacketsToClient(sendCopy, true)
+	writePacketsToClient(sendCopy)
 	// 返回值
 	return errResults
 }
