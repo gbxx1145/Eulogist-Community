@@ -64,8 +64,6 @@ func (m *MinecraftServer) OnPyRpc(p *packet.PyRpc) (shouldSendCopy bool, err err
 		)
 		// 标记零知识证明(挑战)已在当前会话下永久完成
 		m.getCheckNumEverPassed = true
-		// 返回值
-		return false, nil
 	default:
 		// 对于其他种类的 PyRpc 数据包，
 		// 返回 true 表示需要将数据包抄送至
