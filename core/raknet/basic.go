@@ -100,7 +100,6 @@ func (r *Raknet) ProcessIncomingPackets() {
 				case packet.IDServerToClientHandshake, packet.IDClientToServerHandshake:
 				case packet.IDStartGame, packet.IDPyRpc:
 				case packet.IDUpdatePlayerGameType:
-				case packet.IDItemStackRequest, packet.IDItemStackResponse, packet.IDPlayerEnchantOptions:
 				default:
 					return
 				}
