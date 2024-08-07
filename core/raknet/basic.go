@@ -27,6 +27,7 @@ func (r *Raknet) SetConnection(connection net.Conn, key *ecdsa.PrivateKey) {
 	r.connection = connection
 	r.encoder = packet.NewEncoder(connection)
 	r.decoder = packet.NewDecoder(connection)
+	r.decoder.DisableBatchPacketLimit()
 	r.packets = make(chan []MinecraftPacket, 255)
 	r.key = key
 	_, _ = rand.Read(r.salt)
