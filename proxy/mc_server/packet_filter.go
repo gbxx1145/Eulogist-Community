@@ -7,20 +7,26 @@ import (
 	"fmt"
 )
 
-// 数据包过滤器过滤来自租赁服的多个数据包，
-// 然后并将过滤后的多个数据包抄送至客户端。
-//
-// 如果需要，
-// 将根据实际情况由本处的桥接直接发送回应。
-//
-// writeSinglePacketToClient 指代
-// 用于向客户端抄送数据包的函数。
-//
-// 返回的 []error 是一个列表，
-// 分别对应 packets 中每一个数据包的处理成功情况
+/*
+数据包过滤器过滤来自租赁服的多个数据包，
+然后并将过滤后的多个数据包抄送至客户端。
+
+如果需要，
+将根据实际情况由本处的桥接直接发送回应。
+
+writeSinglePacketToClient 指代
+用于向客户端抄送数据包的函数。
+
+syncFunc 用于将数据同步到 Minecraft 客户端，
+它会在每个数据包被过滤处理后执行一次。
+
+返回的 []error 是一个列表，
+分别对应 packets 中每一个数据包的处理成功情况
+*/
 func (m *MinecraftServer) FiltePacketsAndSendCopy(
 	packets []RaknetConnection.MinecraftPacket,
 	writePacketsToClient func(packets []RaknetConnection.MinecraftPacket),
+	syncFunc func() error,
 ) []error {
 	// 初始化
 	sendCopy := make([]RaknetConnection.MinecraftPacket, 0)
@@ -94,6 +100,10 @@ func (m *MinecraftServer) FiltePacketsAndSendCopy(
 			// 默认情况下，
 			// 我们需要将数据包同步到客户端
 			shouldSendCopy[index] = true
+		}
+		// 同步数据到 Minecraft 客户端
+		if err := syncFunc(); err != nil {
+			errResults[index] = fmt.Errorf("FiltePacketsAndSendCopy: %v", err)
 		}
 	}
 	// 抄送数据包

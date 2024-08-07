@@ -144,20 +144,24 @@ func Eulogist() error {
 			waitGroup.Add(-1)
 		}()
 		for {
+			// 初始化一个函数，
+			// 用于同步数据到 Minecraft 客户端
+			syncFunc := func() error {
+				if shieldID := server.GetShieldID(); shieldID != 0 {
+					client.SetShieldID(shieldID)
+				}
+				if entityUniqueID := server.GetEntityUniqueID(); entityUniqueID != 0 {
+					client.SetEntityUniqueID(entityUniqueID)
+				}
+				return nil
+			}
 			// 读取、过滤数据包，
 			// 然后抄送其到 Minecraft 客户端
-			errList := server.FiltePacketsAndSendCopy(server.ReadPackets(), client.WritePackets)
+			errList := server.FiltePacketsAndSendCopy(server.ReadPackets(), client.WritePackets, syncFunc)
 			for _, err = range errList {
 				if err != nil {
 					pterm.Warning.Printf("Eulogist: %v\n", err)
 				}
-			}
-			// 同步数据到 Minecraft 客户端
-			if shieldID := server.GetShieldID(); shieldID != 0 {
-				client.SetShieldID(shieldID)
-			}
-			if entityUniqueID := server.GetEntityUniqueID(); entityUniqueID != 0 {
-				client.SetEntityUniqueID(entityUniqueID)
 			}
 			// 检查连接状态
 			select {
