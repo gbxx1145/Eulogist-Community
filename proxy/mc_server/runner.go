@@ -58,8 +58,8 @@ func ConnectToServer(basicConfig BasicConfig) (*MinecraftServer, error) {
 	return &mcServer, nil
 }
 
-// WaitClientHandshakeDown 等待 赞颂者
-// 完成与 网易租赁服 的基本数据包交换。
+// WaitClientHandshakeDown 等待赞颂者
+// 完成与网易租赁服的基本数据包交换。
 // 此函数应当只被调用一次
 func (m *MinecraftServer) WaitClientHandshakeDown() error {
 	// 准备

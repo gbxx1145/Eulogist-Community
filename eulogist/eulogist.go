@@ -32,7 +32,7 @@ func Eulogist() error {
 		}
 	}
 
-	// 使 赞颂者 连接到 网易租赁服
+	// 使赞颂者连接到网易租赁服
 	{
 		pterm.Info.Println("Now we try to communicate with Auth Server.")
 
@@ -101,14 +101,14 @@ func Eulogist() error {
 			return fmt.Errorf("Eulogist: %v", err)
 		}
 		client.SetPlayerSkin(server.GetPlayerSkin())
-		// 打印 赞颂者 准备完成的信息
+		// 打印赞颂者准备完成的信息
 		pterm.Success.Printf(
 			"Eulogist is ready! Please connect to Eulogist manually.\nEulogist server address: %s:%d\n",
 			client.GetServerIP(), client.GetServerPort(),
 		)
 	}
 
-	// 等待 Minecraft 客户端与 赞颂者 完成基本数据包交换
+	// 等待 Minecraft 客户端与赞颂者完成基本数据包交换
 	{
 		// 等待 Minecraft 客户端连接
 		if config.LaunchType == LaunchTypeNormal {
@@ -182,7 +182,15 @@ func Eulogist() error {
 			waitGroup.Add(-1)
 		}()
 		for {
-			server.WritePackets(client.ReadPackets())
+			// 初始化一个函数，
+			// 用于同步数据到网易租赁服
+			syncFunc := func() error {
+				return nil
+			}
+			// 读取、过滤数据包，
+			// 然后抄送其到网易租赁服
+			client.FiltePacketsAndSendCopy(client.ReadPackets(), server.WritePackets, syncFunc)
+			// 检查连接状态
 			select {
 			case <-client.GetContext().Done():
 				return

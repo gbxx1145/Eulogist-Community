@@ -30,7 +30,7 @@ func RunServer() (client *MinecraftClient, connected chan struct{}, err error) {
 }
 
 // WaitClientHandshakeDown 等待 Minecraft
-// 完成与 赞颂者 的基本数据包交换。
+// 完成与赞颂者的基本数据包交换。
 // 此函数应当只被调用一次
 func (m *MinecraftClient) WaitClientHandshakeDown() error {
 	// prepare
