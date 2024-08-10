@@ -1,8 +1,8 @@
 package minecraft
 
 import (
-	mei "Eulogist/core/fb_auth/py_rpc/mod_event/interface"
-	"Eulogist/core/fb_auth/py_rpc/mod_event/server_to_client/minecraft/chat_phrases"
+	mei "Eulogist/core/tools/py_rpc/mod_event/interface"
+	"Eulogist/core/tools/py_rpc/mod_event/server_to_client/minecraft/chat_phrases"
 )
 
 // 快捷游戏短语

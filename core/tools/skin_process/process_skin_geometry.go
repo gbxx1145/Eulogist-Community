@@ -1,4 +1,4 @@
-package RaknetConnection
+package SkinProcess
 
 import (
 	"bytes"

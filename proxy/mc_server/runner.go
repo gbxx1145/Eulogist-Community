@@ -5,6 +5,7 @@ import (
 	"Eulogist/core/minecraft/protocol"
 	"Eulogist/core/minecraft/protocol/packet"
 	RaknetConnection "Eulogist/core/raknet"
+	SkinProcess "Eulogist/core/tools/skin_process"
 	"context"
 	"crypto/ecdsa"
 	"crypto/elliptic"
@@ -39,7 +40,7 @@ func ConnectToServer(basicConfig BasicConfig) (*MinecraftServer, error) {
 	// 初始化皮肤信息
 	if len(authResponse.SkinInfo.SkinDownloadURL) > 0 {
 		mcServer.InitPlayerSkin()
-		err = RaknetConnection.GetSkinFromAuthResponse(authResponse, mcServer.GetPlayerSkin())
+		err = SkinProcess.GetSkinFromAuthResponse(authResponse, mcServer.GetPlayerSkin())
 		if err != nil {
 			return nil, fmt.Errorf("ConnectToServer: %v", err)
 		}

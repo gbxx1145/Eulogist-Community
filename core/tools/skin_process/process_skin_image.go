@@ -1,4 +1,4 @@
-package RaknetConnection
+package SkinProcess
 
 import (
 	fbauth "Eulogist/core/fb_auth/pv4"
@@ -14,12 +14,6 @@ import (
 
 	_ "embed"
 )
-
-//go:embed default_skin_resource_patch.json
-var defaultSkinResourcePatch []byte
-
-//go:embed default_skin_geometry.json
-var defaultSkinGeometry []byte
 
 // ...
 func IsZIPFile(fileData []byte) bool {
@@ -61,7 +55,7 @@ func GetSkinFromAuthResponse(authResponse fbauth.AuthResponse, skin *Skin) error
 		// 那么 res 就是该皮肤的 PNG 二进制形式，
 		// 并且该皮肤使用的骨架格式为默认格式
 		skin.SkinItemID = authResponse.SkinInfo.ItemID
-		skin.FullSkinData, skin.SkinGeometry = res, defaultSkinGeometry
+		skin.FullSkinData, skin.SkinGeometry = res, DefaultSkinGeometry
 		skinImageData = res
 		// 如果这是一个高级的皮肤(比如 4D 皮肤)，
 		// 那么 res 是一个压缩包，
@@ -98,7 +92,7 @@ func ConvertZIPToSkin(skin *Skin) (skinImageData []byte, err error) {
 		return nil, fmt.Errorf("ConvertZIPToSkin: %v", err)
 	}
 	// 设置皮肤默认资源路径
-	skin.SkinResourcePatch = defaultSkinResourcePatch
+	skin.SkinResourcePatch = DefaultSkinResourcePatch
 	// 查找皮肤内容
 	for _, file := range reader.File {
 		// 皮肤数据

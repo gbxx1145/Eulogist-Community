@@ -1,8 +1,8 @@
 package mod_event_server_to_client
 
 import (
-	mei "Eulogist/core/fb_auth/py_rpc/mod_event/interface"
-	"Eulogist/core/fb_auth/py_rpc/mod_event/server_to_client/minecraft"
+	mei "Eulogist/core/tools/py_rpc/mod_event/interface"
+	"Eulogist/core/tools/py_rpc/mod_event/server_to_client/minecraft"
 )
 
 // Minecraft Package

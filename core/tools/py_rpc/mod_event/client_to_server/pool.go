@@ -1,7 +1,7 @@
 package mod_event_client_to_server
 
 import (
-	mei "Eulogist/core/fb_auth/py_rpc/mod_event/interface"
+	mei "Eulogist/core/tools/py_rpc/mod_event/interface"
 )
 
 // Return a pool/map that contains

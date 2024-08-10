@@ -1,8 +1,8 @@
 package mc_client
 
 import (
-	"Eulogist/core/fb_auth/py_rpc"
 	"Eulogist/core/minecraft/protocol/packet"
+	"Eulogist/core/tools/py_rpc"
 	"fmt"
 )
 

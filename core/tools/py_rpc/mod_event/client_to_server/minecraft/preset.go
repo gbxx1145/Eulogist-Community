@@ -1,8 +1,8 @@
 package minecraft
 
 import (
-	"Eulogist/core/fb_auth/py_rpc/mod_event/client_to_server/minecraft/preset"
-	mei "Eulogist/core/fb_auth/py_rpc/mod_event/interface"
+	"Eulogist/core/tools/py_rpc/mod_event/client_to_server/minecraft/preset"
+	mei "Eulogist/core/tools/py_rpc/mod_event/interface"
 )
 
 type Preset struct{ mei.Module }

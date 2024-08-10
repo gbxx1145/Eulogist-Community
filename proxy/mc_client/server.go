@@ -2,6 +2,7 @@ package mc_client
 
 import (
 	RaknetConnection "Eulogist/core/raknet"
+	SkinProcess "Eulogist/core/tools/skin_process"
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/rand"
@@ -61,16 +62,16 @@ func (m *MinecraftClient) GetServerPort() int {
 
 // ...
 func (m *MinecraftClient) InitPlayerSkin() {
-	m.playerSkin = &RaknetConnection.Skin{}
+	m.playerSkin = &SkinProcess.Skin{}
 }
 
 // ...
-func (m *MinecraftClient) SetPlayerSkin(skin *RaknetConnection.Skin) {
+func (m *MinecraftClient) SetPlayerSkin(skin *SkinProcess.Skin) {
 	m.playerSkin = skin
 }
 
 // ...
-func (m *MinecraftClient) GetPlayerSkin() *RaknetConnection.Skin {
+func (m *MinecraftClient) GetPlayerSkin() *SkinProcess.Skin {
 	return m.playerSkin
 }
 

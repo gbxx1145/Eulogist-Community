@@ -4,6 +4,7 @@ import (
 	fbauth "Eulogist/core/fb_auth/pv4"
 	"Eulogist/core/minecraft/protocol"
 	"Eulogist/core/minecraft/protocol/login"
+	SkinProcess "Eulogist/core/tools/skin_process"
 	"bytes"
 	"crypto/ecdsa"
 	"encoding/base64"
@@ -20,7 +21,7 @@ import (
 func (r *Raknet) EncodeLogin(
 	authResponse fbauth.AuthResponse,
 	clientKey *ecdsa.PrivateKey,
-	skin *Skin,
+	skin *SkinProcess.Skin,
 ) (
 	request []byte,
 	identityData *login.IdentityData, clientData *login.ClientData,
@@ -68,7 +69,7 @@ func defaultIdentityData(data *login.IdentityData) {
 func defaultClientData(
 	d *login.ClientData,
 	authResponse fbauth.AuthResponse,
-	skin *Skin,
+	skin *SkinProcess.Skin,
 ) error {
 	rand.Seed(time.Now().Unix())
 
@@ -136,10 +137,10 @@ func defaultClientData(
 		d.SkinItemID = skin.SkinItemID
 	}
 	if d.SkinResourcePatch == "" {
-		d.SkinResourcePatch = base64.StdEncoding.EncodeToString(defaultSkinResourcePatch)
+		d.SkinResourcePatch = base64.StdEncoding.EncodeToString(SkinProcess.DefaultSkinResourcePatch)
 	}
 	if d.SkinGeometry == "" {
-		d.SkinGeometry = base64.StdEncoding.EncodeToString(defaultSkinGeometry)
+		d.SkinGeometry = base64.StdEncoding.EncodeToString(SkinProcess.DefaultSkinGeometry)
 	}
 
 	return nil

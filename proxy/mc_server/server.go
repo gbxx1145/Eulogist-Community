@@ -1,19 +1,19 @@
 package mc_server
 
-import RaknetConnection "Eulogist/core/raknet"
+import SkinProcess "Eulogist/core/tools/skin_process"
 
 // ...
 func (m *MinecraftServer) InitPlayerSkin() {
-	m.playerSkin = &RaknetConnection.Skin{}
+	m.playerSkin = &SkinProcess.Skin{}
 }
 
 // ...
-func (m *MinecraftServer) GetPlayerSkin() *RaknetConnection.Skin {
+func (m *MinecraftServer) GetPlayerSkin() *SkinProcess.Skin {
 	return m.playerSkin
 }
 
 // ...
-func (m *MinecraftServer) SetPlayerSkin(skin *RaknetConnection.Skin) {
+func (m *MinecraftServer) SetPlayerSkin(skin *SkinProcess.Skin) {
 	m.playerSkin = skin
 }
 

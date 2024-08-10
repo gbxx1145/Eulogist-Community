@@ -1,9 +1,9 @@
 package py_rpc
 
 import (
-	cts "Eulogist/core/fb_auth/py_rpc/mod_event/client_to_server"
-	mei "Eulogist/core/fb_auth/py_rpc/mod_event/interface"
-	stc "Eulogist/core/fb_auth/py_rpc/mod_event/server_to_client"
+	cts "Eulogist/core/tools/py_rpc/mod_event/client_to_server"
+	mei "Eulogist/core/tools/py_rpc/mod_event/interface"
+	stc "Eulogist/core/tools/py_rpc/mod_event/server_to_client"
 	"fmt"
 )
 

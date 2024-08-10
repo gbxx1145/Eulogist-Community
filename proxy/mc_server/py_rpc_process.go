@@ -1,9 +1,9 @@
 package mc_server
 
 import (
-	"Eulogist/core/fb_auth/py_rpc"
 	"Eulogist/core/minecraft/protocol/packet"
 	RaknetConnection "Eulogist/core/raknet"
+	"Eulogist/core/tools/py_rpc"
 	"encoding/json"
 	"fmt"
 )

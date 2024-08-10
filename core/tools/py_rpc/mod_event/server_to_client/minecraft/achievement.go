@@ -1,8 +1,8 @@
 package minecraft
 
 import (
-	mei "Eulogist/core/fb_auth/py_rpc/mod_event/interface"
-	"Eulogist/core/fb_auth/py_rpc/mod_event/server_to_client/minecraft/achievement"
+	mei "Eulogist/core/tools/py_rpc/mod_event/interface"
+	"Eulogist/core/tools/py_rpc/mod_event/server_to_client/minecraft/achievement"
 )
 
 // 成就

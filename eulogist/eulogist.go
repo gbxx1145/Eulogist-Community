@@ -1,7 +1,7 @@
 package Eulogist
 
 import (
-	RaknetConnection "Eulogist/core/raknet"
+	SkinProcess "Eulogist/core/tools/skin_process"
 	Client "Eulogist/proxy/mc_client"
 	Server "Eulogist/proxy/mc_server"
 	"fmt"
@@ -66,7 +66,7 @@ func Eulogist() error {
 		}
 		// 生成皮肤文件
 		if playerSkin := server.GetPlayerSkin(); !FileExist(config.SkinPath) && playerSkin != nil {
-			if RaknetConnection.IsZIPFile(playerSkin.FullSkinData) {
+			if SkinProcess.IsZIPFile(playerSkin.FullSkinData) {
 				neteaseSkinFileName = "skin.zip"
 			} else {
 				neteaseSkinFileName = "skin.png"
