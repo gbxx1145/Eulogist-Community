@@ -75,7 +75,6 @@ FinishHandshake 用于赞颂者完成
 */
 func (m *MinecraftServer) FinishHandshake() error {
 	// 准备
-	var downInitConnect bool
 	var err error
 	// 向网易租赁服请求网络设置，
 	// 这是赞颂者登录到网易租赁服的第一个数据包
@@ -99,18 +98,15 @@ func (m *MinecraftServer) FinishHandshake() error {
 				if err != nil {
 					return fmt.Errorf("FinishHandshake: %v", err)
 				}
-				downInitConnect = true
+				// 连接已完成初始化，
+				// 于是我们返回值
+				return nil
 			}
 			// 检查连接状态
 			select {
 			case <-m.GetContext().Done():
 				return fmt.Errorf("FinishHandshake: NetEase Minecraft Rental Server closed their connection to eulogist")
 			default:
-			}
-			// 连接已完成初始化，
-			// 于是我们返回值
-			if downInitConnect {
-				return nil
 			}
 		}
 	}

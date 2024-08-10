@@ -33,13 +33,13 @@ func RunServer() (client *MinecraftClient, connected chan struct{}, err error) {
 // 完成与赞颂者的基本数据包交换。
 // 此函数应当只被调用一次
 func (m *MinecraftClient) WaitClientHandshakeDown() error {
-	// prepare
-	var downInitConnect bool
+	// 准备
 	var err error
-	// process login related packets from Minecraft
+	// 处理来自 Minecraft
+	// 客户端的登录相关的数据包
 	for {
 		for _, pk := range m.ReadPackets() {
-			// handle login related packets
+			// 处理初始连接数据包
 			switch p := pk.Packet.(type) {
 			case *packet.RequestNetworkSettings:
 				err = m.HandleRequestNetworkSettings(p)
@@ -52,17 +52,15 @@ func (m *MinecraftClient) WaitClientHandshakeDown() error {
 					panic(fmt.Sprintf("WaitClientHandshakeDown: %v", err))
 				}
 			case *packet.ClientToServerHandshake:
-				downInitConnect = true
+				// 连接已完成初始化，
+				// 于是我们返回值
+				return nil
 			}
-			// check connection states
+			// 检查连接状态
 			select {
 			case <-m.GetContext().Done():
 				return fmt.Errorf("WaitClientHandshakeDown: Minecraft closed its connection to eulogist")
 			default:
-			}
-			// return
-			if downInitConnect {
-				return nil
 			}
 		}
 	}
