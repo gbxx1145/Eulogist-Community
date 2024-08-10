@@ -6,8 +6,6 @@ import (
 	"fmt"
 	"slices"
 	"strings"
-
-	_ "embed"
 )
 
 type SkinCube struct {
