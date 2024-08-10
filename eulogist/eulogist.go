@@ -50,7 +50,7 @@ func Eulogist() error {
 
 		pterm.Success.Println("Success to create connection with NetEase Minecraft Bedrock Rental Server, now we try to create handshake with it.")
 
-		err = server.WaitClientHandshakeDown()
+		err = server.FinishHandshake()
 		if err != nil {
 			return fmt.Errorf("Eulogist: %v", err)
 		}

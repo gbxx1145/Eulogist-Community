@@ -59,10 +59,21 @@ func ConnectToServer(basicConfig BasicConfig) (*MinecraftServer, error) {
 	return &mcServer, nil
 }
 
-// WaitClientHandshakeDown 等待赞颂者
-// 完成与网易租赁服的基本数据包交换。
-// 此函数应当只被调用一次
-func (m *MinecraftServer) WaitClientHandshakeDown() error {
+/*
+FinishHandshake 用于赞颂者完成
+与网易租赁服的基本数据包交换。
+
+在与网易租赁服建立 Raknet 连接后，
+由赞颂者发送第一个数据包，
+用于向服务器请求网络信息设置。
+
+随后，得到来自网易服务器的回应，
+并由赞颂者完成基础登录序列，
+然后，最终完成与网易租赁服的握手。
+
+此函数应当只被调用一次
+*/
+func (m *MinecraftServer) FinishHandshake() error {
 	// 准备
 	var downInitConnect bool
 	var err error
@@ -81,19 +92,19 @@ func (m *MinecraftServer) WaitClientHandshakeDown() error {
 			case *packet.NetworkSettings:
 				m.identityData, m.clientData, err = m.HandleNetworkSettings(p, m.authResponse, m.playerSkin)
 				if err != nil {
-					return fmt.Errorf("ConnectToServer: %v", err)
+					return fmt.Errorf("FinishHandshake: %v", err)
 				}
 			case *packet.ServerToClientHandshake:
 				err = m.HandleServerToClientHandshake(p)
 				if err != nil {
-					return fmt.Errorf("ConnectToServer: %v", err)
+					return fmt.Errorf("FinishHandshake: %v", err)
 				}
 				downInitConnect = true
 			}
 			// 检查连接状态
 			select {
 			case <-m.GetContext().Done():
-				return fmt.Errorf("ConnectToServer: NetEase Minecraft Rental Server closed their connection to eulogist")
+				return fmt.Errorf("FinishHandshake: NetEase Minecraft Rental Server closed their connection to eulogist")
 			default:
 			}
 			// 连接已完成初始化，
