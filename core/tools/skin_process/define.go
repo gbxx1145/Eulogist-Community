@@ -1,6 +1,11 @@
 package SkinProcess
 
-import _ "embed"
+import (
+	_ "embed"
+	"encoding/json"
+)
+
+// ----------------------------------------------------------------------------------------------------
 
 //go:embed default_skin_resource_patch.json
 var DefaultSkinResourcePatch []byte
@@ -8,12 +13,10 @@ var DefaultSkinResourcePatch []byte
 //go:embed default_skin_geometry.json
 var DefaultSkinGeometry []byte
 
-// ...
-type SkinManifest struct {
-	Header struct {
-		UUID string `json:"uuid"`
-	} `json:"header"`
-}
+//go:embed steve.png
+var SteveSkin []byte
+
+// ----------------------------------------------------------------------------------------------------
 
 // 描述皮肤信息
 type Skin struct {
@@ -39,4 +42,41 @@ type Skin struct {
 	SkinWidth int
 	// 皮肤的高度
 	SkinHight int
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+// ...
+type SkinManifest struct {
+	Header struct {
+		UUID string `json:"uuid"`
+	} `json:"header"`
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+type SkinCube struct {
+	Inflate *json.Number  `json:"inflate,omitempty"`
+	Mirror  *bool         `json:"mirror,omitempty"`
+	Origin  []json.Number `json:"origin"`
+	Size    []json.Number `json:"size"`
+	Uv      []json.Number `json:"uv"`
+}
+
+type SkinGeometryBone struct {
+	Cubes         *[]SkinCube   `json:"cubes,omitempty"`
+	Name          string        `json:"name"`
+	Parent        string        `json:"parent,omitempty"`
+	Pivot         []json.Number `json:"pivot"`
+	RenderGroupID int           `json:"render_group_id,omitempty"`
+	Rotation      []json.Number `json:"rotation,omitempty"`
+}
+
+type SkinGeometry struct {
+	Bones               []*SkinGeometryBone `json:"bones"`
+	TextureHeight       int                 `json:"textureheight"`
+	TextureWidth        int                 `json:"texturewidth"`
+	VisibleBoundsHeight json.Number         `json:"visible_bounds_height,omitempty"`
+	VisibleBoundsOffset []json.Number       `json:"visible_bounds_offset,omitempty"`
+	VisibleBoundsWidth  json.Number         `json:"visible_bounds_width,omitempty"`
 }

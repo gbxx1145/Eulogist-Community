@@ -1,8 +1,8 @@
 package Eulogist
 
 import (
+	SkinProcess "Eulogist/core/tools/skin_process"
 	"bytes"
-	_ "embed"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -90,9 +90,6 @@ func GenerateEulogistConfig() (config *EulogistConfig, err error) {
 	return &cfg, nil
 }
 
-//go:embed steve.png
-var steveSkin []byte
-
 // GenerateNetEaseConfig 根据赞颂者的配置 config，
 // 在当前目录下生成用于启动 Minecraft 客户端的配置文件，
 // 并返回该配置文件的绝对路径
@@ -105,7 +102,7 @@ func GenerateNetEaseConfig(config *EulogistConfig, ip string, port int) (configP
 	if !FileExist(config.SkinPath) {
 		currentPath, _ := os.Getwd()
 		cfg.SkinInfo.SkinPath = fmt.Sprintf(`%s\steve.png`, currentPath)
-		err = os.WriteFile("steve.png", steveSkin, 0600)
+		err = os.WriteFile("steve.png", SkinProcess.SteveSkin, 0600)
 		if err != nil {
 			return "", fmt.Errorf("GenerateNetEaseConfig: %v", err)
 		}
