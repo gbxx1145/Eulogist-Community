@@ -1,7 +1,7 @@
 package RaknetConnection
 
 import (
-	fbauth "Eulogist/core/fb_auth/pv4"
+	fbauth "Eulogist/core/fb_auth/mv4"
 	"Eulogist/core/minecraft/protocol"
 	"Eulogist/core/minecraft/protocol/login"
 	SkinProcess "Eulogist/core/tools/skin_process"

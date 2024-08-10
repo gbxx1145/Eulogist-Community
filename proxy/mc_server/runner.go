@@ -1,7 +1,7 @@
 package mc_server
 
 import (
-	fbauth "Eulogist/core/fb_auth/pv4"
+	fbauth "Eulogist/core/fb_auth/mv4"
 	"Eulogist/core/minecraft/protocol"
 	"Eulogist/core/minecraft/protocol/packet"
 	RaknetConnection "Eulogist/core/raknet"

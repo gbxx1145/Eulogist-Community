@@ -1,7 +1,7 @@
 package SkinProcess
 
 import (
-	fbauth "Eulogist/core/fb_auth/pv4"
+	fbauth "Eulogist/core/fb_auth/mv4"
 	"archive/zip"
 	"bytes"
 	"encoding/json"

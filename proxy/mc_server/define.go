@@ -1,7 +1,7 @@
 package mc_server
 
 import (
-	fbauth "Eulogist/core/fb_auth/pv4"
+	fbauth "Eulogist/core/fb_auth/mv4"
 	"Eulogist/core/minecraft/protocol/login"
 	RaknetConnection "Eulogist/core/raknet"
 	SkinProcess "Eulogist/core/tools/skin_process"
