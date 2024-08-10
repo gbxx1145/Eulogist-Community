@@ -1,5 +1,7 @@
 package SkinProcess
 
+import _ "embed"
+
 //go:embed default_skin_resource_patch.json
 var DefaultSkinResourcePatch []byte
 
