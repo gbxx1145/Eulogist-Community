@@ -46,15 +46,6 @@ type Skin struct {
 
 // ----------------------------------------------------------------------------------------------------
 
-// ...
-type SkinManifest struct {
-	Header struct {
-		UUID string `json:"uuid"`
-	} `json:"header"`
-}
-
-// ----------------------------------------------------------------------------------------------------
-
 type SkinCube struct {
 	Inflate *json.Number  `json:"inflate,omitempty"`
 	Mirror  *bool         `json:"mirror,omitempty"`
@@ -79,4 +70,13 @@ type SkinGeometry struct {
 	VisibleBoundsHeight json.Number         `json:"visible_bounds_height,omitempty"`
 	VisibleBoundsOffset []json.Number       `json:"visible_bounds_offset,omitempty"`
 	VisibleBoundsWidth  json.Number         `json:"visible_bounds_width,omitempty"`
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+// ...
+type SkinManifest struct {
+	Header struct {
+		UUID string `json:"uuid"`
+	} `json:"header"`
 }
