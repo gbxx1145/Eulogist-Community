@@ -49,8 +49,9 @@ func (m *MinecraftServer) FiltePacketsAndSendCopy(
 				errResults[index] = fmt.Errorf("FiltePacketsAndSendCopy: %v", err)
 			}
 		case *packet.StartGame:
-			// 保存 entityUniqueID
+			// 保存数据，然后设置数据包抄送状态
 			m.entityUniqueID = m.HandleStartGame(p)
+			shouldSendCopy[index] = true
 			// 发送简要身份证明
 			m.WriteSinglePacket(RaknetConnection.MinecraftPacket{
 				Packet: &packet.NeteaseJson{
@@ -64,7 +65,6 @@ func (m *MinecraftServer) FiltePacketsAndSendCopy(
 			// 皮肤特效处理
 			playerSkin := m.GetPlayerSkin()
 			if playerSkin == nil {
-				shouldSendCopy[index] = true
 				break
 			}
 			m.WriteSinglePacket(RaknetConnection.MinecraftPacket{
@@ -79,8 +79,6 @@ func (m *MinecraftServer) FiltePacketsAndSendCopy(
 					OperationType: packet.PyRpcOperationTypeSend,
 				},
 			})
-			// 设置数据包抄送状态
-			shouldSendCopy[index] = true
 		case *packet.UpdatePlayerGameType:
 			if p.PlayerUniqueID == m.entityUniqueID {
 				// 如果玩家的唯一 ID 与数据包中记录的值匹配，
