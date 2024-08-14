@@ -30,28 +30,25 @@ func (m *MinecraftServer) FiltePacketsAndSendCopy(
 ) []error {
 	// 初始化
 	sendCopy := make([]RaknetConnection.MinecraftPacket, 0)
-	shouldSendCopy := make([]bool, len(packets))
+	doNotSendCopy := make([]bool, len(packets))
 	errResults := make([]error, len(packets))
 	// 处理每个数据包
 	for index, minecraftPacket := range packets {
-		// 如果传入的数据包为空，
-		// 则直接返回 true 表示需要同步到客户端
-		pk := minecraftPacket.Packet
-		if pk == nil {
-			shouldSendCopy[index] = true
+		// 如果传入的数据包为空
+		if minecraftPacket.Packet == nil {
 			continue
 		}
 		// 根据数据包的类型进行不同的处理
-		switch p := pk.(type) {
+		switch pk := minecraftPacket.Packet.(type) {
 		case *packet.PyRpc:
-			shouldSendCopy[index], errResults[index] = m.OnPyRpc(p)
+			doNotSendCopy[index], errResults[index] = m.OnPyRpc(pk)
 			if err := errResults[index]; err != nil {
 				errResults[index] = fmt.Errorf("FiltePacketsAndSendCopy: %v", err)
 			}
 		case *packet.StartGame:
-			// 保存数据，然后设置数据包抄送状态
-			m.entityUniqueID = m.HandleStartGame(p)
-			shouldSendCopy[index] = true
+			// 预处理
+			m.entityUniqueID = m.HandleStartGame(pk)
+			playerSkin := m.GetPlayerSkin()
 			// 发送简要身份证明
 			m.WriteSinglePacket(RaknetConnection.MinecraftPacket{
 				Packet: &packet.NeteaseJson{
@@ -63,24 +60,29 @@ func (m *MinecraftServer) FiltePacketsAndSendCopy(
 				},
 			})
 			// 皮肤特效处理
-			playerSkin := m.GetPlayerSkin()
 			if playerSkin == nil {
-				break
+				m.WriteSinglePacket(RaknetConnection.MinecraftPacket{
+					Packet: &packet.PyRpc{
+						Value:         py_rpc.Marshal(&py_rpc.SyncUsingMod{}),
+						OperationType: packet.PyRpcOperationTypeSend,
+					},
+				})
+			} else {
+				m.WriteSinglePacket(RaknetConnection.MinecraftPacket{
+					Packet: &packet.PyRpc{
+						Value: py_rpc.Marshal(&py_rpc.SyncUsingMod{
+							[]any{},
+							playerSkin.SkinUUID,
+							playerSkin.SkinItemID,
+							true,
+							map[string]any{},
+						}),
+						OperationType: packet.PyRpcOperationTypeSend,
+					},
+				})
 			}
-			m.WriteSinglePacket(RaknetConnection.MinecraftPacket{
-				Packet: &packet.PyRpc{
-					Value: py_rpc.Marshal(&py_rpc.SyncUsingMod{
-						[]any{},
-						playerSkin.SkinUUID,
-						playerSkin.SkinItemID,
-						true,
-						map[string]any{},
-					}),
-					OperationType: packet.PyRpcOperationTypeSend,
-				},
-			})
 		case *packet.UpdatePlayerGameType:
-			if p.PlayerUniqueID == m.entityUniqueID {
+			if pk.PlayerUniqueID == m.entityUniqueID {
 				// 如果玩家的唯一 ID 与数据包中记录的值匹配，
 				// 则向客户端发送 SetPlayerGameType 数据包，
 				// 并放弃当前数据包的发送，
@@ -88,16 +90,14 @@ func (m *MinecraftServer) FiltePacketsAndSendCopy(
 				// 否则，按原样抄送当前数据包
 				writePacketsToClient([]RaknetConnection.MinecraftPacket{
 					{
-						Packet: &packet.SetPlayerGameType{GameType: p.GameType},
+						Packet: &packet.SetPlayerGameType{GameType: pk.GameType},
 					},
 				})
+				doNotSendCopy[index] = true
 			}
-			// 设置数据包抄送状态
-			shouldSendCopy[index] = p.PlayerUniqueID != m.entityUniqueID
 		default:
 			// 默认情况下，
 			// 我们需要将数据包同步到客户端
-			shouldSendCopy[index] = true
 		}
 		// 同步数据到 Minecraft 客户端
 		if err := syncFunc(); err != nil {
@@ -106,7 +106,7 @@ func (m *MinecraftServer) FiltePacketsAndSendCopy(
 	}
 	// 抄送数据包
 	for index, pk := range packets {
-		if !shouldSendCopy[index] {
+		if doNotSendCopy[index] {
 			continue
 		}
 		sendCopy = append(sendCopy, pk)

@@ -29,29 +29,24 @@ func (m *MinecraftClient) FiltePacketsAndSendCopy(
 ) []error {
 	// 初始化
 	sendCopy := make([]RaknetConnection.MinecraftPacket, 0)
-	shouldSendCopy := make([]bool, len(packets))
+	doNotSendCopy := make([]bool, len(packets))
 	errResults := make([]error, len(packets))
 	// 处理每个数据包
 	for index, minecraftPacket := range packets {
-		// 如果传入的数据包为空，
-		// 则直接返回 true
-		// 表示需要同步到网易租赁服
-		pk := minecraftPacket.Packet
-		if pk == nil {
-			shouldSendCopy[index] = true
+		// 如果传入的数据包为空
+		if minecraftPacket.Packet == nil {
 			continue
 		}
 		// 根据数据包的类型进行不同的处理
-		switch p := pk.(type) {
+		switch pk := minecraftPacket.Packet.(type) {
 		case *packet.PyRpc:
-			shouldSendCopy[index], errResults[index] = m.OnPyRpc(p)
+			doNotSendCopy[index], errResults[index] = m.OnPyRpc(pk)
 			if err := errResults[index]; err != nil {
 				errResults[index] = fmt.Errorf("FiltePacketsAndSendCopy: %v", err)
 			}
 		default:
 			// 默认情况下，我们需要将
 			// 数据包同步到网易租赁服
-			shouldSendCopy[index] = true
 		}
 		// 同步数据到网易租赁服
 		if err := syncFunc(); err != nil {
@@ -60,7 +55,7 @@ func (m *MinecraftClient) FiltePacketsAndSendCopy(
 	}
 	// 抄送数据包
 	for index, pk := range packets {
-		if !shouldSendCopy[index] {
+		if doNotSendCopy[index] {
 			continue
 		}
 		sendCopy = append(sendCopy, pk)

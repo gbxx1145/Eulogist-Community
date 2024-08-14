@@ -9,14 +9,14 @@ import (
 )
 
 // OnPyRpc 处理数据包 PyRpc
-func (m *MinecraftServer) OnPyRpc(p *packet.PyRpc) (shouldSendCopy bool, err error) {
+func (m *MinecraftServer) OnPyRpc(p *packet.PyRpc) (doNotSendCopy bool, err error) {
 	// 解码 PyRpc
 	if p.Value == nil {
-		return true, nil
+		return false, nil
 	}
 	content, err := py_rpc.Unmarshal(p.Value)
 	if err != nil {
-		return true, fmt.Errorf("OnPyRpc: %v", err)
+		return false, fmt.Errorf("OnPyRpc: %v", err)
 	}
 	// 根据内容类型处理不同的 PyRpc
 	switch c := content.(type) {
@@ -66,10 +66,10 @@ func (m *MinecraftServer) OnPyRpc(p *packet.PyRpc) (shouldSendCopy bool, err err
 		m.getCheckNumEverPassed = true
 	default:
 		// 对于其他种类的 PyRpc 数据包，
-		// 返回 true 表示需要将数据包抄送至
+		// 返回 false 表示需要将数据包抄送至
 		// Minecraft 客户端
-		return true, nil
+		return false, nil
 	}
 	// 返回值
-	return false, nil
+	return true, nil
 }
