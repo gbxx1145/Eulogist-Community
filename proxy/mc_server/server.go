@@ -3,6 +3,16 @@ package mc_server
 import SkinProcess "Eulogist/core/tools/skin_process"
 
 // ...
+func (m *MinecraftServer) GetNeteaseUID() string {
+	return m.neteaseUID
+}
+
+// ...
+func (m *MinecraftServer) SetNeteaseUID(neteaseUID string) {
+	m.neteaseUID = neteaseUID
+}
+
+// ...
 func (m *MinecraftServer) InitPlayerSkin() {
 	m.playerSkin = &SkinProcess.Skin{}
 }

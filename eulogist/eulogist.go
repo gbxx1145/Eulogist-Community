@@ -133,7 +133,9 @@ func Eulogist() error {
 		pterm.Success.Println("Success to create handshake with Minecraft Client, and then you will login to NetEase Minecraft Bedrock Rental Server.")
 	}
 
-	// 设置等待队列
+	// 同步网易账户 UID，
+	// 并设置等待队列
+	client.SetNeteaseUID(server.GetNeteaseUID())
 	waitGroup.Add(2)
 
 	// 处理网易租赁服到赞颂者的数据包

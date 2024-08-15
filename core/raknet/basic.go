@@ -122,7 +122,7 @@ func (r *Raknet) ProcessIncomingPackets() {
 				case packet.IDRequestNetworkSettings, packet.IDNetworkSettings:
 				case packet.IDLogin:
 				case packet.IDServerToClientHandshake, packet.IDClientToServerHandshake:
-				case packet.IDStartGame, packet.IDPyRpc:
+				case packet.IDStartGame, packet.IDNeteaseJson, packet.IDPyRpc:
 				case packet.IDUpdatePlayerGameType:
 				default:
 					return

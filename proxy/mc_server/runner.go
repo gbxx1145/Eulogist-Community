@@ -45,6 +45,8 @@ func ConnectToServer(basicConfig BasicConfig) (*MinecraftServer, error) {
 			return nil, fmt.Errorf("ConnectToServer: %v", err)
 		}
 	}
+	// 初始化网易账户 UID
+	mcServer.SetNeteaseUID(mcServer.fbClient.ClientInfo.Uid)
 	// 连接到服务器
 	connection, err := raknet.DialContext(ctx, authResponse.RentalServerIP)
 	if err != nil {

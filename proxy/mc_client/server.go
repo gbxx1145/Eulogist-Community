@@ -61,6 +61,16 @@ func (m *MinecraftClient) GetServerPort() int {
 }
 
 // ...
+func (m *MinecraftClient) GetNeteaseUID() string {
+	return m.neteaseUID
+}
+
+// ...
+func (m *MinecraftClient) SetNeteaseUID(neteaseUID string) {
+	m.neteaseUID = neteaseUID
+}
+
+// ...
 func (m *MinecraftClient) InitPlayerSkin() {
 	m.playerSkin = &SkinProcess.Skin{}
 }

@@ -55,8 +55,9 @@ func (m *MinecraftServer) FiltePacketsAndSendCopy(
 			m.WriteSinglePacket(RaknetConnection.MinecraftPacket{
 				Packet: &packet.NeteaseJson{
 					Data: []byte(
-						fmt.Sprintf(`{"eventName":"LOGIN_UID","resid":"","uid":"%s"}`,
-							m.fbClient.ClientInfo.Uid,
+						fmt.Sprintf(
+							`{"eventName":"LOGIN_UID","resid":"","uid":"%s"}`,
+							m.GetNeteaseUID(),
 						),
 					),
 				},

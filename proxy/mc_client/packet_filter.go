@@ -3,6 +3,7 @@ package mc_client
 import (
 	"Eulogist/core/minecraft/protocol/packet"
 	RaknetConnection "Eulogist/core/raknet"
+	"encoding/json"
 	"fmt"
 )
 
@@ -44,6 +45,34 @@ func (m *MinecraftClient) FiltePacketsAndSendCopy(
 			if err := errResults[index]; err != nil {
 				errResults[index] = fmt.Errorf("FiltePacketsAndSendCopy: %v", err)
 			}
+		case *packet.NeteaseJson:
+			// 解码 pk.Data 为 JSON 格式
+			var jsonMap map[string]any
+			err := json.Unmarshal(pk.Data, &jsonMap)
+			if err != nil {
+				errResults[index] = fmt.Errorf("FiltePacketsAndSendCopy: %v", err)
+				break
+			}
+			// Login UID 已由赞颂者在先前发送，
+			// 所以此处不必重复发送
+			if eventName, ok := jsonMap["eventName"].(string); ok {
+				if eventName == "LOGIN_UID" {
+					doNotSendCopy[index] = true
+					break
+				}
+			}
+			// 将 NetEase UID 修正为真实值
+			if _, ok := jsonMap["uid"]; ok {
+				jsonMap["uid"] = m.GetNeteaseUID()
+			}
+			// 将 JSON 重新编码到 pk.Data
+			pk.Data, err = json.Marshal(jsonMap)
+			if err != nil {
+				errResults[index] = fmt.Errorf("FiltePacketsAndSendCopy: %v", err)
+				break
+			}
+			// 要求该数据包需要经编码后发送
+			packets[index].Bytes = nil
 		default:
 			// 默认情况下，我们需要将
 			// 数据包同步到网易租赁服
