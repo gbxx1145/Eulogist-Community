@@ -7,7 +7,9 @@ import (
 	"context"
 	"crypto/ecdsa"
 	"crypto/rand"
+	"fmt"
 	"net"
+	"runtime/debug"
 
 	"github.com/pterm/pterm"
 )
@@ -99,8 +101,21 @@ func (r *Raknet) ProcessIncomingPackets() {
 			func() {
 				defer func() {
 					r := recover()
-					if r != nil {
-						pterm.Warning.Printf("ProcessIncomingPackets: %v\n", r)
+					if r == nil {
+						return
+					}
+					if packetFunc == nil {
+						pterm.Warning.Printf(
+							"ProcessIncomingPackets: Failed to unmarshal packet which numbered %d, and the error log is %v\n\n[Stack Info]\n%s\n",
+							packetHeader.PacketID, r, string(debug.Stack()),
+						)
+						fmt.Println()
+					} else {
+						pterm.Warning.Printf(
+							"ProcessIncomingPackets: Failed to unmarshal packet %T, and the error log is %v\n\n[Stack Info]\n%s\n",
+							packetFunc(), r, string(debug.Stack()),
+						)
+						fmt.Println()
 					}
 				}()
 				switch packetHeader.PacketID {
