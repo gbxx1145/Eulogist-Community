@@ -165,7 +165,7 @@ func Eulogist() error {
 			errList := server.FiltePacketsAndSendCopy(server.ReadPackets(), client.WritePackets, syncFunc)
 			for _, err = range errList {
 				if err != nil {
-					pterm.Warning.Printf("Eulogist: %v\n", err)
+					pterm.Warning.Printf("Eulogist: Process packets from server error: %v\n", err)
 				}
 			}
 			// 检查连接状态
@@ -194,7 +194,12 @@ func Eulogist() error {
 			}
 			// 读取、过滤数据包，
 			// 然后抄送其到网易租赁服
-			client.FiltePacketsAndSendCopy(client.ReadPackets(), server.WritePackets, syncFunc)
+			errList := client.FiltePacketsAndSendCopy(client.ReadPackets(), server.WritePackets, syncFunc)
+			for _, err = range errList {
+				if err != nil {
+					pterm.Warning.Printf("Eulogist: Process packets from client error: %v\n", err)
+				}
+			}
 			// 检查连接状态
 			select {
 			case <-client.GetContext().Done():
