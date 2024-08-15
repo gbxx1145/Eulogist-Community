@@ -47,7 +47,9 @@ func (m *MinecraftServer) FiltePacketsAndSendCopy(
 			}
 		case *packet.StartGame:
 			// 预处理
-			m.entityUniqueID = m.HandleStartGame(pk)
+			entityUniqueID, entityRuntimeID := m.HandleStartGame(pk)
+			m.SetEntityUniqueID(entityUniqueID)
+			m.SetEntityRuntimeID(entityRuntimeID)
 			playerSkin := m.GetPlayerSkin()
 			// 发送简要身份证明
 			m.WriteSinglePacket(RaknetConnection.MinecraftPacket{

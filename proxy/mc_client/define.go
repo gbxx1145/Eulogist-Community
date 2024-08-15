@@ -18,7 +18,8 @@ type MinecraftClient struct {
 	clientData   *login.ClientData
 	playerSkin   *SkinProcess.Skin
 
-	entityUniqueID int64
+	entityUniqueID  int64
+	entityRuntimeID uint64
 
 	*RaknetConnection.Raknet
 }

@@ -92,8 +92,9 @@ func (r *Raknet) HandleServerToClientHandshake(pk *packet.ServerToClientHandshak
 
 // HandleStartGame 处理 StartGame 数据包，
 // 用于表示玩家已加入游戏
-func (r *Raknet) HandleStartGame(pk *packet.StartGame) (entityUniqueID int64) {
+func (r *Raknet) HandleStartGame(pk *packet.StartGame) (entityUniqueID int64, entityRuntimeID uint64) {
 	entityUniqueID = pk.EntityUniqueID
+	entityRuntimeID = pk.EntityRuntimeID
 
 	for _, item := range pk.Items {
 		if item.Name == "minecraft:shield" {
@@ -101,5 +102,5 @@ func (r *Raknet) HandleStartGame(pk *packet.StartGame) (entityUniqueID int64) {
 		}
 	}
 
-	return entityUniqueID
+	return
 }

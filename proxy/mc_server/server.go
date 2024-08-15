@@ -26,3 +26,13 @@ func (m *MinecraftServer) GetEntityUniqueID() int64 {
 func (m *MinecraftServer) SetEntityUniqueID(entityUniqueID int64) {
 	m.entityUniqueID = entityUniqueID
 }
+
+// ...
+func (m *MinecraftServer) GetEntityRuntimeID() uint64 {
+	return m.entityRuntimeID
+}
+
+// ...
+func (m *MinecraftServer) SetEntityRuntimeID(entityRuntimeID uint64) {
+	m.entityRuntimeID = entityRuntimeID
+}

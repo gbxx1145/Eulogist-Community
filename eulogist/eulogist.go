@@ -153,6 +153,9 @@ func Eulogist() error {
 				if entityUniqueID := server.GetEntityUniqueID(); entityUniqueID != 0 {
 					client.SetEntityUniqueID(entityUniqueID)
 				}
+				if entityRuntimeID := server.GetEntityRuntimeID(); entityRuntimeID != 0 {
+					client.SetEntityRuntimeID(entityRuntimeID)
+				}
 				return nil
 			}
 			// 读取、过滤数据包，
