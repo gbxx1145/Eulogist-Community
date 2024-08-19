@@ -14,8 +14,10 @@ type MinecraftServer struct {
 
 	identityData *login.IdentityData
 	clientData   *login.ClientData
-	neteaseUID   string
-	playerSkin   *SkinProcess.Skin
+
+	neteaseUID string
+	playerSkin *SkinProcess.Skin
+	outfitInfo map[string]*int
 
 	entityUniqueID  int64
 	entityRuntimeID uint64

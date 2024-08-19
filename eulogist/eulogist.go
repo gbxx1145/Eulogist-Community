@@ -83,7 +83,6 @@ func Eulogist() error {
 		if err != nil {
 			return fmt.Errorf("Eulogist: %v", err)
 		}
-		client.SetPlayerSkin(server.GetPlayerSkin())
 		// 生成网易配置文件
 		neteaseConfigPath, err = GenerateNetEaseConfig(config, client.GetServerIP(), client.GetServerPort())
 		if err != nil {
@@ -100,7 +99,6 @@ func Eulogist() error {
 		if err != nil {
 			return fmt.Errorf("Eulogist: %v", err)
 		}
-		client.SetPlayerSkin(server.GetPlayerSkin())
 		// 打印赞颂者准备完成的信息
 		pterm.Success.Printf(
 			"Eulogist is ready! Please connect to Eulogist manually.\nEulogist server address: %s:%d\n",
@@ -133,9 +131,11 @@ func Eulogist() error {
 		pterm.Success.Println("Success to create handshake with Minecraft Client, and then you will login to NetEase Minecraft Bedrock Rental Server.")
 	}
 
-	// 同步网易账户 UID，
+	// 同步相关数据，
 	// 并设置等待队列
 	client.SetNeteaseUID(server.GetNeteaseUID())
+	client.SetPlayerSkin(server.GetPlayerSkin())
+	client.SetOutfitInfo(server.GetOutfitInfo())
 	waitGroup.Add(2)
 
 	// 处理网易租赁服到赞颂者的数据包

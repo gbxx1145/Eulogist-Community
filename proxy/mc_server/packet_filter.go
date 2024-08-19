@@ -61,7 +61,7 @@ func (m *MinecraftServer) FiltePacketsAndSendCopy(
 					),
 				},
 			})
-			// 皮肤特效处理
+			// 其他组件处理
 			if playerSkin == nil {
 				m.WriteSinglePacket(RaknetConnection.MinecraftPacket{
 					Packet: &packet.PyRpc{
@@ -70,14 +70,26 @@ func (m *MinecraftServer) FiltePacketsAndSendCopy(
 					},
 				})
 			} else {
+				// 初始化
+				modUUIDs := make([]any, 0)
+				outfitInfo := make(map[string]int64, 0)
+				// 设置数据
+				for modUUID, outfitType := range m.GetOutfitInfo() {
+					modUUIDs = append(modUUIDs, modUUID)
+					if outfitType != nil {
+						outfitInfo[modUUID] = int64(*outfitType)
+					}
+				}
+				fmt.Println(modUUIDs, outfitInfo)
+				// 组件处理
 				m.WriteSinglePacket(RaknetConnection.MinecraftPacket{
 					Packet: &packet.PyRpc{
 						Value: py_rpc.Marshal(&py_rpc.SyncUsingMod{
-							[]any{},
+							modUUIDs,
 							playerSkin.SkinUUID,
 							playerSkin.SkinItemID,
 							true,
-							map[string]any{},
+							outfitInfo,
 						}),
 						OperationType: packet.PyRpcOperationTypeSend,
 					},

@@ -76,13 +76,23 @@ func (m *MinecraftClient) InitPlayerSkin() {
 }
 
 // ...
+func (m *MinecraftClient) GetPlayerSkin() *SkinProcess.Skin {
+	return m.playerSkin
+}
+
+// ...
 func (m *MinecraftClient) SetPlayerSkin(skin *SkinProcess.Skin) {
 	m.playerSkin = skin
 }
 
 // ...
-func (m *MinecraftClient) GetPlayerSkin() *SkinProcess.Skin {
-	return m.playerSkin
+func (m *MinecraftClient) GetOutfitInfo() map[string]*int {
+	return m.outfitInfo
+}
+
+// ...
+func (m *MinecraftClient) SetOutfitInfo(outfitInfo map[string]*int) {
+	m.outfitInfo = outfitInfo
 }
 
 // ...

@@ -28,6 +28,16 @@ func (m *MinecraftServer) SetPlayerSkin(skin *SkinProcess.Skin) {
 }
 
 // ...
+func (m *MinecraftServer) GetOutfitInfo() map[string]*int {
+	return m.outfitInfo
+}
+
+// ...
+func (m *MinecraftServer) SetOutfitInfo(outfitInfo map[string]*int) {
+	m.outfitInfo = outfitInfo
+}
+
+// ...
 func (m *MinecraftServer) GetEntityUniqueID() int64 {
 	return m.entityUniqueID
 }
