@@ -162,8 +162,11 @@ func Eulogist() error {
 			}
 			// 读取、过滤数据包，
 			// 然后抄送其到 Minecraft 客户端
-			errList := server.FiltePacketsAndSendCopy(server.ReadPackets(), client.WritePackets, syncFunc)
-			for _, err = range errList {
+			errResults, syncError := server.FiltePacketsAndSendCopy(server.ReadPackets(), client.WritePackets, syncFunc)
+			if syncError != nil {
+				pterm.Warning.Printf("Eulogist: Failed to sync data when process packets from server, and the error log is %v", syncError)
+			}
+			for _, err = range errResults {
 				if err != nil {
 					pterm.Warning.Printf("Eulogist: Process packets from server error: %v\n", err)
 				}
@@ -194,8 +197,11 @@ func Eulogist() error {
 			}
 			// 读取、过滤数据包，
 			// 然后抄送其到网易租赁服
-			errList := client.FiltePacketsAndSendCopy(client.ReadPackets(), server.WritePackets, syncFunc)
-			for _, err = range errList {
+			errResults, syncError := client.FiltePacketsAndSendCopy(client.ReadPackets(), server.WritePackets, syncFunc)
+			if syncError != nil {
+				pterm.Warning.Printf("Eulogist: Failed to sync data when process packets from client, and the error log is %v", syncError)
+			}
+			for _, err = range errResults {
 				if err != nil {
 					pterm.Warning.Printf("Eulogist: Process packets from client error: %v\n", err)
 				}

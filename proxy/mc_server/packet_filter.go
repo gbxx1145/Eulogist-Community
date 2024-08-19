@@ -17,8 +17,9 @@ import (
 writeSinglePacketToClient 指代
 用于向客户端抄送数据包的函数。
 
-syncFunc 用于将数据同步到 Minecraft 客户端，
-它会在每个数据包被过滤处理后执行一次。
+syncFunc 用于将数据同步到 Minecraft，
+它会在 packets 全部被处理完毕后执行，
+随后，相应的数据包会被抄送至网易租赁服。
 
 返回的 []error 是一个列表，
 分别对应 packets 中每一个数据包的处理成功情况
@@ -27,23 +28,21 @@ func (m *MinecraftServer) FiltePacketsAndSendCopy(
 	packets []RaknetConnection.MinecraftPacket,
 	writePacketsToClient func(packets []RaknetConnection.MinecraftPacket),
 	syncFunc func() error,
-) []error {
+) (errResults []error, syncError error) {
 	// 初始化
+	errResults = make([]error, 0)
 	sendCopy := make([]RaknetConnection.MinecraftPacket, 0)
-	doNotSendCopy := make([]bool, len(packets))
-	errResults := make([]error, len(packets))
 	// 处理每个数据包
-	for index, minecraftPacket := range packets {
-		// 如果传入的数据包为空
-		if minecraftPacket.Packet == nil {
-			continue
-		}
+	for _, minecraftPacket := range packets {
+		// 初始化
+		var shouldSendCopy bool = true
+		var err error
 		// 根据数据包的类型进行不同的处理
 		switch pk := minecraftPacket.Packet.(type) {
 		case *packet.PyRpc:
-			doNotSendCopy[index], errResults[index] = m.OnPyRpc(pk)
-			if err := errResults[index]; err != nil {
-				errResults[index] = fmt.Errorf("FiltePacketsAndSendCopy: %v", err)
+			shouldSendCopy, err = m.OnPyRpc(pk)
+			if err != nil {
+				err = fmt.Errorf("FiltePacketsAndSendCopy: %v", err)
 			}
 		case *packet.StartGame:
 			// 预处理
@@ -91,30 +90,28 @@ func (m *MinecraftServer) FiltePacketsAndSendCopy(
 				// 并放弃当前数据包的发送，
 				// 以确保 Minecraft 客户端可以正常同步游戏模式更改。
 				// 否则，按原样抄送当前数据包
-				writePacketsToClient([]RaknetConnection.MinecraftPacket{
-					{
-						Packet: &packet.SetPlayerGameType{GameType: pk.GameType},
-					},
+				sendCopy = append(sendCopy, RaknetConnection.MinecraftPacket{
+					Packet: &packet.SetPlayerGameType{GameType: pk.GameType},
 				})
-				doNotSendCopy[index] = true
+				shouldSendCopy = false
 			}
 		default:
 			// 默认情况下，
 			// 我们需要将数据包同步到客户端
 		}
-		// 同步数据到 Minecraft 客户端
-		if err := syncFunc(); err != nil {
-			errResults[index] = fmt.Errorf("FiltePacketsAndSendCopy: %v", err)
+		// 提交子结果
+		errResults = append(errResults, err)
+		if shouldSendCopy {
+			sendCopy = append(sendCopy, minecraftPacket)
 		}
 	}
-	// 抄送数据包
-	for index, pk := range packets {
-		if doNotSendCopy[index] {
-			continue
-		}
-		sendCopy = append(sendCopy, pk)
-	}
+	// 同步数据并抄送数据包
+	err := syncFunc()
 	writePacketsToClient(sendCopy)
 	// 返回值
-	return errResults
+	if err != nil {
+		return errResults, fmt.Errorf("FiltePacketsAndSendCopy: %v", err)
+	} else {
+		return errResults, nil
+	}
 }
