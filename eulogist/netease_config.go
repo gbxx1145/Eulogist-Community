@@ -48,6 +48,6 @@ func DefaultNetEaseConfig() NetEaseConfig {
 			UserName: "Eulogist",
 			Urs:      "***",
 		},
-		Misc: Misc{MultiplayerGameType: 1000},
+		Misc: Misc{MultiplayerGameType: 100},
 	}
 }
