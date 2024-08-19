@@ -80,7 +80,6 @@ func (m *MinecraftServer) FiltePacketsAndSendCopy(
 						outfitInfo[modUUID] = int64(*outfitType)
 					}
 				}
-				fmt.Println(modUUIDs, outfitInfo)
 				// 组件处理
 				m.WriteSinglePacket(RaknetConnection.MinecraftPacket{
 					Packet: &packet.PyRpc{
