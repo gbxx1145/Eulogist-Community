@@ -6,7 +6,7 @@ import (
 	SkinProcess "Eulogist/core/tools/skin_process"
 	"net"
 
-	"github.com/sandertv/go-raknet"
+	"Eulogist/core/minecraft/raknet"
 )
 
 type MinecraftClient struct {

@@ -14,7 +14,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/sandertv/go-raknet"
+	"Eulogist/core/minecraft/raknet"
 )
 
 // ConnectToServer 用于连接到租赁服号为 serverCode，

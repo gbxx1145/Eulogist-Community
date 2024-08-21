@@ -9,7 +9,7 @@ import (
 	"fmt"
 	"net"
 
-	"github.com/sandertv/go-raknet"
+	"Eulogist/core/minecraft/raknet"
 )
 
 // CreateListener 在 127.0.0.1 上以 Raknet 协议侦听 Minecraft 客户端的连接，
