@@ -22,7 +22,7 @@ func Eulogist() error {
 	var waitGroup sync.WaitGroup
 	var client *Client.MinecraftClient
 	var server *Server.MinecraftServer
-	var ClientWasConnected chan struct{}
+	var clientWasConnected chan struct{}
 
 	// 读取配置文件
 	{
@@ -79,7 +79,7 @@ func Eulogist() error {
 			config.SkinPath = fmt.Sprintf(`%s\%s`, currentPath, neteaseSkinFileName)
 		}
 		// 启动 Eulogist 服务器
-		client, ClientWasConnected, err = Client.RunServer()
+		client, clientWasConnected, err = Client.RunServer()
 		if err != nil {
 			return fmt.Errorf("Eulogist: %v", err)
 		}
@@ -95,7 +95,7 @@ func Eulogist() error {
 		pterm.Success.Println("Eulogist is ready! Now we are going to start Minecraft Client.\nThen, the Minecraft Client will connect to Eulogist automatically.")
 	} else {
 		// 启动 Eulogist 服务器
-		client, ClientWasConnected, err = Client.RunServer()
+		client, clientWasConnected, err = Client.RunServer()
 		if err != nil {
 			return fmt.Errorf("Eulogist: %v", err)
 		}
@@ -115,12 +115,12 @@ func Eulogist() error {
 			select {
 			case <-timer.C:
 				return fmt.Errorf("Eulogist: Failed to create connection with Minecraft")
-			case <-ClientWasConnected:
-				close(ClientWasConnected)
+			case <-clientWasConnected:
+				close(clientWasConnected)
 			}
 		} else {
-			<-ClientWasConnected
-			close(ClientWasConnected)
+			<-clientWasConnected
+			close(clientWasConnected)
 		}
 		pterm.Success.Println("Success to create connection with Minecraft Client, now we try to create handshake with it.")
 		// 等待 Minecraft 客户端完成握手
