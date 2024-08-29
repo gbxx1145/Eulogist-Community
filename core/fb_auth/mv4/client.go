@@ -1,6 +1,7 @@
 package fbauth
 
 import (
+	I18n "Eulogist/core/fb_auth/i18n"
 	"bytes"
 	"context"
 	"encoding/json"
@@ -10,8 +11,6 @@ import (
 	"regexp"
 
 	"github.com/pterm/pterm"
-
-	I18n "Eulogist/core/fb_auth/i18n"
 )
 
 type secretLoadingTransport struct {
@@ -49,7 +48,7 @@ func parseAndPanic(message string) {
 	error_regex := regexp.MustCompile("^(\\d{3} [a-zA-Z ]+)\n\n(.*?)($|\n)")
 	err_matches := error_regex.FindAllStringSubmatch(message, 1)
 	if len(err_matches) == 0 {
-		panic(fmt.Errorf("Unknown error"))
+		panic("Unknown error")
 	}
 	panic(fmt.Errorf("%s: %s", err_matches[0][1], err_matches[0][2]))
 }
@@ -66,7 +65,7 @@ func assertAndParse[T any](resp *http.Response) T {
 	var ret T
 	err := json.Unmarshal([]byte(body), &ret)
 	if err != nil {
-		panic(fmt.Errorf("Error parsing API response: %v", err))
+		panic(fmt.Sprintf("Error parsing API response: %v", err))
 	}
 	return ret
 }
@@ -74,7 +73,7 @@ func assertAndParse[T any](resp *http.Response) T {
 func CreateClient(options *ClientOptions) *Client {
 	secret_res, err := http.Get(fmt.Sprintf("%s/api/new", options.AuthServer))
 	if err != nil {
-		panic(fmt.Errorf("Failed to contact with API"))
+		panic("Failed to contact with API")
 	}
 	_secret_body, _ := io.ReadAll(secret_res.Body)
 	secret_body := string(_secret_body)
@@ -237,7 +236,7 @@ func (client *Client) TransferData(content string) string {
 	succ, _ := resp["success"].(bool)
 	if !succ {
 		err_m, _ := resp["message"].(string)
-		panic(fmt.Errorf("Failed to transfer start type: %s", err_m))
+		panic(fmt.Sprintf("Failed to transfer start type: %s", err_m))
 	}
 	data, _ := resp["data"].(string)
 	return data
@@ -263,7 +262,7 @@ func (client *Client) TransferCheckNum(data string) string {
 	succ, _ := resp["success"].(bool)
 	if !succ {
 		err_m, _ := resp["message"].(string)
-		panic(fmt.Errorf("Failed to transfer check num: %s", err_m))
+		panic(fmt.Sprintf("Failed to transfer check num: %s", err_m))
 	}
 	val, _ := resp["value"].(string)
 	return val
