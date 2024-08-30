@@ -1,11 +1,11 @@
-package RaknetConnection
+package raknet_connection
 
 import (
 	fbauth "Eulogist/core/fb_auth/mv4"
 	"Eulogist/core/minecraft/protocol"
 	"Eulogist/core/minecraft/protocol/login"
 	"Eulogist/core/minecraft/protocol/packet"
-	SkinProcess "Eulogist/core/tools/skin_process"
+	"Eulogist/core/tools/skin_process"
 	"bytes"
 	"crypto/ecdsa"
 	"crypto/sha256"
@@ -24,7 +24,7 @@ import (
 func (r *Raknet) HandleNetworkSettings(
 	pk *packet.NetworkSettings,
 	authResponse fbauth.AuthResponse,
-	skin *SkinProcess.Skin,
+	skin *skin_process.Skin,
 ) (identityData *login.IdentityData, clientData *login.ClientData, err error) {
 	// 准备
 	var loginRequest []byte

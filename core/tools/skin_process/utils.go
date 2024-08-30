@@ -1,4 +1,4 @@
-package SkinProcess
+package skin_process
 
 import (
 	"bytes"

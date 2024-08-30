@@ -4,8 +4,8 @@ import (
 	fbauth "Eulogist/core/fb_auth/mv4"
 	"Eulogist/core/minecraft/protocol"
 	"Eulogist/core/minecraft/protocol/packet"
-	RaknetConnection "Eulogist/core/raknet"
-	SkinProcess "Eulogist/core/tools/skin_process"
+	raknet_connection "Eulogist/core/raknet"
+	"Eulogist/core/tools/skin_process"
 	"context"
 	"crypto/ecdsa"
 	"crypto/elliptic"
@@ -40,7 +40,7 @@ func ConnectToServer(basicConfig BasicConfig) (*MinecraftServer, error) {
 	// 初始化皮肤信息
 	if len(authResponse.SkinInfo.SkinDownloadURL) > 0 {
 		mcServer.InitPlayerSkin()
-		err = SkinProcess.GetSkinFromAuthResponse(authResponse, mcServer.GetPlayerSkin())
+		err = skin_process.GetSkinFromAuthResponse(authResponse, mcServer.GetPlayerSkin())
 		if err != nil {
 			return nil, fmt.Errorf("ConnectToServer: %v", err)
 		}
@@ -55,7 +55,7 @@ func ConnectToServer(basicConfig BasicConfig) (*MinecraftServer, error) {
 	}
 	// 设置数据
 	mcServer.authResponse = authResponse
-	mcServer.Raknet = RaknetConnection.NewRaknet()
+	mcServer.Raknet = raknet_connection.NewRaknet()
 	mcServer.SetConnection(connection, clientkey)
 	go mcServer.ProcessIncomingPackets()
 	// 返回值
@@ -82,7 +82,7 @@ func (m *MinecraftServer) FinishHandshake() error {
 	// 向网易租赁服请求网络设置，
 	// 这是赞颂者登录到网易租赁服的第一个数据包
 	m.WriteSinglePacket(
-		RaknetConnection.MinecraftPacket{
+		raknet_connection.MinecraftPacket{
 			Packet: &packet.RequestNetworkSettings{ClientProtocol: protocol.CurrentProtocol},
 		},
 	)

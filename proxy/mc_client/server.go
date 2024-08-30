@@ -1,8 +1,8 @@
 package mc_client
 
 import (
-	RaknetConnection "Eulogist/core/raknet"
-	SkinProcess "Eulogist/core/tools/skin_process"
+	raknet_connection "Eulogist/core/raknet"
+	"Eulogist/core/tools/skin_process"
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/rand"
@@ -30,7 +30,7 @@ func (m *MinecraftClient) CreateListener() error {
 	m.listener = listener
 	m.address = address
 	m.connected = make(chan struct{}, 1)
-	m.Raknet = RaknetConnection.NewRaknet()
+	m.Raknet = raknet_connection.NewRaknet()
 	// 返回成功
 	return nil
 }
@@ -72,16 +72,16 @@ func (m *MinecraftClient) SetNeteaseUID(neteaseUID string) {
 
 // ...
 func (m *MinecraftClient) InitPlayerSkin() {
-	m.playerSkin = &SkinProcess.Skin{}
+	m.playerSkin = &skin_process.Skin{}
 }
 
 // ...
-func (m *MinecraftClient) GetPlayerSkin() *SkinProcess.Skin {
+func (m *MinecraftClient) GetPlayerSkin() *skin_process.Skin {
 	return m.playerSkin
 }
 
 // ...
-func (m *MinecraftClient) SetPlayerSkin(skin *SkinProcess.Skin) {
+func (m *MinecraftClient) SetPlayerSkin(skin *skin_process.Skin) {
 	m.playerSkin = skin
 }
 

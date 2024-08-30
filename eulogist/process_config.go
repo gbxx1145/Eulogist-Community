@@ -1,7 +1,7 @@
 package Eulogist
 
 import (
-	SkinProcess "Eulogist/core/tools/skin_process"
+	"Eulogist/core/tools/skin_process"
 	"bytes"
 	"encoding/json"
 	"fmt"
@@ -102,7 +102,7 @@ func GenerateNetEaseConfig(config *EulogistConfig, ip string, port int) (configP
 	if !FileExist(config.SkinPath) {
 		currentPath, _ := os.Getwd()
 		cfg.SkinInfo.SkinPath = fmt.Sprintf(`%s\steve.png`, currentPath)
-		err = os.WriteFile("steve.png", SkinProcess.SteveSkin, 0600)
+		err = os.WriteFile("steve.png", skin_process.SteveSkin, 0600)
 		if err != nil {
 			return "", fmt.Errorf("GenerateNetEaseConfig: %v", err)
 		}

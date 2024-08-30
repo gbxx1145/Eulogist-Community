@@ -2,7 +2,7 @@ package mc_server
 
 import (
 	"Eulogist/core/minecraft/protocol/packet"
-	RaknetConnection "Eulogist/core/raknet"
+	raknet_connection "Eulogist/core/raknet"
 	"Eulogist/core/tools/py_rpc"
 	"encoding/json"
 	"fmt"
@@ -24,7 +24,7 @@ func (m *MinecraftServer) OnPyRpc(p *packet.PyRpc) (shouldSendCopy bool, err err
 		c.Content = m.fbClient.TransferData(c.Content)
 		c.Type = py_rpc.StartTypeResponse
 		m.WriteSinglePacket(
-			RaknetConnection.MinecraftPacket{
+			raknet_connection.MinecraftPacket{
 				Packet: &packet.PyRpc{
 					Value:         py_rpc.Marshal(c),
 					OperationType: packet.PyRpcOperationTypeSend,
@@ -55,7 +55,7 @@ func (m *MinecraftServer) OnPyRpc(p *packet.PyRpc) (shouldSendCopy bool, err err
 		}
 		// 完成零知识证明(挑战)
 		m.WriteSinglePacket(
-			RaknetConnection.MinecraftPacket{
+			raknet_connection.MinecraftPacket{
 				Packet: &packet.PyRpc{
 					Value:         py_rpc.Marshal(&py_rpc.SetMCPCheckNum{ret_p}),
 					OperationType: packet.PyRpcOperationTypeSend,

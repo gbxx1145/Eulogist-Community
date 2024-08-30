@@ -3,8 +3,8 @@ package mc_server
 import (
 	fbauth "Eulogist/core/fb_auth/mv4"
 	"Eulogist/core/minecraft/protocol/login"
-	RaknetConnection "Eulogist/core/raknet"
-	SkinProcess "Eulogist/core/tools/skin_process"
+	raknet_connection "Eulogist/core/raknet"
+	"Eulogist/core/tools/skin_process"
 )
 
 type MinecraftServer struct {
@@ -16,13 +16,13 @@ type MinecraftServer struct {
 	clientData   *login.ClientData
 
 	neteaseUID string
-	playerSkin *SkinProcess.Skin
+	playerSkin *skin_process.Skin
 	outfitInfo map[string]*int
 
 	entityUniqueID  int64
 	entityRuntimeID uint64
 
-	*RaknetConnection.Raknet
+	*raknet_connection.Raknet
 }
 
 // ...

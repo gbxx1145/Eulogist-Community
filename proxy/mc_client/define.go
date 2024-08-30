@@ -2,8 +2,8 @@ package mc_client
 
 import (
 	"Eulogist/core/minecraft/protocol/login"
-	RaknetConnection "Eulogist/core/raknet"
-	SkinProcess "Eulogist/core/tools/skin_process"
+	raknet_connection "Eulogist/core/raknet"
+	"Eulogist/core/tools/skin_process"
 	"net"
 
 	"Eulogist/core/minecraft/raknet"
@@ -18,11 +18,11 @@ type MinecraftClient struct {
 	clientData   *login.ClientData
 
 	neteaseUID string
-	playerSkin *SkinProcess.Skin
+	playerSkin *skin_process.Skin
 	outfitInfo map[string]*int
 
 	entityUniqueID  int64
 	entityRuntimeID uint64
 
-	*RaknetConnection.Raknet
+	*raknet_connection.Raknet
 }

@@ -2,7 +2,7 @@ package mc_server
 
 import (
 	"Eulogist/core/minecraft/protocol/packet"
-	RaknetConnection "Eulogist/core/raknet"
+	raknet_connection "Eulogist/core/raknet"
 	"Eulogist/core/tools/py_rpc"
 	"fmt"
 )
@@ -25,13 +25,13 @@ syncFunc 用于将数据同步到 Minecraft，
 分别对应 packets 中每一个数据包的处理成功情况
 */
 func (m *MinecraftServer) FiltePacketsAndSendCopy(
-	packets []RaknetConnection.MinecraftPacket,
-	writePacketsToClient func(packets []RaknetConnection.MinecraftPacket),
+	packets []raknet_connection.MinecraftPacket,
+	writePacketsToClient func(packets []raknet_connection.MinecraftPacket),
 	syncFunc func() error,
 ) (errResults []error, syncError error) {
 	// 初始化
 	errResults = make([]error, 0)
-	sendCopy := make([]RaknetConnection.MinecraftPacket, 0)
+	sendCopy := make([]raknet_connection.MinecraftPacket, 0)
 	// 处理每个数据包
 	for _, minecraftPacket := range packets {
 		// 初始化
@@ -51,7 +51,7 @@ func (m *MinecraftServer) FiltePacketsAndSendCopy(
 			m.SetEntityRuntimeID(entityRuntimeID)
 			playerSkin := m.GetPlayerSkin()
 			// 发送简要身份证明
-			m.WriteSinglePacket(RaknetConnection.MinecraftPacket{
+			m.WriteSinglePacket(raknet_connection.MinecraftPacket{
 				Packet: &packet.NeteaseJson{
 					Data: []byte(
 						fmt.Sprintf(
@@ -63,7 +63,7 @@ func (m *MinecraftServer) FiltePacketsAndSendCopy(
 			})
 			// 其他组件处理
 			if playerSkin == nil {
-				m.WriteSinglePacket(RaknetConnection.MinecraftPacket{
+				m.WriteSinglePacket(raknet_connection.MinecraftPacket{
 					Packet: &packet.PyRpc{
 						Value:         py_rpc.Marshal(&py_rpc.SyncUsingMod{}),
 						OperationType: packet.PyRpcOperationTypeSend,
@@ -81,7 +81,7 @@ func (m *MinecraftServer) FiltePacketsAndSendCopy(
 					}
 				}
 				// 组件处理
-				m.WriteSinglePacket(RaknetConnection.MinecraftPacket{
+				m.WriteSinglePacket(raknet_connection.MinecraftPacket{
 					Packet: &packet.PyRpc{
 						Value: py_rpc.Marshal(&py_rpc.SyncUsingMod{
 							modUUIDs,
@@ -101,7 +101,7 @@ func (m *MinecraftServer) FiltePacketsAndSendCopy(
 				// 并放弃当前数据包的发送，
 				// 以确保 Minecraft 客户端可以正常同步游戏模式更改。
 				// 否则，按原样抄送当前数据包
-				sendCopy = append(sendCopy, RaknetConnection.MinecraftPacket{
+				sendCopy = append(sendCopy, raknet_connection.MinecraftPacket{
 					Packet: &packet.SetPlayerGameType{GameType: pk.GameType},
 				})
 				shouldSendCopy = false

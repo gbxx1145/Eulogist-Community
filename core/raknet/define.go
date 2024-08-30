@@ -1,4 +1,4 @@
-package RaknetConnection
+package raknet_connection
 
 import (
 	"Eulogist/core/minecraft/protocol/packet"
