@@ -1,6 +1,7 @@
 package mc_server
 
 import (
+	fbauth "Eulogist/core/fb_auth/mv4"
 	"Eulogist/core/minecraft/protocol/packet"
 	raknet_connection "Eulogist/core/raknet"
 	"Eulogist/core/tools/py_rpc"
@@ -21,7 +22,7 @@ func (m *MinecraftServer) OnPyRpc(p *packet.PyRpc) (shouldSendCopy bool, err err
 	// 根据内容类型处理不同的 PyRpc
 	switch c := content.(type) {
 	case *py_rpc.StartType:
-		c.Content = m.fbClient.TransferData(c.Content)
+		c.Content = fbauth.TransferData(m.fbClient, c.Content)
 		c.Type = py_rpc.StartTypeResponse
 		m.WriteSinglePacket(
 			raknet_connection.MinecraftPacket{
@@ -43,7 +44,7 @@ func (m *MinecraftServer) OnPyRpc(p *packet.PyRpc) (shouldSendCopy bool, err err
 			c.SecondArg.Arg,
 			m.entityUniqueID,
 		})
-		ret := m.fbClient.TransferCheckNum(string(arg))
+		ret := fbauth.TransferCheckNum(m.fbClient, string(arg))
 		// 解码响应并调整数据
 		ret_p := []any{}
 		json.Unmarshal([]byte(ret), &ret_p)

@@ -1,4 +1,4 @@
-package fbauth
+package fb_client
 
 import (
 	I18n "Eulogist/core/fb_auth/i18n"
@@ -6,93 +6,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io"
-	"net/http"
-	"regexp"
-
-	"github.com/pterm/pterm"
 )
-
-type secretLoadingTransport struct {
-	secret string
-}
-
-func (s secretLoadingTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", s.secret))
-	return http.DefaultTransport.RoundTrip(req)
-}
-
-type ClientOptions struct {
-	AuthServer          string
-	RespondUserOverride string
-}
-
-func MakeDefaultClientOptions() *ClientOptions {
-	return &ClientOptions{}
-}
-
-type ClientInfo struct {
-	FBUCUsername string
-	GrowthLevel  int
-	RespondTo    string
-	Uid          string
-}
-
-type Client struct {
-	ClientInfo
-	client http.Client
-	*ClientOptions
-}
-
-func parseAndPanic(message string) {
-	error_regex := regexp.MustCompile("^(\\d{3} [a-zA-Z ]+)\n\n(.*?)($|\n)")
-	err_matches := error_regex.FindAllStringSubmatch(message, 1)
-	if len(err_matches) == 0 {
-		panic("Unknown error")
-	}
-	panic(fmt.Errorf("%s: %s", err_matches[0][1], err_matches[0][2]))
-}
-
-func assertAndParse[T any](resp *http.Response) T {
-	if resp.StatusCode == 503 {
-		panic("API server is down")
-	}
-	_body, _ := io.ReadAll(resp.Body)
-	body := string(_body)
-	if resp.StatusCode != 200 {
-		parseAndPanic(body)
-	}
-	var ret T
-	err := json.Unmarshal([]byte(body), &ret)
-	if err != nil {
-		panic(fmt.Sprintf("Error parsing API response: %v", err))
-	}
-	return ret
-}
-
-func CreateClient(options *ClientOptions) *Client {
-	secret_res, err := http.Get(fmt.Sprintf("%s/api/new", options.AuthServer))
-	if err != nil {
-		panic("Failed to contact with API")
-	}
-	_secret_body, _ := io.ReadAll(secret_res.Body)
-	secret_body := string(_secret_body)
-	if secret_res.StatusCode == 503 {
-		panic("API server is down")
-	} else if secret_res.StatusCode != 200 {
-		parseAndPanic(secret_body)
-	}
-	authclient := &Client{
-		client: http.Client{Transport: secretLoadingTransport{
-			secret: secret_body,
-		}},
-		ClientOptions: options,
-		ClientInfo: ClientInfo{
-			RespondTo: options.RespondUserOverride,
-		},
-	}
-	return authclient
-}
 
 // 客户端向验证服务器发送的请求体，
 // 用于获得 FBToken，
@@ -179,7 +93,7 @@ func (client *Client) Auth(
 	serverCode string, serverPassword string,
 	key string,
 	fbtoken string, username string, password string,
-) (AuthResponse, error) {
+) (*AuthResponse, error) {
 	var authResponse AuthResponse
 	// prepare
 	request := AuthRequest{
@@ -192,7 +106,7 @@ func (client *Client) Auth(
 	}
 	authRequest, _ := json.Marshal(request)
 	// pack request and marshal to binary
-	httpResponse, err := client.client.Post(
+	httpResponse, err := client.HttpClient.Post(
 		fmt.Sprintf("%s/api/phoenix/login", client.AuthServer),
 		"application/json",
 		bytes.NewBuffer(authRequest),
@@ -200,7 +114,7 @@ func (client *Client) Auth(
 	if err != nil {
 		panic(fmt.Sprintf("Auth: %v", err))
 	}
-	authResponse = assertAndParse[AuthResponse](httpResponse)
+	authResponse = AssertAndParse[AuthResponse](httpResponse)
 	// get response
 	if !authResponse.SuccessStates {
 		failedReason := authResponse.Message
@@ -208,62 +122,13 @@ func (client *Client) Auth(
 		if t := failedReason.Translation; t != -1 && t != 0 {
 			err = I18n.T(uint16(t))
 		}
-		return AuthResponse{}, fmt.Errorf("%s", err)
+		return nil, fmt.Errorf("%s", err)
 	}
 	// if reuqest failed
-	if len(authResponse.ServerMessage) > 0 {
-		pterm.Println(pterm.LightGreen(I18n.T(I18n.Auth_MessageFromAuthServer)))
-		pterm.Println(pterm.LightGreen(authResponse.ServerMessage))
-	}
-	// server message
-	client.FBUCUsername = authResponse.BotName
-	client.Uid = authResponse.BotUID
-	client.GrowthLevel = authResponse.BotLevel
-	if len(authResponse.MasterName) > 0 && client.RespondTo == "" {
-		client.RespondTo = authResponse.MasterName
-	}
+	client.ClientInfo.FBUCUsername = authResponse.BotName
+	client.ClientInfo.Uid = authResponse.BotUID
+	client.ClientInfo.GrowthLevel = authResponse.BotLevel
 	// set value
-	return authResponse, nil
+	return &authResponse, nil
 	// return
-}
-
-func (client *Client) TransferData(content string) string {
-	r, err := client.client.Get(fmt.Sprintf("%s/api/phoenix/transfer_start_type?content=%s", client.AuthServer, content))
-	if err != nil {
-		panic(err)
-	}
-	resp := assertAndParse[map[string]any](r)
-	succ, _ := resp["success"].(bool)
-	if !succ {
-		err_m, _ := resp["message"].(string)
-		panic(fmt.Sprintf("Failed to transfer start type: %s", err_m))
-	}
-	data, _ := resp["data"].(string)
-	return data
-}
-
-type FNumRequest struct {
-	Data string `json:"data"`
-}
-
-func (client *Client) TransferCheckNum(data string) string {
-	rspreq := &FNumRequest{
-		Data: data,
-	}
-	msg, err := json.Marshal(rspreq)
-	if err != nil {
-		panic("Failed to encode json")
-	}
-	r, err := client.client.Post(fmt.Sprintf("%s/api/phoenix/transfer_check_num", client.AuthServer), "application/json", bytes.NewBuffer(msg))
-	if err != nil {
-		panic(err)
-	}
-	resp := assertAndParse[map[string]any](r)
-	succ, _ := resp["success"].(bool)
-	if !succ {
-		err_m, _ := resp["message"].(string)
-		panic(fmt.Sprintf("Failed to transfer check num: %s", err_m))
-	}
-	val, _ := resp["value"].(string)
-	return val
 }

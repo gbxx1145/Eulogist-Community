@@ -2,6 +2,7 @@ package mc_server
 
 import (
 	fbauth "Eulogist/core/fb_auth/mv4"
+	fb_client "Eulogist/core/fb_auth/mv4/client"
 	"Eulogist/core/minecraft/protocol"
 	"Eulogist/core/minecraft/protocol/packet"
 	raknet_connection "Eulogist/core/raknet"
@@ -24,7 +25,7 @@ func ConnectToServer(basicConfig BasicConfig) (*MinecraftServer, error) {
 	// 准备
 	var mcServer MinecraftServer
 	// 初始化
-	mcServer.fbClient = fbauth.CreateClient(&fbauth.ClientOptions{AuthServer: basicConfig.AuthServer})
+	mcServer.fbClient = fb_client.CreateClient(basicConfig.AuthServer)
 	authenticator := fbauth.NewAccessWrapper(
 		mcServer.fbClient, basicConfig.ServerCode, basicConfig.ServerPassword, basicConfig.Token, "", "",
 	)

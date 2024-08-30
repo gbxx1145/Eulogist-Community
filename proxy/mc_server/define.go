@@ -1,15 +1,15 @@
 package mc_server
 
 import (
-	fbauth "Eulogist/core/fb_auth/mv4"
+	fb_client "Eulogist/core/fb_auth/mv4/client"
 	"Eulogist/core/minecraft/protocol/login"
 	raknet_connection "Eulogist/core/raknet"
 	"Eulogist/core/tools/skin_process"
 )
 
 type MinecraftServer struct {
-	fbClient              *fbauth.Client
-	authResponse          fbauth.AuthResponse
+	fbClient              *fb_client.Client
+	authResponse          *fb_client.AuthResponse
 	getCheckNumEverPassed bool
 
 	identityData *login.IdentityData

@@ -1,7 +1,7 @@
 package raknet_connection
 
 import (
-	fbauth "Eulogist/core/fb_auth/mv4"
+	fb_client "Eulogist/core/fb_auth/mv4/client"
 	"Eulogist/core/minecraft/protocol"
 	"Eulogist/core/minecraft/protocol/login"
 	"Eulogist/core/minecraft/protocol/packet"
@@ -23,7 +23,7 @@ import (
 // 然后，我们会构造并发送 Login 数据包至服务器
 func (r *Raknet) HandleNetworkSettings(
 	pk *packet.NetworkSettings,
-	authResponse fbauth.AuthResponse,
+	authResponse *fb_client.AuthResponse,
 	skin *skin_process.Skin,
 ) (identityData *login.IdentityData, clientData *login.ClientData, err error) {
 	// 准备
@@ -36,7 +36,7 @@ func (r *Raknet) HandleNetworkSettings(
 	r.encoder.EnableCompression(alg)
 	r.decoder.EnableCompression(alg)
 	// 编码登录请求
-	loginRequest, identityData, clientData, err = r.EncodeLogin(authResponse, r.key, skin)
+	loginRequest, identityData, clientData, err = EncodeLogin(authResponse, r.key, skin)
 	if err != nil {
 		return nil, nil, fmt.Errorf("HandleNetworkSettings: %v", err)
 	}

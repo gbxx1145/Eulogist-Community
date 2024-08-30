@@ -1,7 +1,7 @@
 package skin_process
 
 import (
-	fbauth "Eulogist/core/fb_auth/mv4"
+	fb_client "Eulogist/core/fb_auth/mv4/client"
 	"archive/zip"
 	"bytes"
 	"encoding/json"
@@ -15,7 +15,7 @@ import (
 // 从 authResponse 指定的网址下载文件，
 // 并处理为有效的皮肤数据，
 // 然后保存在 skin 中
-func GetSkinFromAuthResponse(authResponse fbauth.AuthResponse, skin *Skin) error {
+func GetSkinFromAuthResponse(authResponse *fb_client.AuthResponse, skin *Skin) error {
 	// 初始化
 	var skinImageData []byte
 	// 从远程服务器下载皮肤文件

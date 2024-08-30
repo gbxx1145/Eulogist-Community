@@ -1,7 +1,7 @@
 package raknet_connection
 
 import (
-	fbauth "Eulogist/core/fb_auth/mv4"
+	fb_client "Eulogist/core/fb_auth/mv4/client"
 	"Eulogist/core/minecraft/protocol"
 	"Eulogist/core/minecraft/protocol/login"
 	"Eulogist/core/tools/skin_process"
@@ -18,8 +18,8 @@ import (
 // EncodeLogin 编码登录请求。
 // 它使用提供的身份验证响应、
 // 客户端密钥和皮肤信息生成登录请求数据包
-func (r *Raknet) EncodeLogin(
-	authResponse fbauth.AuthResponse,
+func EncodeLogin(
+	authResponse *fb_client.AuthResponse,
 	clientKey *ecdsa.PrivateKey,
 	skin *skin_process.Skin,
 ) (
@@ -68,7 +68,7 @@ func defaultIdentityData(data *login.IdentityData) {
 // 为所有未更改的字段设置默认值
 func defaultClientData(
 	d *login.ClientData,
-	authResponse fbauth.AuthResponse,
+	authResponse *fb_client.AuthResponse,
 	skin *skin_process.Skin,
 ) error {
 	rand.Seed(time.Now().Unix())
