@@ -1,14 +1,16 @@
-package raknet_connection
+package handshake
 
 import (
-	"Eulogist/core/minecraft/protocol"
-	"Eulogist/core/minecraft/protocol/login"
-	"Eulogist/core/minecraft/protocol/packet"
+	raknet_wrapper "Eulogist/core/raknet/wrapper"
 	"bytes"
 	"crypto/ecdsa"
 	"crypto/sha256"
 	"encoding/base64"
 	"fmt"
+
+	"github.com/sandertv/gophertunnel/minecraft/protocol"
+	"github.com/sandertv/gophertunnel/minecraft/protocol/login"
+	"github.com/sandertv/gophertunnel/minecraft/protocol/packet"
 
 	"gopkg.in/square/go-jose.v2"
 	"gopkg.in/square/go-jose.v2/jwt"
@@ -18,7 +20,10 @@ import (
 // 如果不支持协议版本，它将返回错误。
 // 否则，以 NetworkSettings 作为响应，
 // 并且为底层 Raknet 连接启用数据包压缩
-func (r *Raknet) HandleRequestNetworkSettings(pk *packet.RequestNetworkSettings) error {
+func HandleRequestNetworkSettings(
+	r *raknet_wrapper.Raknet[packet.Packet],
+	pk *packet.RequestNetworkSettings,
+) error {
 	// 检查网络协议版本
 	if pk.ClientProtocol != protocol.CurrentProtocol {
 		status := packet.PlayStatusLoginFailedClient
@@ -26,20 +31,25 @@ func (r *Raknet) HandleRequestNetworkSettings(pk *packet.RequestNetworkSettings)
 			// 此时服务器已过期，所以我们需要更新 status 的值
 			status = packet.PlayStatusLoginFailedServer
 		}
-		r.WriteSinglePacket(MinecraftPacket{Packet: &packet.PlayStatus{Status: status}})
-		return fmt.Errorf("HandleRequestNetworkSettings: Connected with an incompatible protocol: expected protocol = %v, client protocol = %v", protocol.CurrentProtocol, pk.ClientProtocol)
+		r.WriteSinglePacket(raknet_wrapper.MinecraftPacket[packet.Packet]{Packet: &packet.PlayStatus{Status: status}})
+		return fmt.Errorf(
+			"HandleRequestNetworkSettings: Connected with an incompatible protocol: expected protocol = %v, client protocol = %v",
+			protocol.CurrentProtocol, pk.ClientProtocol,
+		)
 	}
 	// 发送 NetworkSettings 数据包以响应客户端
-	r.WriteSinglePacket(MinecraftPacket{Packet: &packet.NetworkSettings{
-		CompressionThreshold:    1,
-		CompressionAlgorithm:    0,
-		ClientThrottle:          false,
-		ClientThrottleThreshold: 0,
-		ClientThrottleScalar:    0,
-	}})
+	r.WriteSinglePacket(raknet_wrapper.MinecraftPacket[packet.Packet]{
+		Packet: &packet.NetworkSettings{
+			CompressionThreshold:    1,
+			CompressionAlgorithm:    0,
+			ClientThrottle:          false,
+			ClientThrottleThreshold: 0,
+			ClientThrottleScalar:    0,
+		},
+	})
 	// 为数据包传输启用压缩
-	r.encoder.EnableCompression(packet.DefaultCompression)
-	r.decoder.EnableCompression(packet.DefaultCompression)
+	r.Encoder.EnableCompression(packet.DefaultCompression)
+	r.Decoder.EnableCompression(packet.DefaultCompression)
 	// 返回值
 	return nil
 }
@@ -47,7 +57,10 @@ func (r *Raknet) HandleRequestNetworkSettings(pk *packet.RequestNetworkSettings)
 // 处理传入的登录数据包。
 // 它验证并解码数据包中找到的登录请求，
 // 如果无法成功完成，则返回错误
-func (r *Raknet) HandleLogin(pk *packet.Login) (*login.IdentityData, *login.ClientData, error) {
+func HandleLogin(
+	r *raknet_wrapper.Raknet[packet.Packet],
+	pk *packet.Login,
+) (*login.IdentityData, *login.ClientData, error) {
 	// 准备
 	var (
 		identityData login.IdentityData
@@ -61,7 +74,7 @@ func (r *Raknet) HandleLogin(pk *packet.Login) (*login.IdentityData, *login.Clie
 		return nil, nil, fmt.Errorf("HandleLogin: parse login request: %w", err)
 	}
 	// 启用加密
-	if err := r.EnableEncryption(authResult.PublicKey); err != nil {
+	if err := EnableEncryption(r, authResult.PublicKey); err != nil {
 		return nil, nil, fmt.Errorf("HandleLogin: error enabling encryption: %v", err)
 	}
 	// 返回值
@@ -71,27 +84,30 @@ func (r *Raknet) HandleLogin(pk *packet.Login) (*login.IdentityData, *login.Clie
 // 为创建的底层 Raknet 连接启用加密。
 // 它向客户端发送未加密的握手数据包，
 // 然后为底层 Raknet 连接启用数据包加密
-func (r *Raknet) EnableEncryption(clientPublicKey *ecdsa.PublicKey) error {
+func EnableEncryption(
+	r *raknet_wrapper.Raknet[packet.Packet],
+	clientPublicKey *ecdsa.PublicKey,
+) error {
 	// 创建 JWT 签名器
-	signer, _ := jose.NewSigner(jose.SigningKey{Key: r.key, Algorithm: jose.ES384}, &jose.SignerOptions{
-		ExtraHeaders: map[jose.HeaderKey]any{"x5u": login.MarshalPublicKey(&r.key.PublicKey)},
+	signer, _ := jose.NewSigner(jose.SigningKey{Key: r.Key, Algorithm: jose.ES384}, &jose.SignerOptions{
+		ExtraHeaders: map[jose.HeaderKey]any{"x5u": login.MarshalPublicKey(&r.Key.PublicKey)},
 	})
 	// 生成并序列化 JWT
-	serverJWT, err := jwt.Signed(signer).Claims(saltClaims{Salt: base64.RawStdEncoding.EncodeToString(r.salt)}).CompactSerialize()
+	serverJWT, err := jwt.Signed(signer).Claims(saltClaims{Salt: base64.RawStdEncoding.EncodeToString(r.Salt)}).CompactSerialize()
 	if err != nil {
 		return fmt.Errorf("EnableEncryption: compact serialise server JWT: %w", err)
 	}
 	// 发送 ServerToClientHandshake 数据包
-	r.WriteSinglePacket(MinecraftPacket{
+	r.WriteSinglePacket(raknet_wrapper.MinecraftPacket[packet.Packet]{
 		Packet: &packet.ServerToClientHandshake{JWT: []byte(serverJWT)},
 	})
 	// 计算公钥
-	x, _ := clientPublicKey.Curve.ScalarMult(clientPublicKey.X, clientPublicKey.Y, r.key.D.Bytes())
+	x, _ := clientPublicKey.Curve.ScalarMult(clientPublicKey.X, clientPublicKey.Y, r.Key.D.Bytes())
 	sharedSecret := append(bytes.Repeat([]byte{0}, 48-len(x.Bytes())), x.Bytes()...)
-	keyBytes := sha256.Sum256(append(r.salt, sharedSecret...))
+	keyBytes := sha256.Sum256(append(r.Salt, sharedSecret...))
 	// 为数据包传输启用加密
-	r.encoder.EnableEncryption(keyBytes)
-	r.decoder.EnableEncryption(keyBytes)
+	r.Encoder.EnableEncryption(keyBytes)
+	r.Decoder.EnableEncryption(keyBytes)
 	// 返回值
 	return nil
 }

@@ -1,4 +1,4 @@
-package raknet_connection
+package handshake
 
 import (
 	fb_client "Eulogist/core/fb_auth/mv4/client"

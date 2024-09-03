@@ -1,10 +1,11 @@
-package raknet_connection
+package handshake
 
 import (
 	fb_client "Eulogist/core/fb_auth/mv4/client"
 	"Eulogist/core/minecraft/protocol"
 	"Eulogist/core/minecraft/protocol/login"
 	"Eulogist/core/minecraft/protocol/packet"
+	raknet_wrapper "Eulogist/core/raknet/wrapper"
 	"Eulogist/core/tools/skin_process"
 	"bytes"
 	"crypto/ecdsa"
@@ -21,7 +22,8 @@ import (
 //
 // 这会为后续的数据包传输启用压缩，
 // 然后，我们会构造并发送 Login 数据包至服务器
-func (r *Raknet) HandleNetworkSettings(
+func HandleNetworkSettings(
+	r *raknet_wrapper.Raknet[packet.Packet],
 	pk *packet.NetworkSettings,
 	authResponse *fb_client.AuthResponse,
 	skin *skin_process.Skin,
@@ -33,15 +35,15 @@ func (r *Raknet) HandleNetworkSettings(
 	if !ok {
 		return nil, nil, fmt.Errorf("HandleNetworkSettings: unknown compression algorithm: %v", pk.CompressionAlgorithm)
 	}
-	r.encoder.EnableCompression(alg)
-	r.decoder.EnableCompression(alg)
+	r.Encoder.EnableCompression(alg)
+	r.Decoder.EnableCompression(alg)
 	// 编码登录请求
-	loginRequest, identityData, clientData, err = EncodeLogin(authResponse, r.key, skin)
+	loginRequest, identityData, clientData, err = EncodeLogin(authResponse, r.Key, skin)
 	if err != nil {
 		return nil, nil, fmt.Errorf("HandleNetworkSettings: %v", err)
 	}
 	// 发送登录请求
-	r.WriteSinglePacket(MinecraftPacket{
+	r.WriteSinglePacket(raknet_wrapper.MinecraftPacket[packet.Packet]{
 		Packet: &packet.Login{
 			ClientProtocol:    protocol.CurrentProtocol,
 			ConnectionRequest: loginRequest,
@@ -54,7 +56,10 @@ func (r *Raknet) HandleNetworkSettings(
 // HandleServerToClientHandshake
 // 处理从服务器收到的 ServerToClientHandshake 包，
 // 并为后续的数据传输启用加密
-func (r *Raknet) HandleServerToClientHandshake(pk *packet.ServerToClientHandshake) error {
+func HandleServerToClientHandshake(
+	r *raknet_wrapper.Raknet[packet.Packet],
+	pk *packet.ServerToClientHandshake,
+) error {
 	// 解析 JWT 令牌
 	tok, err := jwt.ParseSigned(string(pk.JWT))
 	if err != nil {
@@ -77,28 +82,31 @@ func (r *Raknet) HandleServerToClientHandshake(pk *packet.ServerToClientHandshak
 		return fmt.Errorf("HandleServerToClientHandshake: error base64 decoding ServerToClientHandshake salt: %v", err)
 	}
 	// 计算共享密钥
-	x, _ := pub.Curve.ScalarMult(pub.X, pub.Y, r.key.D.Bytes())
+	x, _ := pub.Curve.ScalarMult(pub.X, pub.Y, r.Key.D.Bytes())
 	sharedSecret := append(bytes.Repeat([]byte{0}, 48-len(x.Bytes())), x.Bytes()...)
 	// 创建加密密钥
 	keyBytes := sha256.Sum256(append(salt, sharedSecret...))
 	// 启用加密
-	r.encoder.EnableEncryption(keyBytes)
-	r.decoder.EnableEncryption(keyBytes)
+	r.Encoder.EnableEncryption(keyBytes)
+	r.Decoder.EnableEncryption(keyBytes)
 	// 发送回应的 ClientToServerHandshake 包
-	r.WriteSinglePacket(MinecraftPacket{Packet: &packet.ClientToServerHandshake{}})
+	r.WriteSinglePacket(raknet_wrapper.MinecraftPacket[packet.Packet]{Packet: &packet.ClientToServerHandshake{}})
 	// 返回值
 	return nil
 }
 
 // HandleStartGame 处理 StartGame 数据包，
 // 用于表示玩家已加入游戏
-func (r *Raknet) HandleStartGame(pk *packet.StartGame) (entityUniqueID int64, entityRuntimeID uint64) {
+func HandleStartGame(
+	r *raknet_wrapper.Raknet[packet.Packet],
+	pk *packet.StartGame,
+) (entityUniqueID int64, entityRuntimeID uint64) {
 	entityUniqueID = pk.EntityUniqueID
 	entityRuntimeID = pk.EntityRuntimeID
 
 	for _, item := range pk.Items {
 		if item.Name == "minecraft:shield" {
-			r.shieldID.Store(int32(item.RuntimeID))
+			r.ShieldID.Store(int32(item.RuntimeID))
 		}
 	}
 
