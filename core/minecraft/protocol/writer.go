@@ -314,9 +314,22 @@ func (w *Writer) ItemDescriptorCount(i *ItemDescriptorCount) {
 func (w *Writer) ItemInstance(i *ItemInstance) {
 	x := &i.Stack
 	w.Varint32(&x.NetworkID)
-	if x.NetworkID == 0 {
-		// The item was air, so there's no more data to follow. Return immediately.
-		return
+
+	// PhoenixBuilder specific changes.
+	// Author: Happy2018new
+	{
+		switch x.NetworkID {
+		case 0, -1:
+			// The item was air, so there's no more data to follow. Return immediately.
+			// 当 x.NetworkID 为 -1 时代表当前槽位的物品未更改，因此无需写入后续数据，直接跳过即可。
+			return
+		}
+		/*
+			if x.NetworkID == 0 {
+				// The item was air, so there's no more data to follow. Return immediately.
+				return
+			}
+		*/
 	}
 
 	w.Uint16(&x.Count)
