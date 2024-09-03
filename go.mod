@@ -23,6 +23,7 @@ require (
 	atomicgo.dev/schedule v0.1.0 // indirect
 	github.com/andybalholm/brotli v1.1.0
 	github.com/containerd/console v1.0.3 // indirect
+	github.com/df-mc/worldupgrader v1.0.16
 	github.com/google/go-cmp v0.6.0 // indirect
 	github.com/gookit/color v1.5.4 // indirect
 	github.com/lithammer/fuzzysearch v1.1.8 // indirect

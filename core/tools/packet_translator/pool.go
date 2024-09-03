@@ -220,6 +220,7 @@ var TranslatorPool = map[uint32]Translator{
 	standardPacket.IDContainerOpen:            &packet.ContainerOpen{},
 	standardPacket.IDCraftingData:             &packet.CraftingData{},
 	standardPacket.IDInventoryTransaction:     &packet.InventoryTransaction{},
+	standardPacket.IDLevelChunk:               &packet.LevelChunk{},
 	standardPacket.IDOnScreenTextureAnimation: &packet.OnScreenTextureAnimation{},
 	standardPacket.IDPlaySound:                &packet.PlaySound{},
 	standardPacket.IDPlayerAuthInput:          &packet.PlayerAuthInput{},

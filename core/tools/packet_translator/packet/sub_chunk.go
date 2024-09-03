@@ -3,6 +3,7 @@ package packet
 import (
 	neteaseProtocol "Eulogist/core/minecraft/protocol"
 	neteasePacket "Eulogist/core/minecraft/protocol/packet"
+	"Eulogist/tools/chunk_process"
 
 	standardProtocol "github.com/sandertv/gophertunnel/minecraft/protocol"
 	standardPacket "github.com/sandertv/gophertunnel/minecraft/protocol/packet"
@@ -42,6 +43,8 @@ func (pk *SubChunk) ToNetEasePacket(standard standardPacket.Packet) neteasePacke
 func (pk *SubChunk) ToStandardPacket(netease neteasePacket.Packet) standardPacket.Packet {
 	p := standardPacket.SubChunk{}
 	input := netease.(*neteasePacket.SubChunk)
+
+	chunk_process.DecodeNetEaseSubChunk(input)
 
 	p.CacheEnabled = input.CacheEnabled
 	p.Dimension = input.Dimension
