@@ -3,7 +3,6 @@ package packet
 import (
 	neteaseProtocol "Eulogist/core/minecraft/protocol"
 	neteasePacket "Eulogist/core/minecraft/protocol/packet"
-	"Eulogist/core/tools/packet_translator"
 
 	standardProtocol "github.com/sandertv/gophertunnel/minecraft/protocol"
 	standardPacket "github.com/sandertv/gophertunnel/minecraft/protocol/packet"
@@ -19,9 +18,9 @@ func (pk *CraftingData) ToNetEaseRecipe(
 	case *standardProtocol.ShapelessRecipe:
 		return &neteaseProtocol.ShapelessRecipe{
 			RecipeID: data.RecipeID,
-			Input: packet_translator.ConvertSlice(
+			Input: ConvertSlice(
 				data.Input,
-				packet_translator.ToNetEaseItemDescriptorCount,
+				ToNetEaseItemDescriptorCount,
 			),
 		}
 	case *standardProtocol.ShapedRecipe:
@@ -29,28 +28,28 @@ func (pk *CraftingData) ToNetEaseRecipe(
 			RecipeID: data.RecipeID,
 			Width:    data.Width,
 			Height:   data.Height,
-			Input: packet_translator.ConvertSlice(
+			Input: ConvertSlice(
 				data.Input,
-				packet_translator.ToNetEaseItemDescriptorCount,
+				ToNetEaseItemDescriptorCount,
 			),
-			Output: packet_translator.ConvertSlice(
+			Output: ConvertSlice(
 				data.Output,
 				func(from standardProtocol.ItemStack) neteaseProtocol.ItemStack {
-					return packet_translator.ConvertToNetEaseItemStack(from)
+					return ConvertToNetEaseItemStack(from)
 				},
 			),
 		}
 	case *standardProtocol.FurnaceRecipe:
 		return &neteaseProtocol.FurnaceRecipe{
 			InputType: neteaseProtocol.ItemType(data.InputType),
-			Output:    packet_translator.ConvertToNetEaseItemStack(data.Output),
+			Output:    ConvertToNetEaseItemStack(data.Output),
 			Block:     data.Block,
 		}
 	case *standardProtocol.FurnaceDataRecipe:
 		return &neteaseProtocol.FurnaceDataRecipe{
 			FurnaceRecipe: neteaseProtocol.FurnaceRecipe{
 				InputType: neteaseProtocol.ItemType(data.FurnaceRecipe.InputType),
-				Output:    packet_translator.ConvertToNetEaseItemStack(data.FurnaceRecipe.Output),
+				Output:    ConvertToNetEaseItemStack(data.FurnaceRecipe.Output),
 				Block:     data.FurnaceRecipe.Block,
 			},
 		}
@@ -63,9 +62,9 @@ func (pk *CraftingData) ToNetEaseRecipe(
 		return &neteaseProtocol.ShulkerBoxRecipe{
 			ShapelessRecipe: neteaseProtocol.ShapelessRecipe{
 				RecipeID: data.ShapelessRecipe.RecipeID,
-				Input: packet_translator.ConvertSlice(
+				Input: ConvertSlice(
 					data.ShapelessRecipe.Input,
-					packet_translator.ToNetEaseItemDescriptorCount,
+					ToNetEaseItemDescriptorCount,
 				),
 			},
 		}
@@ -73,9 +72,9 @@ func (pk *CraftingData) ToNetEaseRecipe(
 		return &neteaseProtocol.ShapelessChemistryRecipe{
 			ShapelessRecipe: neteaseProtocol.ShapelessRecipe{
 				RecipeID: data.ShapelessRecipe.RecipeID,
-				Input: packet_translator.ConvertSlice(
+				Input: ConvertSlice(
 					data.ShapelessRecipe.Input,
-					packet_translator.ToNetEaseItemDescriptorCount,
+					ToNetEaseItemDescriptorCount,
 				),
 			},
 		}
@@ -85,14 +84,14 @@ func (pk *CraftingData) ToNetEaseRecipe(
 				RecipeID: data.ShapedRecipe.RecipeID,
 				Width:    data.ShapedRecipe.Width,
 				Height:   data.ShapedRecipe.Height,
-				Input: packet_translator.ConvertSlice(
+				Input: ConvertSlice(
 					data.ShapedRecipe.Input,
-					packet_translator.ToNetEaseItemDescriptorCount,
+					ToNetEaseItemDescriptorCount,
 				),
-				Output: packet_translator.ConvertSlice(
+				Output: ConvertSlice(
 					data.ShapedRecipe.Output,
 					func(from standardProtocol.ItemStack) neteaseProtocol.ItemStack {
-						return packet_translator.ConvertToNetEaseItemStack(from)
+						return ConvertToNetEaseItemStack(from)
 					},
 				),
 			},
@@ -101,19 +100,19 @@ func (pk *CraftingData) ToNetEaseRecipe(
 		return &neteaseProtocol.SmithingTransformRecipe{
 			RecipeNetworkID: data.RecipeNetworkID,
 			RecipeID:        data.RecipeID,
-			Template:        packet_translator.ToNetEaseItemDescriptorCount(data.Template),
-			Base:            packet_translator.ToNetEaseItemDescriptorCount(data.Base),
-			Addition:        packet_translator.ToNetEaseItemDescriptorCount(data.Addition),
-			Result:          packet_translator.ConvertToNetEaseItemStack(data.Result),
+			Template:        ToNetEaseItemDescriptorCount(data.Template),
+			Base:            ToNetEaseItemDescriptorCount(data.Base),
+			Addition:        ToNetEaseItemDescriptorCount(data.Addition),
+			Result:          ConvertToNetEaseItemStack(data.Result),
 			Block:           data.Block,
 		}
 	case *standardProtocol.SmithingTrimRecipe:
 		return &neteaseProtocol.SmithingTrimRecipe{
 			RecipeNetworkID: data.RecipeNetworkID,
 			RecipeID:        data.RecipeID,
-			Template:        packet_translator.ToNetEaseItemDescriptorCount(data.Template),
-			Base:            packet_translator.ToNetEaseItemDescriptorCount(data.Base),
-			Addition:        packet_translator.ToNetEaseItemDescriptorCount(data.Addition),
+			Template:        ToNetEaseItemDescriptorCount(data.Template),
+			Base:            ToNetEaseItemDescriptorCount(data.Base),
+			Addition:        ToNetEaseItemDescriptorCount(data.Addition),
 			Block:           data.Block,
 		}
 	}
@@ -129,9 +128,9 @@ func (pk *CraftingData) ToStandardRecipe(
 	case *neteaseProtocol.ShapelessRecipe:
 		return &standardProtocol.ShapelessRecipe{
 			RecipeID: data.RecipeID,
-			Input: packet_translator.ConvertSlice(
+			Input: ConvertSlice(
 				data.Input,
-				packet_translator.ToStandardItemDescriptorCount,
+				ToStandardItemDescriptorCount,
 			),
 		}
 	case *neteaseProtocol.ShapedRecipe:
@@ -139,28 +138,28 @@ func (pk *CraftingData) ToStandardRecipe(
 			RecipeID: data.RecipeID,
 			Width:    data.Width,
 			Height:   data.Height,
-			Input: packet_translator.ConvertSlice(
+			Input: ConvertSlice(
 				data.Input,
-				packet_translator.ToStandardItemDescriptorCount,
+				ToStandardItemDescriptorCount,
 			),
-			Output: packet_translator.ConvertSlice(
+			Output: ConvertSlice(
 				data.Output,
 				func(from neteaseProtocol.ItemStack) standardProtocol.ItemStack {
-					return packet_translator.ConvertToStandardItemStack(from)
+					return ConvertToStandardItemStack(from)
 				},
 			),
 		}
 	case *neteaseProtocol.FurnaceRecipe:
 		return &standardProtocol.FurnaceRecipe{
 			InputType: standardProtocol.ItemType(data.InputType),
-			Output:    packet_translator.ConvertToStandardItemStack(data.Output),
+			Output:    ConvertToStandardItemStack(data.Output),
 			Block:     data.Block,
 		}
 	case *neteaseProtocol.FurnaceDataRecipe:
 		return &standardProtocol.FurnaceDataRecipe{
 			FurnaceRecipe: standardProtocol.FurnaceRecipe{
 				InputType: standardProtocol.ItemType(data.FurnaceRecipe.InputType),
-				Output:    packet_translator.ConvertToStandardItemStack(data.FurnaceRecipe.Output),
+				Output:    ConvertToStandardItemStack(data.FurnaceRecipe.Output),
 				Block:     data.FurnaceRecipe.Block,
 			},
 		}
@@ -173,9 +172,9 @@ func (pk *CraftingData) ToStandardRecipe(
 		return &standardProtocol.ShulkerBoxRecipe{
 			ShapelessRecipe: standardProtocol.ShapelessRecipe{
 				RecipeID: data.ShapelessRecipe.RecipeID,
-				Input: packet_translator.ConvertSlice(
+				Input: ConvertSlice(
 					data.ShapelessRecipe.Input,
-					packet_translator.ToStandardItemDescriptorCount,
+					ToStandardItemDescriptorCount,
 				),
 			},
 		}
@@ -183,9 +182,9 @@ func (pk *CraftingData) ToStandardRecipe(
 		return &standardProtocol.ShapelessChemistryRecipe{
 			ShapelessRecipe: standardProtocol.ShapelessRecipe{
 				RecipeID: data.ShapelessRecipe.RecipeID,
-				Input: packet_translator.ConvertSlice(
+				Input: ConvertSlice(
 					data.ShapelessRecipe.Input,
-					packet_translator.ToStandardItemDescriptorCount,
+					ToStandardItemDescriptorCount,
 				),
 			},
 		}
@@ -195,14 +194,14 @@ func (pk *CraftingData) ToStandardRecipe(
 				RecipeID: data.ShapedRecipe.RecipeID,
 				Width:    data.ShapedRecipe.Width,
 				Height:   data.ShapedRecipe.Height,
-				Input: packet_translator.ConvertSlice(
+				Input: ConvertSlice(
 					data.ShapedRecipe.Input,
-					packet_translator.ToStandardItemDescriptorCount,
+					ToStandardItemDescriptorCount,
 				),
-				Output: packet_translator.ConvertSlice(
+				Output: ConvertSlice(
 					data.ShapedRecipe.Output,
 					func(from neteaseProtocol.ItemStack) standardProtocol.ItemStack {
-						return packet_translator.ConvertToStandardItemStack(from)
+						return ConvertToStandardItemStack(from)
 					},
 				),
 			},
@@ -211,19 +210,19 @@ func (pk *CraftingData) ToStandardRecipe(
 		return &standardProtocol.SmithingTransformRecipe{
 			RecipeNetworkID: data.RecipeNetworkID,
 			RecipeID:        data.RecipeID,
-			Template:        packet_translator.ToStandardItemDescriptorCount(data.Template),
-			Base:            packet_translator.ToStandardItemDescriptorCount(data.Base),
-			Addition:        packet_translator.ToStandardItemDescriptorCount(data.Addition),
-			Result:          packet_translator.ConvertToStandardItemStack(data.Result),
+			Template:        ToStandardItemDescriptorCount(data.Template),
+			Base:            ToStandardItemDescriptorCount(data.Base),
+			Addition:        ToStandardItemDescriptorCount(data.Addition),
+			Result:          ConvertToStandardItemStack(data.Result),
 			Block:           data.Block,
 		}
 	case *neteaseProtocol.SmithingTrimRecipe:
 		return &standardProtocol.SmithingTrimRecipe{
 			RecipeNetworkID: data.RecipeNetworkID,
 			RecipeID:        data.RecipeID,
-			Template:        packet_translator.ToStandardItemDescriptorCount(data.Template),
-			Base:            packet_translator.ToStandardItemDescriptorCount(data.Base),
-			Addition:        packet_translator.ToStandardItemDescriptorCount(data.Addition),
+			Template:        ToStandardItemDescriptorCount(data.Template),
+			Base:            ToStandardItemDescriptorCount(data.Base),
+			Addition:        ToStandardItemDescriptorCount(data.Addition),
 			Block:           data.Block,
 		}
 	}
@@ -237,28 +236,28 @@ func (pk *CraftingData) ToNetEasePacket(standard standardPacket.Packet) neteaseP
 
 	p.ClearRecipes = input.ClearRecipes
 
-	p.Recipes = packet_translator.ConvertSlice(
+	p.Recipes = ConvertSlice(
 		input.Recipes,
 		pk.ToNetEaseRecipe,
 	)
-	p.PotionRecipes = packet_translator.ConvertSlice(
+	p.PotionRecipes = ConvertSlice(
 		input.PotionRecipes,
 		func(from standardProtocol.PotionRecipe) neteaseProtocol.PotionRecipe {
 			return neteaseProtocol.PotionRecipe(from)
 		},
 	)
-	p.PotionContainerChangeRecipes = packet_translator.ConvertSlice(
+	p.PotionContainerChangeRecipes = ConvertSlice(
 		input.PotionContainerChangeRecipes,
 		func(from standardProtocol.PotionContainerChangeRecipe) neteaseProtocol.PotionContainerChangeRecipe {
 			return neteaseProtocol.PotionContainerChangeRecipe(from)
 		},
 	)
-	p.MaterialReducers = packet_translator.ConvertSlice(
+	p.MaterialReducers = ConvertSlice(
 		input.MaterialReducers,
 		func(from standardProtocol.MaterialReducer) neteaseProtocol.MaterialReducer {
 			return neteaseProtocol.MaterialReducer{
 				InputItem: neteaseProtocol.ItemType(from.InputItem),
-				Outputs: packet_translator.ConvertSlice(
+				Outputs: ConvertSlice(
 					from.Outputs,
 					func(from standardProtocol.MaterialReducerOutput) neteaseProtocol.MaterialReducerOutput {
 						return neteaseProtocol.MaterialReducerOutput(from)
@@ -281,28 +280,28 @@ func (pk *CraftingData) ToStandardPacket(netease neteasePacket.Packet) standardP
 
 	p.ClearRecipes = input.ClearRecipes
 
-	p.Recipes = packet_translator.ConvertSlice(
+	p.Recipes = ConvertSlice(
 		input.Recipes,
 		pk.ToStandardRecipe,
 	)
-	p.PotionRecipes = packet_translator.ConvertSlice(
+	p.PotionRecipes = ConvertSlice(
 		input.PotionRecipes,
 		func(from neteaseProtocol.PotionRecipe) standardProtocol.PotionRecipe {
 			return standardProtocol.PotionRecipe(from)
 		},
 	)
-	p.PotionContainerChangeRecipes = packet_translator.ConvertSlice(
+	p.PotionContainerChangeRecipes = ConvertSlice(
 		input.PotionContainerChangeRecipes,
 		func(from neteaseProtocol.PotionContainerChangeRecipe) standardProtocol.PotionContainerChangeRecipe {
 			return standardProtocol.PotionContainerChangeRecipe(from)
 		},
 	)
-	p.MaterialReducers = packet_translator.ConvertSlice(
+	p.MaterialReducers = ConvertSlice(
 		input.MaterialReducers,
 		func(from neteaseProtocol.MaterialReducer) standardProtocol.MaterialReducer {
 			return standardProtocol.MaterialReducer{
 				InputItem: standardProtocol.ItemType(from.InputItem),
-				Outputs: packet_translator.ConvertSlice(
+				Outputs: ConvertSlice(
 					from.Outputs,
 					func(from neteaseProtocol.MaterialReducerOutput) standardProtocol.MaterialReducerOutput {
 						return standardProtocol.MaterialReducerOutput(from)

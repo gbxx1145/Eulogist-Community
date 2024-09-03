@@ -3,7 +3,6 @@ package packet
 import (
 	neteaseProtocol "Eulogist/core/minecraft/protocol"
 	neteasePacket "Eulogist/core/minecraft/protocol/packet"
-	"Eulogist/core/tools/packet_translator"
 
 	standardProtocol "github.com/sandertv/gophertunnel/minecraft/protocol"
 	standardPacket "github.com/sandertv/gophertunnel/minecraft/protocol/packet"
@@ -88,10 +87,10 @@ func (pk *PlayerAuthInput) ToNetEaseStackRequestAction(
 		return &neteaseProtocol.AutoCraftRecipeStackRequestAction{
 			RecipeNetworkID: data.RecipeNetworkID,
 			TimesCrafted:    data.TimesCrafted,
-			Ingredients: packet_translator.ConvertSlice(
+			Ingredients: ConvertSlice(
 				data.Ingredients,
 				func(from standardProtocol.ItemDescriptorCount) neteaseProtocol.ItemDescriptorCount {
-					return packet_translator.ToNetEaseItemDescriptorCount(from)
+					return ToNetEaseItemDescriptorCount(from)
 				},
 			),
 		}
@@ -117,10 +116,10 @@ func (pk *PlayerAuthInput) ToNetEaseStackRequestAction(
 		return &neteaseProtocol.CraftNonImplementedStackRequestAction{}
 	case *standardProtocol.CraftResultsDeprecatedStackRequestAction:
 		return &neteaseProtocol.CraftResultsDeprecatedStackRequestAction{
-			ResultItems: packet_translator.ConvertSlice(
+			ResultItems: ConvertSlice(
 				data.ResultItems,
 				func(from standardProtocol.ItemStack) neteaseProtocol.ItemStack {
-					return packet_translator.ConvertToNetEaseItemStack(from)
+					return ConvertToNetEaseItemStack(from)
 				},
 			),
 			TimesCrafted: data.TimesCrafted,
@@ -207,10 +206,10 @@ func (pk *PlayerAuthInput) ToStandardStackRequestAction(
 		return &standardProtocol.AutoCraftRecipeStackRequestAction{
 			RecipeNetworkID: data.RecipeNetworkID,
 			TimesCrafted:    data.TimesCrafted,
-			Ingredients: packet_translator.ConvertSlice(
+			Ingredients: ConvertSlice(
 				data.Ingredients,
 				func(from neteaseProtocol.ItemDescriptorCount) standardProtocol.ItemDescriptorCount {
-					return packet_translator.ToStandardItemDescriptorCount(from)
+					return ToStandardItemDescriptorCount(from)
 				},
 			),
 		}
@@ -236,10 +235,10 @@ func (pk *PlayerAuthInput) ToStandardStackRequestAction(
 		return &standardProtocol.CraftNonImplementedStackRequestAction{}
 	case *neteaseProtocol.CraftResultsDeprecatedStackRequestAction:
 		return &standardProtocol.CraftResultsDeprecatedStackRequestAction{
-			ResultItems: packet_translator.ConvertSlice(
+			ResultItems: ConvertSlice(
 				data.ResultItems,
 				func(from neteaseProtocol.ItemStack) standardProtocol.ItemStack {
-					return packet_translator.ConvertToStandardItemStack(from)
+					return ConvertToStandardItemStack(from)
 				},
 			),
 			TimesCrafted: data.TimesCrafted,
@@ -264,8 +263,8 @@ func (pk *PlayerAuthInput) ToNetEasePacket(standard standardPacket.Packet) netea
 	p.GazeDirection = input.GazeDirection
 	p.Tick = input.Tick
 	p.Delta = input.Delta
-	p.ItemInteractionData = *packet_translator.ConvertToNetEaseUseItemTransactionData(&input.ItemInteractionData)
-	p.BlockActions = packet_translator.ConvertSlice(
+	p.ItemInteractionData = *ConvertToNetEaseUseItemTransactionData(&input.ItemInteractionData)
+	p.BlockActions = ConvertSlice(
 		input.BlockActions,
 		func(from standardProtocol.PlayerBlockAction) neteaseProtocol.PlayerBlockAction {
 			return neteaseProtocol.PlayerBlockAction{
@@ -280,7 +279,7 @@ func (pk *PlayerAuthInput) ToNetEasePacket(standard standardPacket.Packet) netea
 
 	p.ItemStackRequest = neteaseProtocol.ItemStackRequest{
 		RequestID: input.ItemStackRequest.RequestID,
-		Actions: packet_translator.ConvertSlice(
+		Actions: ConvertSlice(
 			input.ItemStackRequest.Actions,
 			pk.ToNetEaseStackRequestAction,
 		),
@@ -312,8 +311,8 @@ func (pk *PlayerAuthInput) ToStandardPacket(netease neteasePacket.Packet) standa
 	p.GazeDirection = input.GazeDirection
 	p.Tick = input.Tick
 	p.Delta = input.Delta
-	p.ItemInteractionData = *packet_translator.ConvertToStandardUseItemTransactionData(&input.ItemInteractionData)
-	p.BlockActions = packet_translator.ConvertSlice(
+	p.ItemInteractionData = *ConvertToStandardUseItemTransactionData(&input.ItemInteractionData)
+	p.BlockActions = ConvertSlice(
 		input.BlockActions,
 		func(from neteaseProtocol.PlayerBlockAction) standardProtocol.PlayerBlockAction {
 			return standardProtocol.PlayerBlockAction{
@@ -328,7 +327,7 @@ func (pk *PlayerAuthInput) ToStandardPacket(netease neteasePacket.Packet) standa
 
 	p.ItemStackRequest = standardProtocol.ItemStackRequest{
 		RequestID: input.ItemStackRequest.RequestID,
-		Actions: packet_translator.ConvertSlice(
+		Actions: ConvertSlice(
 			input.ItemStackRequest.Actions,
 			pk.ToStandardStackRequestAction,
 		),

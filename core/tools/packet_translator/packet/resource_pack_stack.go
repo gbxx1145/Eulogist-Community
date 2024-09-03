@@ -3,7 +3,6 @@ package packet
 import (
 	neteaseProtocol "Eulogist/core/minecraft/protocol"
 	neteasePacket "Eulogist/core/minecraft/protocol/packet"
-	"Eulogist/core/tools/packet_translator"
 
 	standardProtocol "github.com/sandertv/gophertunnel/minecraft/protocol"
 	standardPacket "github.com/sandertv/gophertunnel/minecraft/protocol/packet"
@@ -21,19 +20,19 @@ func (pk *ResourcePackStack) ToNetEasePacket(standard standardPacket.Packet) net
 	p.Unknown1 = false
 	p.Unknown2 = false
 
-	p.BehaviourPacks = packet_translator.ConvertSlice(
+	p.BehaviourPacks = ConvertSlice(
 		input.BehaviourPacks,
 		func(from standardProtocol.StackResourcePack) neteaseProtocol.StackResourcePack {
 			return neteaseProtocol.StackResourcePack(from)
 		},
 	)
-	p.TexturePacks = packet_translator.ConvertSlice(
+	p.TexturePacks = ConvertSlice(
 		input.TexturePacks,
 		func(from standardProtocol.StackResourcePack) neteaseProtocol.StackResourcePack {
 			return neteaseProtocol.StackResourcePack(from)
 		},
 	)
-	p.Experiments = packet_translator.ConvertSlice(
+	p.Experiments = ConvertSlice(
 		input.Experiments,
 		func(from standardProtocol.ExperimentData) neteaseProtocol.ExperimentData {
 			return neteaseProtocol.ExperimentData(from)
@@ -51,19 +50,19 @@ func (pk *ResourcePackStack) ToStandardPacket(netease neteasePacket.Packet) stan
 	p.BaseGameVersion = input.BaseGameVersion
 	p.ExperimentsPreviouslyToggled = input.ExperimentsPreviouslyToggled
 
-	p.BehaviourPacks = packet_translator.ConvertSlice(
+	p.BehaviourPacks = ConvertSlice(
 		input.BehaviourPacks,
 		func(from neteaseProtocol.StackResourcePack) standardProtocol.StackResourcePack {
 			return standardProtocol.StackResourcePack(from)
 		},
 	)
-	p.TexturePacks = packet_translator.ConvertSlice(
+	p.TexturePacks = ConvertSlice(
 		input.TexturePacks,
 		func(from neteaseProtocol.StackResourcePack) standardProtocol.StackResourcePack {
 			return standardProtocol.StackResourcePack(from)
 		},
 	)
-	p.Experiments = packet_translator.ConvertSlice(
+	p.Experiments = ConvertSlice(
 		input.Experiments,
 		func(from neteaseProtocol.ExperimentData) standardProtocol.ExperimentData {
 			return standardProtocol.ExperimentData(from)

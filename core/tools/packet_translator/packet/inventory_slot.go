@@ -2,7 +2,6 @@ package packet
 
 import (
 	neteasePacket "Eulogist/core/minecraft/protocol/packet"
-	"Eulogist/core/tools/packet_translator"
 
 	standardPacket "github.com/sandertv/gophertunnel/minecraft/protocol/packet"
 )
@@ -15,7 +14,7 @@ func (pk *InventorySlot) ToNetEasePacket(standard standardPacket.Packet) netease
 
 	p.WindowID = input.WindowID
 	p.Slot = input.Slot
-	p.NewItem = packet_translator.ConvertToNetEaseItemInstance(input.NewItem)
+	p.NewItem = ConvertToNetEaseItemInstance(input.NewItem)
 
 	return &p
 }
@@ -26,7 +25,7 @@ func (pk *InventorySlot) ToStandardPacket(netease neteasePacket.Packet) standard
 
 	p.WindowID = input.WindowID
 	p.Slot = input.Slot
-	p.NewItem = packet_translator.ConvertToStandardItemInstance(input.NewItem)
+	p.NewItem = ConvertToStandardItemInstance(input.NewItem)
 
 	return &p
 }

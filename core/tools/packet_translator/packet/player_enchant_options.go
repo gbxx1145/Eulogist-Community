@@ -3,7 +3,6 @@ package packet
 import (
 	neteaseProtocol "Eulogist/core/minecraft/protocol"
 	neteasePacket "Eulogist/core/minecraft/protocol/packet"
-	"Eulogist/core/tools/packet_translator"
 
 	standardProtocol "github.com/sandertv/gophertunnel/minecraft/protocol"
 	standardPacket "github.com/sandertv/gophertunnel/minecraft/protocol/packet"
@@ -18,7 +17,7 @@ func (pk *PlayerEnchantOptions) ToNetEaseItemEnchantments(
 	return neteaseProtocol.ItemEnchantments{
 		Slot: from.Slot,
 		Enchantments: [3][]neteaseProtocol.EnchantmentInstance{
-			packet_translator.ConvertSlice(
+			ConvertSlice(
 				from.Enchantments[0],
 				func(from standardProtocol.EnchantmentInstance) neteaseProtocol.EnchantmentInstance {
 					return neteaseProtocol.EnchantmentInstance{
@@ -28,7 +27,7 @@ func (pk *PlayerEnchantOptions) ToNetEaseItemEnchantments(
 					}
 				},
 			),
-			packet_translator.ConvertSlice(
+			ConvertSlice(
 				from.Enchantments[1],
 				func(from standardProtocol.EnchantmentInstance) neteaseProtocol.EnchantmentInstance {
 					return neteaseProtocol.EnchantmentInstance{
@@ -38,7 +37,7 @@ func (pk *PlayerEnchantOptions) ToNetEaseItemEnchantments(
 					}
 				},
 			),
-			packet_translator.ConvertSlice(
+			ConvertSlice(
 				from.Enchantments[2],
 				func(from standardProtocol.EnchantmentInstance) neteaseProtocol.EnchantmentInstance {
 					return neteaseProtocol.EnchantmentInstance{
@@ -60,7 +59,7 @@ func (pk *PlayerEnchantOptions) ToStandardItemEnchantments(
 	return standardProtocol.ItemEnchantments{
 		Slot: from.Slot,
 		Enchantments: [3][]standardProtocol.EnchantmentInstance{
-			packet_translator.ConvertSlice(
+			ConvertSlice(
 				from.Enchantments[0],
 				func(from neteaseProtocol.EnchantmentInstance) standardProtocol.EnchantmentInstance {
 					return standardProtocol.EnchantmentInstance{
@@ -69,7 +68,7 @@ func (pk *PlayerEnchantOptions) ToStandardItemEnchantments(
 					}
 				},
 			),
-			packet_translator.ConvertSlice(
+			ConvertSlice(
 				from.Enchantments[1],
 				func(from neteaseProtocol.EnchantmentInstance) standardProtocol.EnchantmentInstance {
 					return standardProtocol.EnchantmentInstance{
@@ -78,7 +77,7 @@ func (pk *PlayerEnchantOptions) ToStandardItemEnchantments(
 					}
 				},
 			),
-			packet_translator.ConvertSlice(
+			ConvertSlice(
 				from.Enchantments[2],
 				func(from neteaseProtocol.EnchantmentInstance) standardProtocol.EnchantmentInstance {
 					return standardProtocol.EnchantmentInstance{
@@ -95,7 +94,7 @@ func (pk *PlayerEnchantOptions) ToNetEasePacket(standard standardPacket.Packet) 
 	p := neteasePacket.PlayerEnchantOptions{}
 	input := standard.(*standardPacket.PlayerEnchantOptions)
 
-	p.Options = packet_translator.ConvertSlice(
+	p.Options = ConvertSlice(
 		input.Options,
 		func(from standardProtocol.EnchantmentOption) neteaseProtocol.EnchantmentOption {
 			return neteaseProtocol.EnchantmentOption{
@@ -114,7 +113,7 @@ func (pk *PlayerEnchantOptions) ToStandardPacket(netease neteasePacket.Packet) s
 	p := standardPacket.PlayerEnchantOptions{}
 	input := netease.(*neteasePacket.PlayerEnchantOptions)
 
-	p.Options = packet_translator.ConvertSlice(
+	p.Options = ConvertSlice(
 		input.Options,
 		func(from neteaseProtocol.EnchantmentOption) standardProtocol.EnchantmentOption {
 			return standardProtocol.EnchantmentOption{

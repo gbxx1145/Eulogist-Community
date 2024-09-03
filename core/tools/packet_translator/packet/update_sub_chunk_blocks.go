@@ -3,7 +3,6 @@ package packet
 import (
 	neteaseProtocol "Eulogist/core/minecraft/protocol"
 	neteasePacket "Eulogist/core/minecraft/protocol/packet"
-	"Eulogist/core/tools/packet_translator"
 
 	standardProtocol "github.com/sandertv/gophertunnel/minecraft/protocol"
 	standardPacket "github.com/sandertv/gophertunnel/minecraft/protocol/packet"
@@ -17,7 +16,7 @@ func (pk *UpdateSubChunkBlocks) ToNetEasePacket(standard standardPacket.Packet) 
 
 	p.Position = neteaseProtocol.SubChunkPos(input.Position)
 
-	p.Blocks = packet_translator.ConvertSlice(
+	p.Blocks = ConvertSlice(
 		input.Blocks,
 		func(from standardProtocol.BlockChangeEntry) neteaseProtocol.BlockChangeEntry {
 			return neteaseProtocol.BlockChangeEntry{
@@ -29,7 +28,7 @@ func (pk *UpdateSubChunkBlocks) ToNetEasePacket(standard standardPacket.Packet) 
 			}
 		},
 	)
-	p.Extra = packet_translator.ConvertSlice(
+	p.Extra = ConvertSlice(
 		input.Extra,
 		func(from standardProtocol.BlockChangeEntry) neteaseProtocol.BlockChangeEntry {
 			return neteaseProtocol.BlockChangeEntry{
@@ -51,7 +50,7 @@ func (pk *UpdateSubChunkBlocks) ToStandardPacket(netease neteasePacket.Packet) s
 
 	p.Position = standardProtocol.SubChunkPos(input.Position)
 
-	p.Blocks = packet_translator.ConvertSlice(
+	p.Blocks = ConvertSlice(
 		input.Blocks,
 		func(from neteaseProtocol.BlockChangeEntry) standardProtocol.BlockChangeEntry {
 			return standardProtocol.BlockChangeEntry{
@@ -63,7 +62,7 @@ func (pk *UpdateSubChunkBlocks) ToStandardPacket(netease neteasePacket.Packet) s
 			}
 		},
 	)
-	p.Extra = packet_translator.ConvertSlice(
+	p.Extra = ConvertSlice(
 		input.Extra,
 		func(from neteaseProtocol.BlockChangeEntry) standardProtocol.BlockChangeEntry {
 			return standardProtocol.BlockChangeEntry{

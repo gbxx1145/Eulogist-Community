@@ -3,7 +3,6 @@ package packet
 import (
 	neteaseProtocol "Eulogist/core/minecraft/protocol"
 	neteasePacket "Eulogist/core/minecraft/protocol/packet"
-	"Eulogist/core/tools/packet_translator"
 
 	standardProtocol "github.com/sandertv/gophertunnel/minecraft/protocol"
 	standardPacket "github.com/sandertv/gophertunnel/minecraft/protocol/packet"
@@ -17,7 +16,7 @@ func (pk *PlayerList) ToNetEasePacket(standard standardPacket.Packet) neteasePac
 
 	p.ActionType = input.ActionType
 
-	p.Entries = packet_translator.ConvertSlice(
+	p.Entries = ConvertSlice(
 		input.Entries,
 		func(from standardProtocol.PlayerListEntry) neteaseProtocol.PlayerListEntry {
 			return neteaseProtocol.PlayerListEntry{
@@ -27,7 +26,7 @@ func (pk *PlayerList) ToNetEasePacket(standard standardPacket.Packet) neteasePac
 				XUID:           from.XUID,
 				PlatformChatID: from.PlatformChatID,
 				BuildPlatform:  from.BuildPlatform,
-				Skin:           packet_translator.ConvertToNetEaseSkin(from.Skin),
+				Skin:           ConvertToNetEaseSkin(from.Skin),
 			}
 		},
 	)
@@ -47,7 +46,7 @@ func (pk *PlayerList) ToStandardPacket(netease neteasePacket.Packet) standardPac
 
 	p.ActionType = input.ActionType
 
-	p.Entries = packet_translator.ConvertSlice(
+	p.Entries = ConvertSlice(
 		input.Entries,
 		func(from neteaseProtocol.PlayerListEntry) standardProtocol.PlayerListEntry {
 			return standardProtocol.PlayerListEntry{
@@ -57,7 +56,7 @@ func (pk *PlayerList) ToStandardPacket(netease neteasePacket.Packet) standardPac
 				XUID:           from.XUID,
 				PlatformChatID: from.PlatformChatID,
 				BuildPlatform:  from.BuildPlatform,
-				Skin:           packet_translator.ConvertToStandardSkin(from.Skin),
+				Skin:           ConvertToStandardSkin(from.Skin),
 			}
 		},
 	)

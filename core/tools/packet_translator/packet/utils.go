@@ -1,4 +1,4 @@
-package packet_translator
+package packet
 
 import (
 	neteaseProtocol "Eulogist/core/minecraft/protocol"

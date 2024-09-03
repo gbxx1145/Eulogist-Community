@@ -3,7 +3,6 @@ package packet
 import (
 	neteaseProtocol "Eulogist/core/minecraft/protocol"
 	neteasePacket "Eulogist/core/minecraft/protocol/packet"
-	"Eulogist/core/tools/packet_translator"
 
 	standardProtocol "github.com/sandertv/gophertunnel/minecraft/protocol"
 	standardPacket "github.com/sandertv/gophertunnel/minecraft/protocol/packet"
@@ -18,7 +17,7 @@ func (pk *SubChunk) ToNetEasePacket(standard standardPacket.Packet) neteasePacke
 	p.CacheEnabled = input.CacheEnabled
 	p.Dimension = input.Dimension
 	p.Position = neteaseProtocol.SubChunkPos(input.Position)
-	p.SubChunkEntries = packet_translator.ConvertSlice(
+	p.SubChunkEntries = ConvertSlice(
 		input.SubChunkEntries,
 		func(from standardProtocol.SubChunkEntry) neteaseProtocol.SubChunkEntry {
 			return neteaseProtocol.SubChunkEntry{
@@ -26,7 +25,7 @@ func (pk *SubChunk) ToNetEasePacket(standard standardPacket.Packet) neteasePacke
 				Result:        from.Result,
 				RawPayload:    from.RawPayload,
 				HeightMapType: from.HeightMapType,
-				HeightMapData: packet_translator.ConvertSlice(
+				HeightMapData: ConvertSlice(
 					from.HeightMapData,
 					func(from int8) uint8 {
 						return uint8(from)
@@ -47,7 +46,7 @@ func (pk *SubChunk) ToStandardPacket(netease neteasePacket.Packet) standardPacke
 	p.CacheEnabled = input.CacheEnabled
 	p.Dimension = input.Dimension
 	p.Position = standardProtocol.SubChunkPos(input.Position)
-	p.SubChunkEntries = packet_translator.ConvertSlice(
+	p.SubChunkEntries = ConvertSlice(
 		input.SubChunkEntries,
 		func(from neteaseProtocol.SubChunkEntry) standardProtocol.SubChunkEntry {
 			return standardProtocol.SubChunkEntry{
@@ -55,7 +54,7 @@ func (pk *SubChunk) ToStandardPacket(netease neteasePacket.Packet) standardPacke
 				Result:        from.Result,
 				RawPayload:    from.RawPayload,
 				HeightMapType: from.HeightMapType,
-				HeightMapData: packet_translator.ConvertSlice(
+				HeightMapData: ConvertSlice(
 					from.HeightMapData,
 					func(from uint8) int8 {
 						return int8(from)

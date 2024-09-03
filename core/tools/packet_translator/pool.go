@@ -2,10 +2,12 @@ package packet_translator
 
 import (
 	neteasePacket "Eulogist/core/minecraft/protocol/packet"
+	"Eulogist/core/tools/packet_translator/packet"
 
 	standardPacket "github.com/sandertv/gophertunnel/minecraft/protocol/packet"
 )
 
+// ...
 var StandardPacketIDToNetEasePacketID = map[uint32]uint32{
 	standardPacket.IDLogin:                      neteasePacket.IDLogin,
 	standardPacket.IDPlayStatus:                 neteasePacket.IDPlayStatus,
@@ -202,4 +204,37 @@ var StandardPacketIDToNetEasePacketID = map[uint32]uint32{
 	standardPacket.IDTrimData:                      neteasePacket.IDTrimData,
 	standardPacket.IDOpenSign:                      neteasePacket.IDOpenSign,
 	standardPacket.IDAgentAnimation:                neteasePacket.IDAgentAnimation,
+}
+
+// ...
+var TranslatorPool = map[uint32]Translator{
+	standardPacket.IDAddActor:                 &packet.AddActor{},
+	standardPacket.IDAddEntity:                &packet.AddEntity{},
+	standardPacket.IDAddVolumeEntity:          &packet.AddVolumeEntity{},
+	standardPacket.IDAnimate:                  &packet.Animate{},
+	standardPacket.IDChangeMobProperty:        &packet.ChangeMobProperty{},
+	standardPacket.IDClientBoundDebugRenderer: &packet.ClientBoundDebugRenderer{},
+	standardPacket.IDCommandBlockUpdate:       &packet.CommandBlockUpdate{},
+	standardPacket.IDCommandRequest:           &packet.CommandRequest{},
+	standardPacket.IDCompletedUsingItem:       &packet.CompletedUsingItem{},
+	standardPacket.IDContainerOpen:            &packet.ContainerOpen{},
+	standardPacket.IDCraftingData:             &packet.CraftingData{},
+	standardPacket.IDInventoryTransaction:     &packet.InventoryTransaction{},
+	standardPacket.IDOnScreenTextureAnimation: &packet.OnScreenTextureAnimation{},
+	standardPacket.IDPlaySound:                &packet.PlaySound{},
+	standardPacket.IDPlayerAuthInput:          &packet.PlayerAuthInput{},
+	standardPacket.IDPlayerEnchantOptions:     &packet.PlayerEnchantOptions{},
+	standardPacket.IDPlayerList:               &packet.PlayerList{},
+	standardPacket.IDPlayerSkin:               &packet.PlayerSkin{},
+	standardPacket.IDRemoveEntity:             &packet.RemoveEntity{},
+	standardPacket.IDRemoveVolumeEntity:       &packet.RemoveVolumeEntity{},
+	standardPacket.IDRequestChunkRadius:       &packet.RequestChunkRadius{},
+	standardPacket.IDRequestPermissions:       &packet.RequestPermissions{},
+	standardPacket.IDResourcePackStack:        &packet.ResourcePackStack{},
+	standardPacket.IDSimpleEvent:              &packet.SimpleEvent{},
+	standardPacket.IDStartGame:                &packet.StartGame{},
+	standardPacket.IDSubChunk:                 &packet.SubChunk{},
+	standardPacket.IDText:                     &packet.Text{},
+	standardPacket.IDUpdateBlockSynced:        &packet.UpdateBlockSynced{},
+	standardPacket.IDUpdateSubChunkBlocks:     &packet.UpdateSubChunkBlocks{},
 }

@@ -3,7 +3,6 @@ package packet
 import (
 	neteaseProtocol "Eulogist/core/minecraft/protocol"
 	neteasePacket "Eulogist/core/minecraft/protocol/packet"
-	"Eulogist/core/tools/packet_translator"
 
 	standardProtocol "github.com/sandertv/gophertunnel/minecraft/protocol"
 	standardPacket "github.com/sandertv/gophertunnel/minecraft/protocol/packet"
@@ -90,25 +89,25 @@ func (pk *StartGame) ToNetEasePacket(standard standardPacket.Packet) neteasePack
 		p.ForceExperimentalGameplay = neteaseProtocol.Option(forceExperimentalGameplay)
 	}
 
-	p.GameRules = packet_translator.ConvertSlice(
+	p.GameRules = ConvertSlice(
 		input.GameRules,
 		func(from standardProtocol.GameRule) neteaseProtocol.GameRule {
 			return neteaseProtocol.GameRule(from)
 		},
 	)
-	p.Experiments = packet_translator.ConvertSlice(
+	p.Experiments = ConvertSlice(
 		input.Experiments,
 		func(from standardProtocol.ExperimentData) neteaseProtocol.ExperimentData {
 			return neteaseProtocol.ExperimentData(from)
 		},
 	)
-	p.Blocks = packet_translator.ConvertSlice(
+	p.Blocks = ConvertSlice(
 		input.Blocks,
 		func(from standardProtocol.BlockEntry) neteaseProtocol.BlockEntry {
 			return neteaseProtocol.BlockEntry(from)
 		},
 	)
-	p.Items = packet_translator.ConvertSlice(
+	p.Items = ConvertSlice(
 		input.Items,
 		func(from standardProtocol.ItemEntry) neteaseProtocol.ItemEntry {
 			return neteaseProtocol.ItemEntry(from)
@@ -228,25 +227,25 @@ func (pk *StartGame) ToStandardPacket(netease neteasePacket.Packet) standardPack
 		p.ForceExperimentalGameplay = standardProtocol.Option(forceExperimentalGameplay)
 	}
 
-	p.GameRules = packet_translator.ConvertSlice(
+	p.GameRules = ConvertSlice(
 		input.GameRules,
 		func(from neteaseProtocol.GameRule) standardProtocol.GameRule {
 			return standardProtocol.GameRule(from)
 		},
 	)
-	p.Experiments = packet_translator.ConvertSlice(
+	p.Experiments = ConvertSlice(
 		input.Experiments,
 		func(from neteaseProtocol.ExperimentData) standardProtocol.ExperimentData {
 			return standardProtocol.ExperimentData(from)
 		},
 	)
-	p.Blocks = packet_translator.ConvertSlice(
+	p.Blocks = ConvertSlice(
 		input.Blocks,
 		func(from neteaseProtocol.BlockEntry) standardProtocol.BlockEntry {
 			return standardProtocol.BlockEntry(from)
 		},
 	)
-	p.Items = packet_translator.ConvertSlice(
+	p.Items = ConvertSlice(
 		input.Items,
 		func(from neteaseProtocol.ItemEntry) standardProtocol.ItemEntry {
 			return standardProtocol.ItemEntry(from)
