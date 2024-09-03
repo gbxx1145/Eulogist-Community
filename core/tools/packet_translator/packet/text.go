@@ -8,7 +8,7 @@ import (
 
 type Text struct{}
 
-func (pk *Text) ToNetNetEasePacket(standard standardPacket.Packet) neteasePacket.Packet {
+func (pk *Text) ToNetEasePacket(standard standardPacket.Packet) neteasePacket.Packet {
 	p := neteasePacket.Text{}
 	input := standard.(*standardPacket.Text)
 

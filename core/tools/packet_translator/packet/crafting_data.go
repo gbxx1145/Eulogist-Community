@@ -11,116 +11,6 @@ import (
 
 type CraftingData struct{}
 
-// 将 standard 转换为 neteaseProtocol.ItemDescriptorCount
-func (pk *CraftingData) ToNetEaseItemDescriptorCount(
-	standard standardProtocol.ItemDescriptorCount,
-) neteaseProtocol.ItemDescriptorCount {
-	switch d := standard.Descriptor.(type) {
-	case *standardProtocol.InvalidItemDescriptor:
-		return neteaseProtocol.ItemDescriptorCount{
-			Descriptor: &neteaseProtocol.InvalidItemDescriptor{},
-			Count:      standard.Count,
-		}
-	case *standardProtocol.DefaultItemDescriptor:
-		return neteaseProtocol.ItemDescriptorCount{
-			Descriptor: &neteaseProtocol.DefaultItemDescriptor{
-				NetworkID:     d.NetworkID,
-				MetadataValue: d.MetadataValue,
-			},
-			Count: standard.Count,
-		}
-	case *standardProtocol.MoLangItemDescriptor:
-		return neteaseProtocol.ItemDescriptorCount{
-			Descriptor: &neteaseProtocol.MoLangItemDescriptor{
-				Expression: d.Expression,
-				Version:    d.Version,
-			},
-			Count: standard.Count,
-		}
-	case *standardProtocol.ItemTagItemDescriptor:
-		return neteaseProtocol.ItemDescriptorCount{
-			Descriptor: &neteaseProtocol.ItemTagItemDescriptor{
-				Tag: d.Tag,
-			},
-			Count: standard.Count,
-		}
-	case *standardProtocol.DeferredItemDescriptor:
-		return neteaseProtocol.ItemDescriptorCount{
-			Descriptor: &neteaseProtocol.DeferredItemDescriptor{
-				Name:          d.Name,
-				MetadataValue: d.MetadataValue,
-			},
-			Count: standard.Count,
-		}
-	case *standardProtocol.ComplexAliasItemDescriptor:
-		return neteaseProtocol.ItemDescriptorCount{
-			Descriptor: &neteaseProtocol.ComplexAliasItemDescriptor{
-				Name: d.Name,
-			},
-			Count: standard.Count,
-		}
-	}
-
-	return neteaseProtocol.ItemDescriptorCount{
-		Count: standard.Count,
-	}
-}
-
-// 将 netease 转换为 standardProtocol.ItemDescriptorCount
-func (pk *CraftingData) ToStandardItemDescriptorCount(
-	netease neteaseProtocol.ItemDescriptorCount,
-) standardProtocol.ItemDescriptorCount {
-	switch d := netease.Descriptor.(type) {
-	case *neteaseProtocol.InvalidItemDescriptor:
-		return standardProtocol.ItemDescriptorCount{
-			Descriptor: &standardProtocol.InvalidItemDescriptor{},
-			Count:      netease.Count,
-		}
-	case *neteaseProtocol.DefaultItemDescriptor:
-		return standardProtocol.ItemDescriptorCount{
-			Descriptor: &standardProtocol.DefaultItemDescriptor{
-				NetworkID:     d.NetworkID,
-				MetadataValue: d.MetadataValue,
-			},
-			Count: netease.Count,
-		}
-	case *neteaseProtocol.MoLangItemDescriptor:
-		return standardProtocol.ItemDescriptorCount{
-			Descriptor: &standardProtocol.MoLangItemDescriptor{
-				Expression: d.Expression,
-				Version:    d.Version,
-			},
-			Count: netease.Count,
-		}
-	case *neteaseProtocol.ItemTagItemDescriptor:
-		return standardProtocol.ItemDescriptorCount{
-			Descriptor: &standardProtocol.ItemTagItemDescriptor{
-				Tag: d.Tag,
-			},
-			Count: netease.Count,
-		}
-	case *neteaseProtocol.DeferredItemDescriptor:
-		return standardProtocol.ItemDescriptorCount{
-			Descriptor: &standardProtocol.DeferredItemDescriptor{
-				Name:          d.Name,
-				MetadataValue: d.MetadataValue,
-			},
-			Count: netease.Count,
-		}
-	case *neteaseProtocol.ComplexAliasItemDescriptor:
-		return standardProtocol.ItemDescriptorCount{
-			Descriptor: &standardProtocol.ComplexAliasItemDescriptor{
-				Name: d.Name,
-			},
-			Count: netease.Count,
-		}
-	}
-
-	return standardProtocol.ItemDescriptorCount{
-		Count: netease.Count,
-	}
-}
-
 // 将 standard 转换为 neteaseProtocol.Recipe
 func (pk *CraftingData) ToNetEaseRecipe(
 	standard standardProtocol.Recipe,
@@ -131,7 +21,7 @@ func (pk *CraftingData) ToNetEaseRecipe(
 			RecipeID: data.RecipeID,
 			Input: packet_translator.ConvertSlice(
 				data.Input,
-				pk.ToNetEaseItemDescriptorCount,
+				packet_translator.ToNetEaseItemDescriptorCount,
 			),
 		}
 	case *standardProtocol.ShapedRecipe:
@@ -141,7 +31,7 @@ func (pk *CraftingData) ToNetEaseRecipe(
 			Height:   data.Height,
 			Input: packet_translator.ConvertSlice(
 				data.Input,
-				pk.ToNetEaseItemDescriptorCount,
+				packet_translator.ToNetEaseItemDescriptorCount,
 			),
 			Output: packet_translator.ConvertSlice(
 				data.Output,
@@ -175,7 +65,7 @@ func (pk *CraftingData) ToNetEaseRecipe(
 				RecipeID: data.ShapelessRecipe.RecipeID,
 				Input: packet_translator.ConvertSlice(
 					data.ShapelessRecipe.Input,
-					pk.ToNetEaseItemDescriptorCount,
+					packet_translator.ToNetEaseItemDescriptorCount,
 				),
 			},
 		}
@@ -185,7 +75,7 @@ func (pk *CraftingData) ToNetEaseRecipe(
 				RecipeID: data.ShapelessRecipe.RecipeID,
 				Input: packet_translator.ConvertSlice(
 					data.ShapelessRecipe.Input,
-					pk.ToNetEaseItemDescriptorCount,
+					packet_translator.ToNetEaseItemDescriptorCount,
 				),
 			},
 		}
@@ -197,7 +87,7 @@ func (pk *CraftingData) ToNetEaseRecipe(
 				Height:   data.ShapedRecipe.Height,
 				Input: packet_translator.ConvertSlice(
 					data.ShapedRecipe.Input,
-					pk.ToNetEaseItemDescriptorCount,
+					packet_translator.ToNetEaseItemDescriptorCount,
 				),
 				Output: packet_translator.ConvertSlice(
 					data.ShapedRecipe.Output,
@@ -211,9 +101,9 @@ func (pk *CraftingData) ToNetEaseRecipe(
 		return &neteaseProtocol.SmithingTransformRecipe{
 			RecipeNetworkID: data.RecipeNetworkID,
 			RecipeID:        data.RecipeID,
-			Template:        pk.ToNetEaseItemDescriptorCount(data.Template),
-			Base:            pk.ToNetEaseItemDescriptorCount(data.Base),
-			Addition:        pk.ToNetEaseItemDescriptorCount(data.Addition),
+			Template:        packet_translator.ToNetEaseItemDescriptorCount(data.Template),
+			Base:            packet_translator.ToNetEaseItemDescriptorCount(data.Base),
+			Addition:        packet_translator.ToNetEaseItemDescriptorCount(data.Addition),
 			Result:          packet_translator.ConvertToNetEaseItemStack(data.Result),
 			Block:           data.Block,
 		}
@@ -221,9 +111,9 @@ func (pk *CraftingData) ToNetEaseRecipe(
 		return &neteaseProtocol.SmithingTrimRecipe{
 			RecipeNetworkID: data.RecipeNetworkID,
 			RecipeID:        data.RecipeID,
-			Template:        pk.ToNetEaseItemDescriptorCount(data.Template),
-			Base:            pk.ToNetEaseItemDescriptorCount(data.Base),
-			Addition:        pk.ToNetEaseItemDescriptorCount(data.Addition),
+			Template:        packet_translator.ToNetEaseItemDescriptorCount(data.Template),
+			Base:            packet_translator.ToNetEaseItemDescriptorCount(data.Base),
+			Addition:        packet_translator.ToNetEaseItemDescriptorCount(data.Addition),
 			Block:           data.Block,
 		}
 	}
@@ -241,7 +131,7 @@ func (pk *CraftingData) ToStandardRecipe(
 			RecipeID: data.RecipeID,
 			Input: packet_translator.ConvertSlice(
 				data.Input,
-				pk.ToStandardItemDescriptorCount,
+				packet_translator.ToStandardItemDescriptorCount,
 			),
 		}
 	case *neteaseProtocol.ShapedRecipe:
@@ -251,7 +141,7 @@ func (pk *CraftingData) ToStandardRecipe(
 			Height:   data.Height,
 			Input: packet_translator.ConvertSlice(
 				data.Input,
-				pk.ToStandardItemDescriptorCount,
+				packet_translator.ToStandardItemDescriptorCount,
 			),
 			Output: packet_translator.ConvertSlice(
 				data.Output,
@@ -285,7 +175,7 @@ func (pk *CraftingData) ToStandardRecipe(
 				RecipeID: data.ShapelessRecipe.RecipeID,
 				Input: packet_translator.ConvertSlice(
 					data.ShapelessRecipe.Input,
-					pk.ToStandardItemDescriptorCount,
+					packet_translator.ToStandardItemDescriptorCount,
 				),
 			},
 		}
@@ -295,7 +185,7 @@ func (pk *CraftingData) ToStandardRecipe(
 				RecipeID: data.ShapelessRecipe.RecipeID,
 				Input: packet_translator.ConvertSlice(
 					data.ShapelessRecipe.Input,
-					pk.ToStandardItemDescriptorCount,
+					packet_translator.ToStandardItemDescriptorCount,
 				),
 			},
 		}
@@ -307,7 +197,7 @@ func (pk *CraftingData) ToStandardRecipe(
 				Height:   data.ShapedRecipe.Height,
 				Input: packet_translator.ConvertSlice(
 					data.ShapedRecipe.Input,
-					pk.ToStandardItemDescriptorCount,
+					packet_translator.ToStandardItemDescriptorCount,
 				),
 				Output: packet_translator.ConvertSlice(
 					data.ShapedRecipe.Output,
@@ -321,9 +211,9 @@ func (pk *CraftingData) ToStandardRecipe(
 		return &standardProtocol.SmithingTransformRecipe{
 			RecipeNetworkID: data.RecipeNetworkID,
 			RecipeID:        data.RecipeID,
-			Template:        pk.ToStandardItemDescriptorCount(data.Template),
-			Base:            pk.ToStandardItemDescriptorCount(data.Base),
-			Addition:        pk.ToStandardItemDescriptorCount(data.Addition),
+			Template:        packet_translator.ToStandardItemDescriptorCount(data.Template),
+			Base:            packet_translator.ToStandardItemDescriptorCount(data.Base),
+			Addition:        packet_translator.ToStandardItemDescriptorCount(data.Addition),
 			Result:          packet_translator.ConvertToStandardItemStack(data.Result),
 			Block:           data.Block,
 		}
@@ -331,9 +221,9 @@ func (pk *CraftingData) ToStandardRecipe(
 		return &standardProtocol.SmithingTrimRecipe{
 			RecipeNetworkID: data.RecipeNetworkID,
 			RecipeID:        data.RecipeID,
-			Template:        pk.ToStandardItemDescriptorCount(data.Template),
-			Base:            pk.ToStandardItemDescriptorCount(data.Base),
-			Addition:        pk.ToStandardItemDescriptorCount(data.Addition),
+			Template:        packet_translator.ToStandardItemDescriptorCount(data.Template),
+			Base:            packet_translator.ToStandardItemDescriptorCount(data.Base),
+			Addition:        packet_translator.ToStandardItemDescriptorCount(data.Addition),
 			Block:           data.Block,
 		}
 	}
@@ -341,7 +231,7 @@ func (pk *CraftingData) ToStandardRecipe(
 	panic("ToStandardRecipe: Invalid recipe enum")
 }
 
-func (pk *CraftingData) ToNetNetEasePacket(standard standardPacket.Packet) neteasePacket.Packet {
+func (pk *CraftingData) ToNetEasePacket(standard standardPacket.Packet) neteasePacket.Packet {
 	p := neteasePacket.CraftingData{}
 	input := standard.(*standardPacket.CraftingData)
 

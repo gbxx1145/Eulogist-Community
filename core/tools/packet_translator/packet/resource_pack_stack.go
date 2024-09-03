@@ -11,7 +11,7 @@ import (
 
 type ResourcePackStack struct{}
 
-func (pk *ResourcePackStack) ToNetNetEasePacket(standard standardPacket.Packet) neteasePacket.Packet {
+func (pk *ResourcePackStack) ToNetEasePacket(standard standardPacket.Packet) neteasePacket.Packet {
 	p := neteasePacket.ResourcePackStack{}
 	input := standard.(*standardPacket.ResourcePackStack)
 

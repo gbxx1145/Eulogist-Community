@@ -9,7 +9,7 @@ import (
 
 type InventorySlot struct{}
 
-func (pk *InventorySlot) ToNetNetEasePacket(standard standardPacket.Packet) neteasePacket.Packet {
+func (pk *InventorySlot) ToNetEasePacket(standard standardPacket.Packet) neteasePacket.Packet {
 	p := neteasePacket.InventorySlot{}
 	input := standard.(*standardPacket.InventorySlot)
 

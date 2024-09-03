@@ -8,7 +8,7 @@ import (
 
 type Animate struct{}
 
-func (pk *Animate) ToNetNetEasePacket(standard standardPacket.Packet) neteasePacket.Packet {
+func (pk *Animate) ToNetEasePacket(standard standardPacket.Packet) neteasePacket.Packet {
 	p := neteasePacket.Animate{}
 	input := standard.(*standardPacket.Animate)
 

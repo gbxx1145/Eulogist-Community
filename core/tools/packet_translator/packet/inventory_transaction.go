@@ -11,7 +11,7 @@ import (
 
 type InventoryTransaction struct{}
 
-func (pk *InventoryTransaction) ToNetNetEasePacket(standard standardPacket.Packet) neteasePacket.Packet {
+func (pk *InventoryTransaction) ToNetEasePacket(standard standardPacket.Packet) neteasePacket.Packet {
 	p := neteasePacket.InventoryTransaction{}
 	input := standard.(*standardPacket.InventoryTransaction)
 
@@ -34,27 +34,7 @@ func (pk *InventoryTransaction) ToNetNetEasePacket(standard standardPacket.Packe
 	case *standardProtocol.MismatchTransactionData:
 		p.TransactionData = &neteaseProtocol.MismatchTransactionData{}
 	case *standardProtocol.UseItemTransactionData:
-		p.TransactionData = &neteaseProtocol.UseItemTransactionData{
-			LegacyRequestID: data.LegacyRequestID,
-			LegacySetItemSlots: packet_translator.ConvertSlice(
-				data.LegacySetItemSlots,
-				func(from standardProtocol.LegacySetItemSlot) neteaseProtocol.LegacySetItemSlot {
-					return neteaseProtocol.LegacySetItemSlot(from)
-				},
-			),
-			Actions: packet_translator.ConvertSlice(
-				data.Actions,
-				packet_translator.ConvertToNetEaseInventoryAction,
-			),
-			ActionType:      data.ActionType,
-			BlockPosition:   neteaseProtocol.BlockPos(data.BlockPosition),
-			BlockFace:       data.BlockFace,
-			HotBarSlot:      data.HotBarSlot,
-			HeldItem:        packet_translator.ConvertToNetEaseItemInstance(data.HeldItem),
-			Position:        data.Position,
-			ClickedPosition: data.ClickedPosition,
-			BlockRuntimeID:  data.BlockRuntimeID,
-		}
+		p.TransactionData = packet_translator.ConvertToNetEaseUseItemTransactionData(data)
 	case *standardProtocol.UseItemOnEntityTransactionData:
 		p.TransactionData = &neteaseProtocol.UseItemOnEntityTransactionData{
 			TargetEntityRuntimeID: data.TargetEntityRuntimeID,
@@ -99,27 +79,7 @@ func (pk *InventoryTransaction) ToStandardPacket(netease neteasePacket.Packet) s
 	case *neteaseProtocol.MismatchTransactionData:
 		p.TransactionData = &standardProtocol.MismatchTransactionData{}
 	case *neteaseProtocol.UseItemTransactionData:
-		p.TransactionData = &standardProtocol.UseItemTransactionData{
-			LegacyRequestID: data.LegacyRequestID,
-			LegacySetItemSlots: packet_translator.ConvertSlice(
-				data.LegacySetItemSlots,
-				func(from neteaseProtocol.LegacySetItemSlot) standardProtocol.LegacySetItemSlot {
-					return standardProtocol.LegacySetItemSlot(from)
-				},
-			),
-			Actions: packet_translator.ConvertSlice(
-				data.Actions,
-				packet_translator.ConvertToStandardInventoryAction,
-			),
-			ActionType:      data.ActionType,
-			BlockPosition:   standardProtocol.BlockPos(data.BlockPosition),
-			BlockFace:       data.BlockFace,
-			HotBarSlot:      data.HotBarSlot,
-			HeldItem:        packet_translator.ConvertToStandardItemInstance(data.HeldItem),
-			Position:        data.Position,
-			ClickedPosition: data.ClickedPosition,
-			BlockRuntimeID:  data.BlockRuntimeID,
-		}
+		p.TransactionData = packet_translator.ConvertToStandardUseItemTransactionData(data)
 	case *neteaseProtocol.UseItemOnEntityTransactionData:
 		p.TransactionData = &standardProtocol.UseItemOnEntityTransactionData{
 			TargetEntityRuntimeID: data.TargetEntityRuntimeID,

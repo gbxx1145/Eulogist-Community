@@ -10,7 +10,7 @@ import (
 
 type ContainerOpen struct{}
 
-func (pk *ContainerOpen) ToNetNetEasePacket(standard standardPacket.Packet) neteasePacket.Packet {
+func (pk *ContainerOpen) ToNetEasePacket(standard standardPacket.Packet) neteasePacket.Packet {
 	p := neteasePacket.ContainerOpen{}
 	input := standard.(*standardPacket.ContainerOpen)
 

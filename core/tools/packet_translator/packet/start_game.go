@@ -11,7 +11,7 @@ import (
 
 type StartGame struct{}
 
-func (pk *StartGame) ToNetNetEasePacket(standard standardPacket.Packet) neteasePacket.Packet {
+func (pk *StartGame) ToNetEasePacket(standard standardPacket.Packet) neteasePacket.Packet {
 	p := neteasePacket.StartGame{}
 	input := standard.(*standardPacket.StartGame)
 

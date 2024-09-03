@@ -11,7 +11,7 @@ import (
 
 type InventoryContent struct{}
 
-func (pk *InventoryContent) ToNetNetEasePacket(standard standardPacket.Packet) neteasePacket.Packet {
+func (pk *InventoryContent) ToNetEasePacket(standard standardPacket.Packet) neteasePacket.Packet {
 	p := neteasePacket.InventoryContent{}
 	input := standard.(*standardPacket.InventoryContent)
 

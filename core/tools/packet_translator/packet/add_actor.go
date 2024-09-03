@@ -11,7 +11,7 @@ import (
 
 type AddActor struct{}
 
-func (pk *AddActor) ToNetNetEasePacket(standard standardPacket.Packet) neteasePacket.Packet {
+func (pk *AddActor) ToNetEasePacket(standard standardPacket.Packet) neteasePacket.Packet {
 	p := neteasePacket.AddActor{}
 	input := standard.(*standardPacket.AddActor)
 
