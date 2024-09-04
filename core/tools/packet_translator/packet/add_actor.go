@@ -105,5 +105,7 @@ func (pk *AddActor) ToStandardPacket(netease neteasePacket.Packet) standardPacke
 		},
 	)
 
+	p.EntityMetadata = map[uint32]any{} // Something can not resolve. --Happy2018new
+
 	return &p
 }
