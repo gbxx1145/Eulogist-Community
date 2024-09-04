@@ -3,6 +3,7 @@ package packet
 import (
 	neteaseProtocol "Eulogist/core/minecraft/protocol"
 	neteasePacket "Eulogist/core/minecraft/protocol/packet"
+	packet_translate_struct "Eulogist/core/tools/packet_translator/struct"
 
 	standardProtocol "Eulogist/core/standard/protocol"
 	standardPacket "Eulogist/core/standard/protocol/packet"
@@ -25,27 +26,27 @@ func (pk *AddActor) ToNetEasePacket(standard standardPacket.Packet) neteasePacke
 	p.BodyYaw = input.BodyYaw
 	p.EntityMetadata = input.EntityMetadata
 
-	p.Attributes = ConvertSlice(
+	p.Attributes = packet_translate_struct.ConvertSlice(
 		input.Attributes,
 		func(from standardProtocol.AttributeValue) neteaseProtocol.AttributeValue {
 			return neteaseProtocol.AttributeValue(from)
 		},
 	)
 	p.EntityProperties = neteaseProtocol.EntityProperties{
-		IntegerProperties: ConvertSlice(
+		IntegerProperties: packet_translate_struct.ConvertSlice(
 			input.EntityProperties.IntegerProperties,
 			func(from standardProtocol.IntegerEntityProperty) neteaseProtocol.IntegerEntityProperty {
 				return neteaseProtocol.IntegerEntityProperty(from)
 			},
 		),
-		FloatProperties: ConvertSlice(
+		FloatProperties: packet_translate_struct.ConvertSlice(
 			input.EntityProperties.FloatProperties,
 			func(from standardProtocol.FloatEntityProperty) neteaseProtocol.FloatEntityProperty {
 				return neteaseProtocol.FloatEntityProperty(from)
 			},
 		),
 	}
-	p.EntityLinks = ConvertSlice(
+	p.EntityLinks = packet_translate_struct.ConvertSlice(
 		input.EntityLinks,
 		func(from standardProtocol.EntityLink) neteaseProtocol.EntityLink {
 			return neteaseProtocol.EntityLink(from)
@@ -77,27 +78,27 @@ func (pk *AddActor) ToStandardPacket(netease neteasePacket.Packet) standardPacke
 	p.BodyYaw = input.BodyYaw
 	p.EntityMetadata = input.EntityMetadata
 
-	p.Attributes = ConvertSlice(
+	p.Attributes = packet_translate_struct.ConvertSlice(
 		input.Attributes,
 		func(from neteaseProtocol.AttributeValue) standardProtocol.AttributeValue {
 			return standardProtocol.AttributeValue(from)
 		},
 	)
 	p.EntityProperties = standardProtocol.EntityProperties{
-		IntegerProperties: ConvertSlice(
+		IntegerProperties: packet_translate_struct.ConvertSlice(
 			input.EntityProperties.IntegerProperties,
 			func(from neteaseProtocol.IntegerEntityProperty) standardProtocol.IntegerEntityProperty {
 				return standardProtocol.IntegerEntityProperty(from)
 			},
 		),
-		FloatProperties: ConvertSlice(
+		FloatProperties: packet_translate_struct.ConvertSlice(
 			input.EntityProperties.FloatProperties,
 			func(from neteaseProtocol.FloatEntityProperty) standardProtocol.FloatEntityProperty {
 				return standardProtocol.FloatEntityProperty(from)
 			},
 		),
 	}
-	p.EntityLinks = ConvertSlice(
+	p.EntityLinks = packet_translate_struct.ConvertSlice(
 		input.EntityLinks,
 		func(from neteaseProtocol.EntityLink) standardProtocol.EntityLink {
 			return standardProtocol.EntityLink(from)

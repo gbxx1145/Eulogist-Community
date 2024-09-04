@@ -6,7 +6,8 @@ import (
 	"Eulogist/core/raknet/marshal"
 	raknet_wrapper "Eulogist/core/raknet/wrapper"
 	"Eulogist/core/tools/packet_translator"
-	translator "Eulogist/core/tools/packet_translator/packet"
+	packet_translate_pool "Eulogist/core/tools/packet_translator/pool"
+	packet_translate_struct "Eulogist/core/tools/packet_translator/struct"
 	"Eulogist/core/tools/py_rpc"
 	"bytes"
 	"fmt"
@@ -251,7 +252,7 @@ func (m *MinecraftServer) FiltePacketsAndSendCopy(
 					Packet: &standardPacket.InventorySlot{
 						WindowID: pk.WindowID,
 						Slot:     uint32(slot),
-						NewItem:  translator.ConvertToStandardItemInstance(item),
+						NewItem:  packet_translate_struct.ConvertToStandardItemInstance(item),
 					},
 				})
 			}
@@ -261,6 +262,12 @@ func (m *MinecraftServer) FiltePacketsAndSendCopy(
 				writePacketsToClient(pks)
 				shouldSendCopy = false
 			}
+		case *neteasePacket.ItemStackResponse:
+			for index, value := range pk.Responses {
+				for i, v := range value.ContainerInfo {
+					pk.Responses[index].ContainerInfo[i].ContainerID = packet_translate_pool.NetEaseContainerIDStandardContainerID[v.ContainerID]
+				}
+			}
 		default:
 			// 默认情况下，
 			// 我们需要将数据包同步到客户端
@@ -269,7 +276,7 @@ func (m *MinecraftServer) FiltePacketsAndSendCopy(
 		errResults = append(errResults, err)
 		if shouldSendCopy {
 			// 查找当前数据包对应的国际版 ID
-			standardPacketID, found := packet_translator.NetEasePacketIDToStandardPacketID[minecraftPacket.Packet.ID()]
+			standardPacketID, found := packet_translate_pool.NetEasePacketIDToStandardPacketID[minecraftPacket.Packet.ID()]
 			if !found {
 				continue
 			}

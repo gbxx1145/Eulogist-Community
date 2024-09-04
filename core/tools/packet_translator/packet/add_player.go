@@ -3,6 +3,7 @@ package packet
 import (
 	neteaseProtocol "Eulogist/core/minecraft/protocol"
 	neteasePacket "Eulogist/core/minecraft/protocol/packet"
+	packet_translate_struct "Eulogist/core/tools/packet_translator/struct"
 
 	standardProtocol "Eulogist/core/standard/protocol"
 	standardPacket "Eulogist/core/standard/protocol/packet"
@@ -27,16 +28,16 @@ func (pk *AddPlayer) ToNetEasePacket(standard standardPacket.Packet) neteasePack
 	p.EntityMetadata = input.EntityMetadata
 	p.DeviceID = input.DeviceID
 	p.BuildPlatform = input.BuildPlatform
-	p.HeldItem = ConvertToNetEaseItemInstance(input.HeldItem)
+	p.HeldItem = packet_translate_struct.ConvertToNetEaseItemInstance(input.HeldItem)
 
 	p.EntityProperties = neteaseProtocol.EntityProperties{
-		IntegerProperties: ConvertSlice(
+		IntegerProperties: packet_translate_struct.ConvertSlice(
 			input.EntityProperties.IntegerProperties,
 			func(from standardProtocol.IntegerEntityProperty) neteaseProtocol.IntegerEntityProperty {
 				return neteaseProtocol.IntegerEntityProperty(from)
 			},
 		),
-		FloatProperties: ConvertSlice(
+		FloatProperties: packet_translate_struct.ConvertSlice(
 			input.EntityProperties.FloatProperties,
 			func(from standardProtocol.FloatEntityProperty) neteaseProtocol.FloatEntityProperty {
 				return neteaseProtocol.FloatEntityProperty(from)
@@ -47,14 +48,14 @@ func (pk *AddPlayer) ToNetEasePacket(standard standardPacket.Packet) neteasePack
 		EntityUniqueID:     input.AbilityData.EntityUniqueID,
 		PlayerPermissions:  input.AbilityData.PlayerPermissions,
 		CommandPermissions: input.AbilityData.CommandPermissions,
-		Layers: ConvertSlice(
+		Layers: packet_translate_struct.ConvertSlice(
 			input.AbilityData.Layers,
 			func(from standardProtocol.AbilityLayer) neteaseProtocol.AbilityLayer {
 				return neteaseProtocol.AbilityLayer(from)
 			},
 		),
 	}
-	p.EntityLinks = ConvertSlice(
+	p.EntityLinks = packet_translate_struct.ConvertSlice(
 		input.EntityLinks,
 		func(from standardProtocol.EntityLink) neteaseProtocol.EntityLink {
 			return neteaseProtocol.EntityLink(from)
@@ -86,16 +87,16 @@ func (pk *AddPlayer) ToStandardPacket(netease neteasePacket.Packet) standardPack
 	p.EntityMetadata = input.EntityMetadata
 	p.DeviceID = input.DeviceID
 	p.BuildPlatform = input.BuildPlatform
-	p.HeldItem = ConvertToStandardItemInstance(input.HeldItem)
+	p.HeldItem = packet_translate_struct.ConvertToStandardItemInstance(input.HeldItem)
 
 	p.EntityProperties = standardProtocol.EntityProperties{
-		IntegerProperties: ConvertSlice(
+		IntegerProperties: packet_translate_struct.ConvertSlice(
 			input.EntityProperties.IntegerProperties,
 			func(from neteaseProtocol.IntegerEntityProperty) standardProtocol.IntegerEntityProperty {
 				return standardProtocol.IntegerEntityProperty(from)
 			},
 		),
-		FloatProperties: ConvertSlice(
+		FloatProperties: packet_translate_struct.ConvertSlice(
 			input.EntityProperties.FloatProperties,
 			func(from neteaseProtocol.FloatEntityProperty) standardProtocol.FloatEntityProperty {
 				return standardProtocol.FloatEntityProperty(from)
@@ -106,14 +107,14 @@ func (pk *AddPlayer) ToStandardPacket(netease neteasePacket.Packet) standardPack
 		EntityUniqueID:     input.AbilityData.EntityUniqueID,
 		PlayerPermissions:  input.AbilityData.PlayerPermissions,
 		CommandPermissions: input.AbilityData.CommandPermissions,
-		Layers: ConvertSlice(
+		Layers: packet_translate_struct.ConvertSlice(
 			input.AbilityData.Layers,
 			func(from neteaseProtocol.AbilityLayer) standardProtocol.AbilityLayer {
 				return standardProtocol.AbilityLayer(from)
 			},
 		),
 	}
-	p.EntityLinks = ConvertSlice(
+	p.EntityLinks = packet_translate_struct.ConvertSlice(
 		input.EntityLinks,
 		func(from neteaseProtocol.EntityLink) standardProtocol.EntityLink {
 			return standardProtocol.EntityLink(from)

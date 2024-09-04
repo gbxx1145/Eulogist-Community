@@ -3,6 +3,7 @@ package packet
 import (
 	neteaseProtocol "Eulogist/core/minecraft/protocol"
 	neteasePacket "Eulogist/core/minecraft/protocol/packet"
+	packet_translate_struct "Eulogist/core/tools/packet_translator/struct"
 
 	standardProtocol "Eulogist/core/standard/protocol"
 	standardPacket "Eulogist/core/standard/protocol/packet"
@@ -15,10 +16,10 @@ func (pk *InventoryContent) ToNetEasePacket(standard standardPacket.Packet) nete
 	input := standard.(*standardPacket.InventoryContent)
 
 	p.WindowID = input.WindowID
-	p.Content = ConvertSlice(
+	p.Content = packet_translate_struct.ConvertSlice(
 		input.Content,
 		func(from standardProtocol.ItemInstance) neteaseProtocol.ItemInstance {
-			return ConvertToNetEaseItemInstance(from)
+			return packet_translate_struct.ConvertToNetEaseItemInstance(from)
 		},
 	)
 
@@ -30,10 +31,10 @@ func (pk *InventoryContent) ToStandardPacket(netease neteasePacket.Packet) stand
 	input := netease.(*neteasePacket.InventoryContent)
 
 	p.WindowID = input.WindowID
-	p.Content = ConvertSlice(
+	p.Content = packet_translate_struct.ConvertSlice(
 		input.Content,
 		func(from neteaseProtocol.ItemInstance) standardProtocol.ItemInstance {
-			return ConvertToStandardItemInstance(from)
+			return packet_translate_struct.ConvertToStandardItemInstance(from)
 		},
 	)
 

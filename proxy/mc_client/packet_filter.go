@@ -4,6 +4,7 @@ import (
 	"Eulogist/core/raknet/marshal"
 	raknet_wrapper "Eulogist/core/raknet/wrapper"
 	"Eulogist/core/tools/packet_translator"
+	packet_translate_pool "Eulogist/core/tools/packet_translator/pool"
 	"bytes"
 	"fmt"
 
@@ -112,7 +113,7 @@ func (m *MinecraftClient) FiltePacketsAndSendCopy(
 		if shouldSendCopy {
 			// 取得当前数据包相关联的 ID
 			standardPacketID := minecraftPacket.Packet.ID()
-			neteasePacketID := packet_translator.StandardPacketIDToNetEasePacketID[standardPacketID]
+			neteasePacketID := packet_translate_pool.StandardPacketIDToNetEasePacketID[standardPacketID]
 			// 确认当前数据包是否需要翻译
 			if translator := packet_translator.TranslatorPool[standardPacketID]; translator != nil {
 				sendCopy = append(sendCopy, raknet_wrapper.MinecraftPacket[neteasePacket.Packet]{

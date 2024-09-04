@@ -2,6 +2,7 @@ package packet
 
 import (
 	neteasePacket "Eulogist/core/minecraft/protocol/packet"
+	packet_translate_struct "Eulogist/core/tools/packet_translator/struct"
 
 	standardPacket "Eulogist/core/standard/protocol/packet"
 )
@@ -15,7 +16,7 @@ func (pk *PlayerSkin) ToNetEasePacket(standard standardPacket.Packet) neteasePac
 	p.UUID = input.UUID
 	p.NewSkinName = input.NewSkinName
 	p.OldSkinName = input.OldSkinName
-	p.Skin = ConvertToNetEaseSkin(input.Skin)
+	p.Skin = packet_translate_struct.ConvertToNetEaseSkin(input.Skin)
 
 	return &p
 }
@@ -27,7 +28,7 @@ func (pk *PlayerSkin) ToStandardPacket(netease neteasePacket.Packet) standardPac
 	p.UUID = input.UUID
 	p.NewSkinName = input.NewSkinName
 	p.OldSkinName = input.OldSkinName
-	p.Skin = ConvertToStandardSkin(input.Skin)
+	p.Skin = packet_translate_struct.ConvertToStandardSkin(input.Skin)
 
 	return &p
 }

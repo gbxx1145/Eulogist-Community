@@ -3,6 +3,7 @@ package packet
 import (
 	neteaseProtocol "Eulogist/core/minecraft/protocol"
 	neteasePacket "Eulogist/core/minecraft/protocol/packet"
+	packet_translate_struct "Eulogist/core/tools/packet_translator/struct"
 
 	standardProtocol "Eulogist/core/standard/protocol"
 	standardPacket "Eulogist/core/standard/protocol/packet"
@@ -16,15 +17,15 @@ func (pk *InventoryTransaction) ToNetEasePacket(standard standardPacket.Packet) 
 
 	p.LegacyRequestID = input.LegacyRequestID
 
-	p.LegacySetItemSlots = ConvertSlice(
+	p.LegacySetItemSlots = packet_translate_struct.ConvertSlice(
 		input.LegacySetItemSlots,
 		func(from standardProtocol.LegacySetItemSlot) neteaseProtocol.LegacySetItemSlot {
 			return neteaseProtocol.LegacySetItemSlot(from)
 		},
 	)
-	p.Actions = ConvertSlice(
+	p.Actions = packet_translate_struct.ConvertSlice(
 		input.Actions,
-		ConvertToNetEaseInventoryAction,
+		packet_translate_struct.ConvertToNetEaseInventoryAction,
 	)
 
 	switch data := input.TransactionData.(type) {
@@ -33,13 +34,13 @@ func (pk *InventoryTransaction) ToNetEasePacket(standard standardPacket.Packet) 
 	case *standardProtocol.MismatchTransactionData:
 		p.TransactionData = &neteaseProtocol.MismatchTransactionData{}
 	case *standardProtocol.UseItemTransactionData:
-		p.TransactionData = ConvertToNetEaseUseItemTransactionData(data)
+		p.TransactionData = packet_translate_struct.ConvertToNetEaseUseItemTransactionData(data)
 	case *standardProtocol.UseItemOnEntityTransactionData:
 		p.TransactionData = &neteaseProtocol.UseItemOnEntityTransactionData{
 			TargetEntityRuntimeID: data.TargetEntityRuntimeID,
 			ActionType:            data.ActionType,
 			HotBarSlot:            data.HotBarSlot,
-			HeldItem:              ConvertToNetEaseItemInstance(data.HeldItem),
+			HeldItem:              packet_translate_struct.ConvertToNetEaseItemInstance(data.HeldItem),
 			Position:              data.Position,
 			ClickedPosition:       data.ClickedPosition,
 		}
@@ -47,7 +48,7 @@ func (pk *InventoryTransaction) ToNetEasePacket(standard standardPacket.Packet) 
 		p.TransactionData = &neteaseProtocol.ReleaseItemTransactionData{
 			ActionType:   data.ActionType,
 			HotBarSlot:   data.HotBarSlot,
-			HeldItem:     ConvertToNetEaseItemInstance(data.HeldItem),
+			HeldItem:     packet_translate_struct.ConvertToNetEaseItemInstance(data.HeldItem),
 			HeadPosition: data.HeadPosition,
 		}
 	}
@@ -61,15 +62,15 @@ func (pk *InventoryTransaction) ToStandardPacket(netease neteasePacket.Packet) s
 
 	p.LegacyRequestID = input.LegacyRequestID
 
-	p.LegacySetItemSlots = ConvertSlice(
+	p.LegacySetItemSlots = packet_translate_struct.ConvertSlice(
 		input.LegacySetItemSlots,
 		func(from neteaseProtocol.LegacySetItemSlot) standardProtocol.LegacySetItemSlot {
 			return standardProtocol.LegacySetItemSlot(from)
 		},
 	)
-	p.Actions = ConvertSlice(
+	p.Actions = packet_translate_struct.ConvertSlice(
 		input.Actions,
-		ConvertToStandardInventoryAction,
+		packet_translate_struct.ConvertToStandardInventoryAction,
 	)
 
 	switch data := input.TransactionData.(type) {
@@ -78,13 +79,13 @@ func (pk *InventoryTransaction) ToStandardPacket(netease neteasePacket.Packet) s
 	case *neteaseProtocol.MismatchTransactionData:
 		p.TransactionData = &standardProtocol.MismatchTransactionData{}
 	case *neteaseProtocol.UseItemTransactionData:
-		p.TransactionData = ConvertToStandardUseItemTransactionData(data)
+		p.TransactionData = packet_translate_struct.ConvertToStandardUseItemTransactionData(data)
 	case *neteaseProtocol.UseItemOnEntityTransactionData:
 		p.TransactionData = &standardProtocol.UseItemOnEntityTransactionData{
 			TargetEntityRuntimeID: data.TargetEntityRuntimeID,
 			ActionType:            data.ActionType,
 			HotBarSlot:            data.HotBarSlot,
-			HeldItem:              ConvertToStandardItemInstance(data.HeldItem),
+			HeldItem:              packet_translate_struct.ConvertToStandardItemInstance(data.HeldItem),
 			Position:              data.Position,
 			ClickedPosition:       data.ClickedPosition,
 		}
@@ -92,7 +93,7 @@ func (pk *InventoryTransaction) ToStandardPacket(netease neteasePacket.Packet) s
 		p.TransactionData = &standardProtocol.ReleaseItemTransactionData{
 			ActionType:   data.ActionType,
 			HotBarSlot:   data.HotBarSlot,
-			HeldItem:     ConvertToStandardItemInstance(data.HeldItem),
+			HeldItem:     packet_translate_struct.ConvertToStandardItemInstance(data.HeldItem),
 			HeadPosition: data.HeadPosition,
 		}
 	}

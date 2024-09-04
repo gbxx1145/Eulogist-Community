@@ -2,6 +2,7 @@ package packet
 
 import (
 	neteasePacket "Eulogist/core/minecraft/protocol/packet"
+	packet_translate_struct "Eulogist/core/tools/packet_translator/struct"
 
 	standardPacket "Eulogist/core/standard/protocol/packet"
 )
@@ -14,7 +15,7 @@ func (pk *InventorySlot) ToNetEasePacket(standard standardPacket.Packet) netease
 
 	p.WindowID = input.WindowID
 	p.Slot = input.Slot
-	p.NewItem = ConvertToNetEaseItemInstance(input.NewItem)
+	p.NewItem = packet_translate_struct.ConvertToNetEaseItemInstance(input.NewItem)
 
 	return &p
 }
@@ -25,7 +26,7 @@ func (pk *InventorySlot) ToStandardPacket(netease neteasePacket.Packet) standard
 
 	p.WindowID = input.WindowID
 	p.Slot = input.Slot
-	p.NewItem = ConvertToStandardItemInstance(input.NewItem)
+	p.NewItem = packet_translate_struct.ConvertToStandardItemInstance(input.NewItem)
 
 	return &p
 }
