@@ -1,14 +1,10 @@
 package Eulogist
 
 import (
-	"Eulogist/core/tools/skin_process"
 	Client "Eulogist/proxy/mc_client"
 	Server "Eulogist/proxy/mc_server"
 	"fmt"
-	"os"
-	"os/exec"
 	"sync"
-	"time"
 
 	"github.com/pterm/pterm"
 )
@@ -17,8 +13,6 @@ import (
 func Eulogist() error {
 	var err error
 	var config *EulogistConfig
-	var neteaseConfigPath string
-	var neteaseSkinFileName string
 	var waitGroup sync.WaitGroup
 	var client *Client.MinecraftClient
 	var server *Server.MinecraftServer
@@ -58,43 +52,9 @@ func Eulogist() error {
 		pterm.Success.Println("Success to create handshake with NetEase Minecraft Bedrock Rental Server.")
 	}
 
-	// 根据配置文件的启动类型决定启动方式
-	if config.LaunchType == LaunchTypeNormal {
-		// 检查 Minecraft 客户端是否存在
-		if !FileExist(config.NEMCPath) {
-			return fmt.Errorf("Eulogist: Client not found, maybe you did not download or the the path is incorrect")
-		}
-		// 生成皮肤文件
-		if playerSkin := server.GetPlayerSkin(); !FileExist(config.SkinPath) && playerSkin != nil {
-			if skin_process.IsZIPFile(playerSkin.FullSkinData) {
-				neteaseSkinFileName = "skin.zip"
-			} else {
-				neteaseSkinFileName = "skin.png"
-			}
-			err = os.WriteFile(neteaseSkinFileName, playerSkin.FullSkinData, 0600)
-			if err != nil {
-				return fmt.Errorf("Eulogist: %v", err)
-			}
-			currentPath, _ := os.Getwd()
-			config.SkinPath = fmt.Sprintf(`%s\%s`, currentPath, neteaseSkinFileName)
-		}
-		// 启动 Eulogist 服务器
-		client, clientWasConnected, err = Client.RunServer()
-		if err != nil {
-			return fmt.Errorf("Eulogist: %v", err)
-		}
-		// 生成网易配置文件
-		neteaseConfigPath, err = GenerateNetEaseConfig(config, client.GetServerIP(), client.GetServerPort())
-		if err != nil {
-			return fmt.Errorf("Eulogist: %v", err)
-		}
-		// 启动 Minecraft 客户端
-		command := exec.Command(config.NEMCPath, fmt.Sprintf("config=%s", neteaseConfigPath))
-		go command.Run()
-		// 打印准备完成的信息
-		pterm.Success.Println("Eulogist is ready! Now we are going to start Minecraft Client.\nThen, the Minecraft Client will connect to Eulogist automatically.")
-	} else {
-		// 启动 Eulogist 服务器
+	// 召唤——赞颂者
+	{
+		// 启动赞颂者
 		client, clientWasConnected, err = Client.RunServer()
 		if err != nil {
 			return fmt.Errorf("Eulogist: %v", err)
@@ -109,19 +69,8 @@ func Eulogist() error {
 	// 等待 Minecraft 客户端与赞颂者完成基本数据包交换
 	{
 		// 等待 Minecraft 客户端连接
-		if config.LaunchType == LaunchTypeNormal {
-			timer := time.NewTimer(time.Second * 120)
-			defer timer.Stop()
-			select {
-			case <-timer.C:
-				return fmt.Errorf("Eulogist: Failed to create connection with Minecraft")
-			case <-clientWasConnected:
-				close(clientWasConnected)
-			}
-		} else {
-			<-clientWasConnected
-			close(clientWasConnected)
-		}
+		<-clientWasConnected
+		close(clientWasConnected)
 		pterm.Success.Println("Success to create connection with Minecraft Client, now we try to create handshake with it.")
 		// 等待 Minecraft 客户端完成握手
 		err = client.WaitClientHandshakeDown()
