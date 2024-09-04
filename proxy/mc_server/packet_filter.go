@@ -6,7 +6,6 @@ import (
 	"Eulogist/core/raknet/marshal"
 	raknet_wrapper "Eulogist/core/raknet/wrapper"
 	"Eulogist/core/tools/packet_translator"
-	translator "Eulogist/core/tools/packet_translator/packet"
 	"Eulogist/core/tools/py_rpc"
 	"bytes"
 	"fmt"
@@ -150,9 +149,21 @@ func (m *MinecraftServer) FiltePacketsAndSendCopy(
 				shouldSendCopy = false
 			}
 		case *neteasePacket.UpdateBlock:
-			standardRuntimeID, found := translator.ConvertToStandardBlockRuntimeID(pk.NewBlockRuntimeID)
+			standardRuntimeID, found := packet_translator.ConvertToStandardBlockRuntimeID(pk.NewBlockRuntimeID)
 			if found {
 				pk.NewBlockRuntimeID = standardRuntimeID
+			}
+		case *neteasePacket.LevelEvent:
+			switch pk.EventType {
+			case neteasePacket.LevelEventParticlesDestroyBlock:
+				standardRuntimeID, found := packet_translator.ConvertToStandardBlockRuntimeID(uint32(pk.EventData))
+				if found {
+					pk.EventData = int32(standardRuntimeID)
+				}
+			case neteasePacket.LevelEventParticlesCrackBlock, neteasePacket.LevelEventStopBlockCracking:
+				if pk.EventData != 0 {
+					shouldSendCopy = false
+				}
 			}
 		default:
 			// 默认情况下，

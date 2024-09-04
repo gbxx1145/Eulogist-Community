@@ -4,7 +4,6 @@ import (
 	"Eulogist/core/raknet/marshal"
 	raknet_wrapper "Eulogist/core/raknet/wrapper"
 	"Eulogist/core/tools/packet_translator"
-	translator "Eulogist/core/tools/packet_translator/packet"
 	"bytes"
 	"fmt"
 
@@ -81,7 +80,7 @@ func (m *MinecraftClient) FiltePacketsAndSendCopy(
 		case *standardPacket.InventoryTransaction:
 			data, ok := pk.TransactionData.(*standardProtocol.UseItemTransactionData)
 			if ok {
-				standardRuntimeID, found := translator.ConvertToNetEaseBlockRuntimeID(data.BlockRuntimeID)
+				standardRuntimeID, found := packet_translator.ConvertToNetEaseBlockRuntimeID(data.BlockRuntimeID)
 				if found {
 					data.BlockRuntimeID = standardRuntimeID
 				}
