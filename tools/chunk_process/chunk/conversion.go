@@ -3,6 +3,7 @@ package chunk
 import (
 	"bytes"
 	_ "embed"
+
 	"github.com/sandertv/gophertunnel/minecraft/nbt"
 )
 

@@ -63,6 +63,21 @@ func DecodeSubChunkPublic(air uint32, data *bytes.Buffer, r cube.Range) (*Chunk,
 	return c, nil
 }
 
+// ...
+func DecodeBiomesPublic(air uint32, data *bytes.Buffer, r cube.Range) (*Chunk, error) {
+	var (
+		c   = New(air, r)
+		err error
+	)
+
+	err = decodeBiomes(data, c, NetworkEncoding)
+	if err != nil {
+		return nil, fmt.Errorf("DecodeBiomesPublic: %v", err)
+	}
+
+	return c, nil
+}
+
 // DiskDecode decodes the data from a SerialisedData object into a chunk and returns it. If the data was
 // invalid, an error is returned.
 func DiskDecode(data SerialisedData, r cube.Range) (*Chunk, error) {

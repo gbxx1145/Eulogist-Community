@@ -38,11 +38,6 @@ type Raknet[T any] struct {
 type MinecraftPacket[T any] struct {
 	// 保存已解码的 Minecraft 数据包
 	Packet T
-	// 保存数据包的二进制形式。
-	//
-	// 在发送 MinecraftPacket 时，
-	// 将优先采用该字段，除非该字段为空，
-	// 则将会尝试编码 Packet 字段，
-	// 然后将编码结果发送到 Raknet 上
+	// 保存数据包的二进制形式
 	Bytes []byte
 }

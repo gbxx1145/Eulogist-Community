@@ -6,6 +6,7 @@ import (
 	"Eulogist/core/raknet/marshal"
 	raknet_wrapper "Eulogist/core/raknet/wrapper"
 	"Eulogist/core/tools/packet_translator"
+	translator "Eulogist/core/tools/packet_translator/packet"
 	"Eulogist/core/tools/py_rpc"
 	"bytes"
 	"fmt"
@@ -20,6 +21,10 @@ func (m *MinecraftServer) DefaultTranslate(
 	pk raknet_wrapper.MinecraftPacket[neteasePacket.Packet],
 	standardPacketID uint32,
 ) raknet_wrapper.MinecraftPacket[standardPacket.Packet] {
+	// 数据包可能已被修改，
+	// 因此此处需要重新编码它的二进制形式
+	pk.Bytes = marshal.EncodeNetEasePacket(pk, &m.ShieldID)
+
 	// 从数据包的二进制负载前端读取其在网易协议下的数据包 ID。
 	// 这一部分将会被替换为国际版协议下的数据包 ID
 	packetBuffer := bytes.NewBuffer(pk.Bytes)
@@ -143,6 +148,11 @@ func (m *MinecraftServer) FiltePacketsAndSendCopy(
 					Packet: &standardPacket.SetPlayerGameType{GameType: pk.GameType},
 				})
 				shouldSendCopy = false
+			}
+		case *neteasePacket.UpdateBlock:
+			standardRuntimeID, found := translator.ConvertToStandardBlockRuntimeID(pk.NewBlockRuntimeID)
+			if found {
+				pk.NewBlockRuntimeID = standardRuntimeID
 			}
 		default:
 			// 默认情况下，

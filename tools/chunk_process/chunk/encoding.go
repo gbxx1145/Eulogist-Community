@@ -1,11 +1,10 @@
 package chunk
 
 import (
+	blks "Eulogist/tools/netease_blocks/blocks"
 	"bytes"
 	"encoding/binary"
 	"fmt"
-
-	blks "Eulogist/tools/netease_blocks/blocks"
 
 	"github.com/df-mc/worldupgrader/blockupgrader"
 	"github.com/sandertv/gophertunnel/minecraft/nbt"

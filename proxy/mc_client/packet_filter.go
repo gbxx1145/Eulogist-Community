@@ -4,11 +4,13 @@ import (
 	"Eulogist/core/raknet/marshal"
 	raknet_wrapper "Eulogist/core/raknet/wrapper"
 	"Eulogist/core/tools/packet_translator"
+	translator "Eulogist/core/tools/packet_translator/packet"
 	"bytes"
 	"fmt"
 
 	neteasePacket "Eulogist/core/minecraft/protocol/packet"
 
+	standardProtocol "github.com/sandertv/gophertunnel/minecraft/protocol"
 	standardPacket "github.com/sandertv/gophertunnel/minecraft/protocol/packet"
 )
 
@@ -19,6 +21,10 @@ func (m *MinecraftClient) DefaultTranslate(
 	pk raknet_wrapper.MinecraftPacket[standardPacket.Packet],
 	neteasePacketID uint32,
 ) raknet_wrapper.MinecraftPacket[neteasePacket.Packet] {
+	// 数据包可能已被修改，
+	// 因此此处需要重新编码它的二进制形式
+	pk.Bytes = marshal.EncodeStandardPacket(pk, &m.ShieldID)
+
 	// 从数据包的二进制负载前端读取其在国际版协议下的数据包 ID。
 	// 这一部分将会被替换为网易版协议下的数据包 ID
 	packetBuffer := bytes.NewBuffer(pk.Bytes)
@@ -66,12 +72,20 @@ func (m *MinecraftClient) FiltePacketsAndSendCopy(
 		var shouldSendCopy bool = true
 		var err error
 		// 根据数据包的类型进行不同的处理
-		switch minecraftPacket.Packet.(type) {
+		switch pk := minecraftPacket.Packet.(type) {
 		case *standardPacket.ClientCacheStatus:
 			writePacketsToServer([]raknet_wrapper.MinecraftPacket[neteasePacket.Packet]{
 				{Packet: &neteasePacket.ClientCacheStatus{Enabled: false}},
 			})
 			shouldSendCopy = false
+		case *standardPacket.InventoryTransaction:
+			data, ok := pk.TransactionData.(*standardProtocol.UseItemTransactionData)
+			if ok {
+				standardRuntimeID, found := translator.ConvertToNetEaseBlockRuntimeID(data.BlockRuntimeID)
+				if found {
+					data.BlockRuntimeID = standardRuntimeID
+				}
+			}
 		default:
 			// 默认情况下，我们需要将
 			// 数据包同步到网易租赁服
