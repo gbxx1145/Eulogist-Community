@@ -5,8 +5,8 @@ import (
 	"bytes"
 	"sync/atomic"
 
-	"github.com/sandertv/gophertunnel/minecraft/protocol"
-	"github.com/sandertv/gophertunnel/minecraft/protocol/packet"
+	"Eulogist/core/standard/protocol"
+	"Eulogist/core/standard/protocol/packet"
 )
 
 // List all packets which include packets from server

@@ -12,7 +12,8 @@ import (
 	"strings"
 	"unsafe"
 
-	"github.com/sandertv/gophertunnel/minecraft/nbt"
+	"Eulogist/core/standard/nbt"
+
 	"github.com/segmentio/fasthash/fnv1"
 )
 

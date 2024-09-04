@@ -4,7 +4,7 @@ import (
 	neteaseProtocol "Eulogist/core/minecraft/protocol"
 	neteasePacket "Eulogist/core/minecraft/protocol/packet"
 
-	standardPacket "github.com/sandertv/gophertunnel/minecraft/protocol/packet"
+	standardPacket "Eulogist/core/standard/protocol/packet"
 )
 
 type CompletedUsingItem struct{}

@@ -7,7 +7,7 @@ import (
 	"net"
 	"sync/atomic"
 
-	"github.com/sandertv/gophertunnel/minecraft/protocol/packet"
+	"Eulogist/core/standard/protocol/packet"
 )
 
 // 初始化一个空的 Raknet。

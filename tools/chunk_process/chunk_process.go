@@ -12,8 +12,9 @@ import (
 
 	_ "Eulogist/tools/chunk_process/block_state"
 
+	"Eulogist/core/standard/nbt"
+
 	"github.com/mitchellh/mapstructure"
-	"github.com/sandertv/gophertunnel/minecraft/nbt"
 )
 
 const (

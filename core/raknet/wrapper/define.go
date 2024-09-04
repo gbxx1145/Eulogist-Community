@@ -7,7 +7,7 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"github.com/sandertv/gophertunnel/minecraft/protocol/packet"
+	"Eulogist/core/standard/protocol/packet"
 )
 
 // 描述一个简单的，但可以支持不同 Minecraft

@@ -4,7 +4,7 @@ import (
 	neteasePacket "Eulogist/core/minecraft/protocol/packet"
 	"Eulogist/core/tools/packet_translator/packet"
 
-	standardPacket "github.com/sandertv/gophertunnel/minecraft/protocol/packet"
+	standardPacket "Eulogist/core/standard/protocol/packet"
 )
 
 // ...

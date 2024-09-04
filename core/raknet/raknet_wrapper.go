@@ -5,7 +5,7 @@ import (
 	"Eulogist/core/raknet/marshal"
 	raknet_wrapper "Eulogist/core/raknet/wrapper"
 
-	standardPacket "github.com/sandertv/gophertunnel/minecraft/protocol/packet"
+	standardPacket "Eulogist/core/standard/protocol/packet"
 )
 
 // 获取一个基于网易 Minecraft 协议的 Raknet 包装器

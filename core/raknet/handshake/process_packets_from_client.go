@@ -8,9 +8,9 @@ import (
 	"encoding/base64"
 	"fmt"
 
-	"github.com/sandertv/gophertunnel/minecraft/protocol"
-	"github.com/sandertv/gophertunnel/minecraft/protocol/login"
-	"github.com/sandertv/gophertunnel/minecraft/protocol/packet"
+	"Eulogist/core/standard/protocol"
+	"Eulogist/core/standard/protocol/login"
+	"Eulogist/core/standard/protocol/packet"
 
 	"gopkg.in/square/go-jose.v2"
 	"gopkg.in/square/go-jose.v2/jwt"

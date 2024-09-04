@@ -3,7 +3,7 @@ package packet_translator
 import (
 	neteasePacket "Eulogist/core/minecraft/protocol/packet"
 
-	standardPacket "github.com/sandertv/gophertunnel/minecraft/protocol/packet"
+	standardPacket "Eulogist/core/standard/protocol/packet"
 )
 
 // 数据包翻译器，

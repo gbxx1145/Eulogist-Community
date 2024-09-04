@@ -9,8 +9,9 @@ import (
 	"fmt"
 	"net"
 
+	"Eulogist/core/standard/protocol"
+
 	"github.com/sandertv/go-raknet"
-	"github.com/sandertv/gophertunnel/minecraft/protocol"
 )
 
 // CreateListener 在 127.0.0.1 上以 Raknet 协议侦听 Minecraft 客户端的连接，

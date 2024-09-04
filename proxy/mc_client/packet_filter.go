@@ -10,8 +10,8 @@ import (
 
 	neteasePacket "Eulogist/core/minecraft/protocol/packet"
 
-	standardProtocol "github.com/sandertv/gophertunnel/minecraft/protocol"
-	standardPacket "github.com/sandertv/gophertunnel/minecraft/protocol/packet"
+	standardProtocol "Eulogist/core/standard/protocol"
+	standardPacket "Eulogist/core/standard/protocol/packet"
 )
 
 // DefaultTranslate 按默认方式翻译数据包为网易的版本。

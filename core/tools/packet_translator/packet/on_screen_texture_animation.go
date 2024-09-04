@@ -3,7 +3,7 @@ package packet
 import (
 	neteasePacket "Eulogist/core/minecraft/protocol/packet"
 
-	standardPacket "github.com/sandertv/gophertunnel/minecraft/protocol/packet"
+	standardPacket "Eulogist/core/standard/protocol/packet"
 )
 
 type OnScreenTextureAnimation struct{}

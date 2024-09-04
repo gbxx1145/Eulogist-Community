@@ -4,8 +4,8 @@ import (
 	neteaseProtocol "Eulogist/core/minecraft/protocol"
 	neteasePacket "Eulogist/core/minecraft/protocol/packet"
 
-	standardProtocol "github.com/sandertv/gophertunnel/minecraft/protocol"
-	standardPacket "github.com/sandertv/gophertunnel/minecraft/protocol/packet"
+	standardProtocol "Eulogist/core/standard/protocol"
+	standardPacket "Eulogist/core/standard/protocol/packet"
 )
 
 type CommandBlockUpdate struct{}

@@ -11,7 +11,7 @@ import (
 	"bytes"
 	"fmt"
 
-	standardPacket "github.com/sandertv/gophertunnel/minecraft/protocol/packet"
+	standardPacket "Eulogist/core/standard/protocol/packet"
 )
 
 // DefaultTranslate 按默认方式翻译数据包为国际版的版本。

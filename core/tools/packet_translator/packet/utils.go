@@ -6,7 +6,7 @@ import (
 	"Eulogist/tools/netease_blocks/blocks"
 	"fmt"
 
-	standardProtocol "github.com/sandertv/gophertunnel/minecraft/protocol"
+	standardProtocol "Eulogist/core/standard/protocol"
 )
 
 // 将切片 from([]From) 转换为 []To。

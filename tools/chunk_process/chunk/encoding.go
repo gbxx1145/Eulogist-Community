@@ -6,9 +6,10 @@ import (
 	"encoding/binary"
 	"fmt"
 
+	"Eulogist/core/standard/nbt"
+	"Eulogist/core/standard/protocol"
+
 	"github.com/df-mc/worldupgrader/blockupgrader"
-	"github.com/sandertv/gophertunnel/minecraft/nbt"
-	"github.com/sandertv/gophertunnel/minecraft/protocol"
 )
 
 type (

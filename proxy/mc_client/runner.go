@@ -4,7 +4,7 @@ import (
 	"Eulogist/core/raknet/handshake"
 	"fmt"
 
-	"github.com/sandertv/gophertunnel/minecraft/protocol/packet"
+	"Eulogist/core/standard/protocol/packet"
 )
 
 // RunServer 在 127.0.0.1 上运行一个代理服务器以等待
