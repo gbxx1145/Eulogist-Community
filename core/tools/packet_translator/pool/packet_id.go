@@ -21,21 +21,21 @@ var StandardPacketIDToNetEasePacketID = map[uint32]uint32{
 	standardPacket.IDAddPlayer:                  neteasePacket.IDAddPlayer,
 	standardPacket.IDAddActor:                   neteasePacket.IDAddActor,
 	standardPacket.IDRemoveActor:                neteasePacket.IDRemoveActor,
-	standardPacket.IDAddItemActor:               neteasePacket.IDAddItemActor, // ...
+	standardPacket.IDAddItemActor:               neteasePacket.IDAddItemActor,
 	// ---
 	standardPacket.IDTakeItemActor:     neteasePacket.IDTakeItemActor,
 	standardPacket.IDMoveActorAbsolute: neteasePacket.IDMoveActorAbsolute,
 	standardPacket.IDMovePlayer:        neteasePacket.IDMovePlayer,
 	standardPacket.IDPassengerJump:     neteasePacket.IDPassengerJump,
-	standardPacket.IDUpdateBlock:       neteasePacket.IDUpdateBlock, // TODO
+	standardPacket.IDUpdateBlock:       neteasePacket.IDUpdateBlock,
 	standardPacket.IDAddPainting:       neteasePacket.IDAddPainting,
 	standardPacket.IDTickSync:          neteasePacket.IDTickSync,
 	// ---
 	standardPacket.IDLevelEvent:           neteasePacket.IDLevelEvent,
 	standardPacket.IDMobEffect:            neteasePacket.IDMobEffect,
 	standardPacket.IDUpdateAttributes:     neteasePacket.IDUpdateAttributes,
-	standardPacket.IDInventoryTransaction: neteasePacket.IDInventoryTransaction, // TODO
-	standardPacket.IDMobEquipment:         neteasePacket.IDMobEquipment,         // ...
+	standardPacket.IDInventoryTransaction: neteasePacket.IDInventoryTransaction,
+	standardPacket.IDMobEquipment:         neteasePacket.IDMobEquipment,
 	standardPacket.IDMobArmourEquipment:   neteasePacket.IDMobArmourEquipment,
 	standardPacket.IDInteract:             neteasePacket.IDInteract,
 	standardPacket.IDBlockPickRequest:     neteasePacket.IDBlockPickRequest,
@@ -55,12 +55,12 @@ var StandardPacketIDToNetEasePacketID = map[uint32]uint32{
 	standardPacket.IDPlayerHotBar:       neteasePacket.IDPlayerHotBar,
 	standardPacket.IDInventoryContent:   neteasePacket.IDInventoryContent,
 	standardPacket.IDInventorySlot:      neteasePacket.IDInventorySlot,
-	standardPacket.IDCraftingData:       neteasePacket.IDCraftingData, // TODO
+	standardPacket.IDCraftingData:       neteasePacket.IDCraftingData,
 	standardPacket.IDCraftingEvent:      neteasePacket.IDCraftingEvent,
 	standardPacket.IDGUIDataPickItem:    neteasePacket.IDGUIDataPickItem,
 	standardPacket.IDBlockActorData:     neteasePacket.IDBlockActorData,
 	standardPacket.IDPlayerInput:        neteasePacket.IDPlayerInput,
-	standardPacket.IDLevelChunk:         neteasePacket.IDLevelChunk, // TODO
+	standardPacket.IDLevelChunk:         neteasePacket.IDLevelChunk,
 	standardPacket.IDSetCommandsEnabled: neteasePacket.IDSetCommandsEnabled,
 	standardPacket.IDSetDifficulty:      neteasePacket.IDSetDifficulty,
 	standardPacket.IDChangeDimension:    neteasePacket.IDChangeDimension,
@@ -111,7 +111,7 @@ var StandardPacketIDToNetEasePacketID = map[uint32]uint32{
 	standardPacket.IDSetDisplayObjective:         neteasePacket.IDSetDisplayObjective,
 	standardPacket.IDSetScore:                    neteasePacket.IDSetScore,
 	standardPacket.IDLabTable:                    neteasePacket.IDLabTable,
-	standardPacket.IDUpdateBlockSynced:           neteasePacket.IDUpdateBlockSynced, // TODO
+	standardPacket.IDUpdateBlockSynced:           neteasePacket.IDUpdateBlockSynced,
 	standardPacket.IDMoveActorDelta:              neteasePacket.IDMoveActorDelta,
 	standardPacket.IDSetScoreboardIdentity:       neteasePacket.IDSetScoreboardIdentity,
 	standardPacket.IDSetLocalPlayerAsInitialised: neteasePacket.IDSetLocalPlayerAsInitialised,
@@ -143,8 +143,8 @@ var StandardPacketIDToNetEasePacketID = map[uint32]uint32{
 	standardPacket.IDAnvilDamage:                       neteasePacket.IDAnvilDamage,
 	standardPacket.IDCompletedUsingItem:                neteasePacket.IDCompletedUsingItem,
 	standardPacket.IDNetworkSettings:                   neteasePacket.IDNetworkSettings,
-	standardPacket.IDPlayerAuthInput:                   neteasePacket.IDPlayerAuthInput, // TODO
-	standardPacket.IDCreativeContent:                   neteasePacket.IDCreativeContent, // TODO
+	standardPacket.IDPlayerAuthInput:                   neteasePacket.IDPlayerAuthInput,
+	standardPacket.IDCreativeContent:                   neteasePacket.IDCreativeContent,
 	standardPacket.IDPlayerEnchantOptions:              neteasePacket.IDPlayerEnchantOptions,
 	standardPacket.IDItemStackRequest:                  neteasePacket.IDItemStackRequest,
 	standardPacket.IDItemStackResponse:                 neteasePacket.IDItemStackResponse,
@@ -171,8 +171,8 @@ var StandardPacketIDToNetEasePacketID = map[uint32]uint32{
 	standardPacket.IDNPCDialogue:                       neteasePacket.IDNPCDialogue,
 	standardPacket.IDEducationResourceURI:              neteasePacket.IDEducationResourceURI,
 	standardPacket.IDCreatePhoto:                       neteasePacket.IDCreatePhoto,
-	standardPacket.IDUpdateSubChunkBlocks:              neteasePacket.IDUpdateSubChunkBlocks, // TODO
-	standardPacket.IDSubChunk:                          neteasePacket.IDSubChunk,             // TODO
+	standardPacket.IDUpdateSubChunkBlocks:              neteasePacket.IDUpdateSubChunkBlocks,
+	standardPacket.IDSubChunk:                          neteasePacket.IDSubChunk,
 	standardPacket.IDSubChunkRequest:                   neteasePacket.IDSubChunkRequest,
 	standardPacket.IDClientStartItemCooldown:           neteasePacket.IDClientStartItemCooldown,
 	standardPacket.IDScriptMessage:                     neteasePacket.IDScriptMessage,
