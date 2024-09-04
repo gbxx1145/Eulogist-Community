@@ -85,10 +85,6 @@ func DecodeNetEaseSubChunk(pk *neteasePacket.SubChunk) {
 			multipleBlockNBT = append(multipleBlockNBT, blockNBT)
 		}
 
-		if len(buf.Bytes()) > 0 {
-			fmt.Println(buf.Bytes())
-		}
-
 		subChunk := chunk.EncodeSubChunk(chunkGet, chunk.NetworkEncoding, int(idx))
 		blockEntityBuf := bytes.NewBuffer(nil)
 		for _, v := range multipleBlockNBT {
