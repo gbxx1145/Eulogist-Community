@@ -104,6 +104,8 @@ func (m *MinecraftClient) FiltePacketsAndSendCopy(
 			if found {
 				pk.NewItem.Stack.BlockRuntimeID = int32(standardRuntimeID)
 			}
+		case *standardPacket.RequestPermissions:
+			pk.PermissionLevel = pk.PermissionLevel / 2
 		default:
 			// 默认情况下，我们需要将
 			// 数据包同步到网易租赁服
