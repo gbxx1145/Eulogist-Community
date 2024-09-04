@@ -78,12 +78,18 @@ func DecodeNetEaseSubChunk(pk *neteasePacket.SubChunk) {
 			continue
 		}
 
-		for len(buf.Bytes()) > 0 {
-			var blockNBT map[string]any
-			_ = nbt.NewDecoderWithEncoding(buf, nbt.NetworkLittleEndian).Decode(&blockNBT)
-			blockNBT, _ = TranslateNBT(blockNBT)
-			multipleBlockNBT = append(multipleBlockNBT, blockNBT)
-		}
+		func() {
+			defer func() {
+				recover()
+			}()
+
+			for len(buf.Bytes()) > 0 {
+				var blockNBT map[string]any
+				_ = nbt.NewDecoderWithEncoding(buf, nbt.NetworkLittleEndian).Decode(&blockNBT)
+				blockNBT, _ = TranslateNBT(blockNBT)
+				multipleBlockNBT = append(multipleBlockNBT, blockNBT)
+			}
+		}()
 
 		subChunk := chunk.EncodeSubChunk(chunkGet, chunk.NetworkEncoding, int(idx))
 		blockEntityBuf := bytes.NewBuffer(nil)
