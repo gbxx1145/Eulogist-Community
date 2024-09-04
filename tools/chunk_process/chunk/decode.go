@@ -48,19 +48,16 @@ func NetworkDecode(air uint32, data *bytes.Buffer, count int, r cube.Range) (*Ch
 }
 
 // ...
-func DecodeSubChunkPublic(air uint32, data *bytes.Buffer, r cube.Range) (*Chunk, error) {
-	var (
-		c   = New(air, r)
-		err error
-	)
+func DecodeSubChunkPublic(air uint32, data *bytes.Buffer, r cube.Range) (c *Chunk, idx uint8, err error) {
+	c = New(air, r)
 
 	index := uint8(0)
 	c.sub[index], err = decodeSubChunk(data, c, &index, NetworkEncoding)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
-	return c, nil
+	return c, index, nil
 }
 
 // ...

@@ -10,8 +10,6 @@ import (
 	"bytes"
 	"fmt"
 
-	_ "Eulogist/tools/chunk_process/block_state"
-
 	"Eulogist/core/standard/nbt"
 
 	"github.com/mitchellh/mapstructure"
@@ -75,7 +73,7 @@ func DecodeNetEaseSubChunk(pk *neteasePacket.SubChunk) {
 		multipleBlockNBT := make([]map[string]any, 0)
 
 		buf := bytes.NewBuffer(value.RawPayload)
-		chunkGet, err := chunk.DecodeSubChunkPublic(blocks.AIR_RUNTIMEID, buf, LookUpCubeRange(pk.Dimension))
+		chunkGet, idx, err := chunk.DecodeSubChunkPublic(blocks.AIR_RUNTIMEID, buf, LookUpCubeRange(pk.Dimension))
 		if err != nil {
 			continue
 		}
@@ -87,7 +85,11 @@ func DecodeNetEaseSubChunk(pk *neteasePacket.SubChunk) {
 			multipleBlockNBT = append(multipleBlockNBT, blockNBT)
 		}
 
-		subChunk := chunk.EncodeSubChunk(chunkGet, chunk.NetworkEncoding, 0)
+		if len(buf.Bytes()) > 0 {
+			fmt.Println(buf.Bytes())
+		}
+
+		subChunk := chunk.EncodeSubChunk(chunkGet, chunk.NetworkEncoding, int(idx))
 		blockEntityBuf := bytes.NewBuffer(nil)
 		for _, v := range multipleBlockNBT {
 			_ = nbt.NewEncoderWithEncoding(blockEntityBuf, nbt.NetworkLittleEndian).Encode(v)

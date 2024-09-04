@@ -4,6 +4,8 @@ import (
 	"Eulogist/tools/chunk_process/chunk"
 	"Eulogist/tools/netease_blocks/blocks"
 	"fmt"
+
+	_ "Eulogist/tools/chunk_process/block_state"
 )
 
 // 将国际版的方块运行时转换为网易协议下的方块运行时
