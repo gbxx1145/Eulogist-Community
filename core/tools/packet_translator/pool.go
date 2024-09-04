@@ -15,6 +15,7 @@ var TranslatorPool = map[uint32]Translator{
 	standardPacket.IDAnimate:                  &packet.Animate{},
 	standardPacket.IDChangeMobProperty:        &packet.ChangeMobProperty{},
 	standardPacket.IDClientBoundDebugRenderer: &packet.ClientBoundDebugRenderer{},
+	standardPacket.IDClientBoundMapItemData:   &packet.ClientBoundMapItemData{},
 	standardPacket.IDCommandBlockUpdate:       &packet.CommandBlockUpdate{},
 	standardPacket.IDCommandRequest:           &packet.CommandRequest{},
 	standardPacket.IDCompletedUsingItem:       &packet.CompletedUsingItem{},
