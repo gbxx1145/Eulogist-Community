@@ -82,6 +82,12 @@ func (m *MinecraftServer) FiltePacketsAndSendCopy(
 			playerSkin := m.GetPlayerSkin()
 			// 发送简要身份证明
 			m.WriteSinglePacket(raknet_wrapper.MinecraftPacket[neteasePacket.Packet]{
+				Packet: &neteasePacket.PyRpc{
+					Value:         py_rpc.Marshal(&py_rpc.ClientLoadAddonsFinishedFromGac{}),
+					OperationType: neteasePacket.PyRpcOperationTypeSend,
+				},
+			})
+			m.WriteSinglePacket(raknet_wrapper.MinecraftPacket[neteasePacket.Packet]{
 				Packet: &neteasePacket.NeteaseJson{
 					Data: []byte(
 						fmt.Sprintf(
