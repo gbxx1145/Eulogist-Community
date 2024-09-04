@@ -2,6 +2,9 @@ package packet
 
 import (
 	neteaseProtocol "Eulogist/core/minecraft/protocol"
+	"Eulogist/tools/chunk_process/chunk"
+	"Eulogist/tools/netease_blocks/blocks"
+	"fmt"
 
 	standardProtocol "Eulogist/core/standard/protocol"
 )
@@ -23,6 +26,12 @@ func ConvertSlice[From any, To any](
 
 // 将 from 转换为 neteaseProtocol.ItemStack
 func ConvertToNetEaseItemStack(from standardProtocol.ItemStack) neteaseProtocol.ItemStack {
+	blockName, blockStates, foundA := chunk.RuntimeIDToState(uint32(from.BlockRuntimeID))
+	neteaseBlockRuntimeID, foundB := blocks.BlockNameAndStateToRuntimeID(blockName, blockStates)
+	if foundA && foundB {
+		from.BlockRuntimeID = int32(neteaseBlockRuntimeID)
+	}
+
 	return neteaseProtocol.ItemStack{
 		ItemType:       neteaseProtocol.ItemType(from.ItemType),
 		BlockRuntimeID: from.BlockRuntimeID,
@@ -36,6 +45,12 @@ func ConvertToNetEaseItemStack(from standardProtocol.ItemStack) neteaseProtocol.
 
 // 将 from 转换为 standardProtocol.ItemStack
 func ConvertToStandardItemStack(from neteaseProtocol.ItemStack) standardProtocol.ItemStack {
+	blockName, blockStates, foundA := blocks.RuntimeIDToState(uint32(from.BlockRuntimeID))
+	standardRuntimeID, foundB := chunk.StateToRuntimeID(fmt.Sprintf("minecraft:%s", blockName), blockStates)
+	if foundA && foundB {
+		from.BlockRuntimeID = int32(standardRuntimeID)
+	}
+
 	return standardProtocol.ItemStack{
 		ItemType:       standardProtocol.ItemType(from.ItemType),
 		BlockRuntimeID: from.BlockRuntimeID,

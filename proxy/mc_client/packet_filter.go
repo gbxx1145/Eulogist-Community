@@ -85,6 +85,24 @@ func (m *MinecraftClient) FiltePacketsAndSendCopy(
 					data.BlockRuntimeID = standardRuntimeID
 				}
 			}
+		case *standardPacket.CraftingEvent:
+			for index, value := range pk.Input {
+				standardRuntimeID, found := packet_translator.ConvertToNetEaseBlockRuntimeID(uint32(value.Stack.BlockRuntimeID))
+				if found {
+					pk.Input[index].Stack.BlockRuntimeID = int32(standardRuntimeID)
+				}
+			}
+			for index, value := range pk.Output {
+				standardRuntimeID, found := packet_translator.ConvertToNetEaseBlockRuntimeID(uint32(value.Stack.BlockRuntimeID))
+				if found {
+					pk.Output[index].Stack.BlockRuntimeID = int32(standardRuntimeID)
+				}
+			}
+		case *standardPacket.MobEquipment:
+			standardRuntimeID, found := packet_translator.ConvertToNetEaseBlockRuntimeID(uint32(pk.NewItem.Stack.BlockRuntimeID))
+			if found {
+				pk.NewItem.Stack.BlockRuntimeID = int32(standardRuntimeID)
+			}
 		default:
 			// 默认情况下，我们需要将
 			// 数据包同步到网易租赁服
