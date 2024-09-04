@@ -80,13 +80,15 @@ func (m *MinecraftServer) FiltePacketsAndSendCopy(
 			m.SetEntityUniqueID(entityUniqueID)
 			m.SetEntityRuntimeID(entityRuntimeID)
 			playerSkin := m.GetPlayerSkin()
-			// 发送简要身份证明
+			// 上报自身已完成组件加载，
+			// 尽管我们实际上并没有加载任何组件
 			m.WriteSinglePacket(raknet_wrapper.MinecraftPacket[neteasePacket.Packet]{
 				Packet: &neteasePacket.PyRpc{
 					Value:         py_rpc.Marshal(&py_rpc.ClientLoadAddonsFinishedFromGac{}),
 					OperationType: neteasePacket.PyRpcOperationTypeSend,
 				},
 			})
+			// 发送简要身份证明
 			m.WriteSinglePacket(raknet_wrapper.MinecraftPacket[neteasePacket.Packet]{
 				Packet: &neteasePacket.NeteaseJson{
 					Data: []byte(
