@@ -1,8 +1,10 @@
 package mc_client
 
 import (
-	"Eulogist/core/minecraft/protocol/packet"
+	"Eulogist/core/raknet/handshake"
 	"fmt"
+
+	"github.com/sandertv/gophertunnel/minecraft/protocol/packet"
 )
 
 // RunServer 在 127.0.0.1 上运行一个代理服务器以等待
@@ -42,12 +44,12 @@ func (m *MinecraftClient) WaitClientHandshakeDown() error {
 			// 处理初始连接数据包
 			switch p := pk.Packet.(type) {
 			case *packet.RequestNetworkSettings:
-				err = m.HandleRequestNetworkSettings(p)
+				err = handshake.HandleRequestNetworkSettings(m.Raknet, p)
 				if err != nil {
 					panic(fmt.Sprintf("WaitClientHandshakeDown: %v", err))
 				}
 			case *packet.Login:
-				m.identityData, m.clientData, err = m.HandleLogin(p)
+				m.identityData, m.clientData, err = handshake.HandleLogin(m.Raknet, p)
 				if err != nil {
 					panic(fmt.Sprintf("WaitClientHandshakeDown: %v", err))
 				}
@@ -58,7 +60,7 @@ func (m *MinecraftClient) WaitClientHandshakeDown() error {
 			}
 			// 检查连接状态
 			select {
-			case <-m.GetContext().Done():
+			case <-m.Context.Done():
 				return fmt.Errorf("WaitClientHandshakeDown: Minecraft closed its connection to eulogist")
 			default:
 			}

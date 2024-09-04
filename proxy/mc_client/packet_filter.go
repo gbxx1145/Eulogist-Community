@@ -1,11 +1,39 @@
 package mc_client
 
 import (
-	"Eulogist/core/minecraft/protocol/packet"
-	raknet_connection "Eulogist/core/raknet"
-	"encoding/json"
+	"Eulogist/core/raknet/marshal"
+	raknet_wrapper "Eulogist/core/raknet/wrapper"
+	"Eulogist/core/tools/packet_translator"
+	"bytes"
 	"fmt"
+
+	neteasePacket "Eulogist/core/minecraft/protocol/packet"
+
+	standardPacket "github.com/sandertv/gophertunnel/minecraft/protocol/packet"
 )
+
+// DefaultTranslate 按默认方式翻译数据包为网易的版本。
+// 它仅仅重定向了数据包前端的 ID，
+// 并用再次解析的方式保证当前翻译完全正确
+func (m *MinecraftClient) DefaultTranslate(
+	pk raknet_wrapper.MinecraftPacket[standardPacket.Packet],
+	neteasePacketID uint32,
+) raknet_wrapper.MinecraftPacket[neteasePacket.Packet] {
+	// 从数据包的二进制负载前端读取其在国际版协议下的数据包 ID。
+	// 这一部分将会被替换为网易版协议下的数据包 ID
+	packetBuffer := bytes.NewBuffer(pk.Bytes)
+	_ = new(neteasePacket.Header).Read(packetBuffer)
+
+	// 取得网易版协议下数据包 ID 的二进制形式
+	packetHeader := neteasePacket.Header{PacketID: neteasePacketID}
+	headerBuffer := bytes.NewBuffer([]byte{})
+	packetHeader.Write(headerBuffer)
+
+	// 获得该数据包在国际版协议下的二进制负载，
+	// 然后将其按国际版协议再次解析，然后返回值
+	packetBytes := append(headerBuffer.Bytes(), packetBuffer.Bytes()...)
+	return marshal.DecodeNetEasePacket(packetBytes, &m.ShieldID)
+}
 
 /*
 数据包过滤器过滤来自 Minecraft 客户端的多个数据包，
@@ -25,53 +53,25 @@ syncFunc 用于将数据同步到网易租赁服，
 分别对应 packets 中每一个数据包的处理成功情况
 */
 func (m *MinecraftClient) FiltePacketsAndSendCopy(
-	packets []raknet_connection.MinecraftPacket,
-	writePacketsToServer func(packets []raknet_connection.MinecraftPacket),
+	packets []raknet_wrapper.MinecraftPacket[standardPacket.Packet],
+	writePacketsToServer func(packets []raknet_wrapper.MinecraftPacket[neteasePacket.Packet]),
 	syncFunc func() error,
 ) (errResults []error, syncError error) {
 	// 初始化
 	errResults = make([]error, 0)
-	sendCopy := make([]raknet_connection.MinecraftPacket, 0)
+	sendCopy := make([]raknet_wrapper.MinecraftPacket[neteasePacket.Packet], 0)
 	// 处理每个数据包
 	for _, minecraftPacket := range packets {
 		// 初始化
 		var shouldSendCopy bool = true
 		var err error
 		// 根据数据包的类型进行不同的处理
-		switch pk := minecraftPacket.Packet.(type) {
-		case *packet.PyRpc:
-			shouldSendCopy, err = m.OnPyRpc(pk)
-			if err != nil {
-				err = fmt.Errorf("FiltePacketsAndSendCopy: %v", err)
-			}
-		case *packet.NeteaseJson:
-			// 解码 pk.Data 为 JSON 格式
-			var jsonMap map[string]any
-			err = json.Unmarshal(pk.Data, &jsonMap)
-			if err != nil {
-				err = fmt.Errorf("FiltePacketsAndSendCopy: %v", err)
-				break
-			}
-			// Login UID 已由赞颂者在先前发送，
-			// 所以此处不必重复发送
-			if eventName, ok := jsonMap["eventName"].(string); ok {
-				if eventName == "LOGIN_UID" {
-					shouldSendCopy = false
-					break
-				}
-			}
-			// 将 NetEase UID 修正为真实值
-			if _, ok := jsonMap["uid"]; ok {
-				jsonMap["uid"] = m.GetNeteaseUID()
-			}
-			// 将 JSON 重新编码到 pk.Data
-			pk.Data, err = json.Marshal(jsonMap)
-			if err != nil {
-				err = fmt.Errorf("FiltePacketsAndSendCopy: %v", err)
-				break
-			}
-			// 要求该数据包需要经编码后发送
-			minecraftPacket.Bytes = nil
+		switch minecraftPacket.Packet.(type) {
+		case *standardPacket.ClientCacheStatus:
+			writePacketsToServer([]raknet_wrapper.MinecraftPacket[neteasePacket.Packet]{
+				{Packet: &neteasePacket.ClientCacheStatus{Enabled: false}},
+			})
+			shouldSendCopy = false
 		default:
 			// 默认情况下，我们需要将
 			// 数据包同步到网易租赁服
@@ -79,7 +79,19 @@ func (m *MinecraftClient) FiltePacketsAndSendCopy(
 		// 提交子结果
 		errResults = append(errResults, err)
 		if shouldSendCopy {
-			sendCopy = append(sendCopy, minecraftPacket)
+			// 取得当前数据包相关联的 ID
+			standardPacketID := minecraftPacket.Packet.ID()
+			neteasePacketID := packet_translator.StandardPacketIDToNetEasePacketID[standardPacketID]
+			// 确认当前数据包是否需要翻译
+			if translator := packet_translator.TranslatorPool[standardPacketID]; translator != nil {
+				sendCopy = append(sendCopy, raknet_wrapper.MinecraftPacket[neteasePacket.Packet]{
+					Packet: translator.ToNetEasePacket(minecraftPacket.Packet),
+				})
+				continue
+			}
+			// 当前数据包无需翻译，
+			// 可以直接传输其二进制负载
+			sendCopy = append(sendCopy, m.DefaultTranslate(minecraftPacket, neteasePacketID))
 		}
 	}
 	// 同步数据并抄送数据包

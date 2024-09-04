@@ -149,8 +149,8 @@ func Eulogist() error {
 			// 初始化一个函数，
 			// 用于同步数据到 Minecraft 客户端
 			syncFunc := func() error {
-				if shieldID := server.GetShieldID(); shieldID != 0 {
-					client.SetShieldID(shieldID)
+				if shieldID := server.ShieldID.Load(); shieldID != 0 {
+					client.ShieldID.Store(shieldID)
 				}
 				if entityUniqueID := server.GetEntityUniqueID(); entityUniqueID != 0 {
 					client.SetEntityUniqueID(entityUniqueID)
@@ -173,9 +173,9 @@ func Eulogist() error {
 			}
 			// 检查连接状态
 			select {
-			case <-server.GetContext().Done():
+			case <-server.Context.Done():
 				return
-			case <-client.GetContext().Done():
+			case <-client.Context.Done():
 				return
 			default:
 			}
@@ -208,9 +208,9 @@ func Eulogist() error {
 			}
 			// 检查连接状态
 			select {
-			case <-client.GetContext().Done():
+			case <-client.Context.Done():
 				return
-			case <-server.GetContext().Done():
+			case <-server.Context.Done():
 				return
 			default:
 			}

@@ -9,7 +9,8 @@ import (
 	"fmt"
 	"net"
 
-	"Eulogist/core/minecraft/raknet"
+	"github.com/sandertv/go-raknet"
+	"github.com/sandertv/gophertunnel/minecraft/protocol"
 )
 
 // CreateListener 在 127.0.0.1 上以 Raknet 协议侦听 Minecraft 客户端的连接，
@@ -17,7 +18,7 @@ import (
 // 稍后，您可以通过 m.GetServerAddress 来取得服务器地址
 func (m *MinecraftClient) CreateListener() error {
 	// 创建一个 Raknet 监听器
-	listener, err := raknet.Listen("127.0.0.1:0")
+	listener, err := raknet.Listen("127.0.0.1:19132")
 	if err != nil {
 		return fmt.Errorf("CreateListener: %v", err)
 	}
@@ -26,11 +27,19 @@ func (m *MinecraftClient) CreateListener() error {
 	if !ok {
 		return fmt.Errorf("CreateListener: Failed to get address for listener")
 	}
+	// 设置 pong data
+	listener.PongData([]byte(
+		fmt.Sprintf(
+			"MCPE;%v;%v;%v;%v;%v;%v;Gophertunnel;%v;%v;%v;%v;",
+			"Eulogist", protocol.CurrentProtocol, protocol.CurrentVersion, "0", "1",
+			listener.ID(), "Creative", 1, address.Port, address.Port,
+		),
+	))
 	// 初始化变量
 	m.listener = listener
 	m.address = address
 	m.connected = make(chan struct{}, 1)
-	m.Raknet = raknet_connection.NewRaknet()
+	m.Raknet = raknet_connection.NewStandardRaknetWrapper()
 	// 返回成功
 	return nil
 }

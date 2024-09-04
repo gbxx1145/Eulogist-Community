@@ -1,11 +1,40 @@
 package mc_server
 
 import (
-	"Eulogist/core/minecraft/protocol/packet"
-	raknet_connection "Eulogist/core/raknet"
+	neteasePacket "Eulogist/core/minecraft/protocol/packet"
+	"Eulogist/core/raknet/handshake"
+	"Eulogist/core/raknet/marshal"
+	raknet_wrapper "Eulogist/core/raknet/wrapper"
+	"Eulogist/core/tools/packet_translator"
 	"Eulogist/core/tools/py_rpc"
+	"bytes"
 	"fmt"
+
+	standardPacket "github.com/sandertv/gophertunnel/minecraft/protocol/packet"
 )
+
+// DefaultTranslate 按默认方式翻译数据包为国际版的版本。
+// 它仅仅重定向了数据包前端的 ID，
+// 并用再次解析的方式保证当前翻译完全正确
+func (m *MinecraftServer) DefaultTranslate(
+	pk raknet_wrapper.MinecraftPacket[neteasePacket.Packet],
+	standardPacketID uint32,
+) raknet_wrapper.MinecraftPacket[standardPacket.Packet] {
+	// 从数据包的二进制负载前端读取其在网易协议下的数据包 ID。
+	// 这一部分将会被替换为国际版协议下的数据包 ID
+	packetBuffer := bytes.NewBuffer(pk.Bytes)
+	_ = new(standardPacket.Header).Read(packetBuffer)
+
+	// 取得国际版协议下数据包 ID 的二进制形式
+	packetHeader := standardPacket.Header{PacketID: standardPacketID}
+	headerBuffer := bytes.NewBuffer([]byte{})
+	packetHeader.Write(headerBuffer)
+
+	// 获得该数据包在国际版协议下的二进制负载，
+	// 然后将其按国际版协议再次解析，然后返回值
+	packetBytes := append(headerBuffer.Bytes(), packetBuffer.Bytes()...)
+	return marshal.DecodeStandardPacket(packetBytes, &m.ShieldID)
+}
 
 /*
 数据包过滤器过滤来自租赁服的多个数据包，
@@ -25,13 +54,13 @@ syncFunc 用于将数据同步到 Minecraft，
 分别对应 packets 中每一个数据包的处理成功情况
 */
 func (m *MinecraftServer) FiltePacketsAndSendCopy(
-	packets []raknet_connection.MinecraftPacket,
-	writePacketsToClient func(packets []raknet_connection.MinecraftPacket),
+	packets []raknet_wrapper.MinecraftPacket[neteasePacket.Packet],
+	writePacketsToClient func(packets []raknet_wrapper.MinecraftPacket[standardPacket.Packet]),
 	syncFunc func() error,
 ) (errResults []error, syncError error) {
 	// 初始化
 	errResults = make([]error, 0)
-	sendCopy := make([]raknet_connection.MinecraftPacket, 0)
+	sendCopy := make([]raknet_wrapper.MinecraftPacket[standardPacket.Packet], 0)
 	// 处理每个数据包
 	for _, minecraftPacket := range packets {
 		// 初始化
@@ -39,20 +68,21 @@ func (m *MinecraftServer) FiltePacketsAndSendCopy(
 		var err error
 		// 根据数据包的类型进行不同的处理
 		switch pk := minecraftPacket.Packet.(type) {
-		case *packet.PyRpc:
-			shouldSendCopy, err = m.OnPyRpc(pk)
+		case *neteasePacket.PyRpc:
+			err = m.OnPyRpc(pk)
 			if err != nil {
 				err = fmt.Errorf("FiltePacketsAndSendCopy: %v", err)
 			}
-		case *packet.StartGame:
+			shouldSendCopy = false
+		case *neteasePacket.StartGame:
 			// 预处理
-			entityUniqueID, entityRuntimeID := m.HandleStartGame(pk)
+			entityUniqueID, entityRuntimeID := handshake.HandleStartGame(m.Raknet, pk)
 			m.SetEntityUniqueID(entityUniqueID)
 			m.SetEntityRuntimeID(entityRuntimeID)
 			playerSkin := m.GetPlayerSkin()
 			// 发送简要身份证明
-			m.WriteSinglePacket(raknet_connection.MinecraftPacket{
-				Packet: &packet.NeteaseJson{
+			m.WriteSinglePacket(raknet_wrapper.MinecraftPacket[neteasePacket.Packet]{
+				Packet: &neteasePacket.NeteaseJson{
 					Data: []byte(
 						fmt.Sprintf(
 							`{"eventName":"LOGIN_UID","resid":"","uid":"%s"}`,
@@ -63,10 +93,10 @@ func (m *MinecraftServer) FiltePacketsAndSendCopy(
 			})
 			// 其他组件处理
 			if playerSkin == nil {
-				m.WriteSinglePacket(raknet_connection.MinecraftPacket{
-					Packet: &packet.PyRpc{
+				m.WriteSinglePacket(raknet_wrapper.MinecraftPacket[neteasePacket.Packet]{
+					Packet: &neteasePacket.PyRpc{
 						Value:         py_rpc.Marshal(&py_rpc.SyncUsingMod{}),
-						OperationType: packet.PyRpcOperationTypeSend,
+						OperationType: neteasePacket.PyRpcOperationTypeSend,
 					},
 				})
 			} else {
@@ -81,8 +111,8 @@ func (m *MinecraftServer) FiltePacketsAndSendCopy(
 					}
 				}
 				// 组件处理
-				m.WriteSinglePacket(raknet_connection.MinecraftPacket{
-					Packet: &packet.PyRpc{
+				m.WriteSinglePacket(raknet_wrapper.MinecraftPacket[neteasePacket.Packet]{
+					Packet: &neteasePacket.PyRpc{
 						Value: py_rpc.Marshal(&py_rpc.SyncUsingMod{
 							modUUIDs,
 							playerSkin.SkinUUID,
@@ -90,19 +120,19 @@ func (m *MinecraftServer) FiltePacketsAndSendCopy(
 							true,
 							outfitInfo,
 						}),
-						OperationType: packet.PyRpcOperationTypeSend,
+						OperationType: neteasePacket.PyRpcOperationTypeSend,
 					},
 				})
 			}
-		case *packet.UpdatePlayerGameType:
+		case *neteasePacket.UpdatePlayerGameType:
 			if pk.PlayerUniqueID == m.entityUniqueID {
 				// 如果玩家的唯一 ID 与数据包中记录的值匹配，
 				// 则向客户端发送 SetPlayerGameType 数据包，
 				// 并放弃当前数据包的发送，
 				// 以确保 Minecraft 客户端可以正常同步游戏模式更改。
 				// 否则，按原样抄送当前数据包
-				sendCopy = append(sendCopy, raknet_connection.MinecraftPacket{
-					Packet: &packet.SetPlayerGameType{GameType: pk.GameType},
+				sendCopy = append(sendCopy, raknet_wrapper.MinecraftPacket[standardPacket.Packet]{
+					Packet: &standardPacket.SetPlayerGameType{GameType: pk.GameType},
 				})
 				shouldSendCopy = false
 			}
@@ -113,7 +143,21 @@ func (m *MinecraftServer) FiltePacketsAndSendCopy(
 		// 提交子结果
 		errResults = append(errResults, err)
 		if shouldSendCopy {
-			sendCopy = append(sendCopy, minecraftPacket)
+			// 查找当前数据包对应的国际版 ID
+			standardPacketID, found := packet_translator.NetEasePacketIDToStandardPacketID[minecraftPacket.Packet.ID()]
+			if !found {
+				continue
+			}
+			// 确认当前数据包是否需要翻译
+			if translator := packet_translator.TranslatorPool[standardPacketID]; translator != nil {
+				sendCopy = append(sendCopy, raknet_wrapper.MinecraftPacket[standardPacket.Packet]{
+					Packet: translator.ToStandardPacket(minecraftPacket.Packet),
+				})
+				continue
+			}
+			// 当前数据包无需翻译，
+			// 可以直接传输其二进制负载
+			sendCopy = append(sendCopy, m.DefaultTranslate(minecraftPacket, standardPacketID))
 		}
 	}
 	// 同步数据并抄送数据包

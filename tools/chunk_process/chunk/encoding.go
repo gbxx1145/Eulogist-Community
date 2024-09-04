@@ -4,6 +4,9 @@ import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
+
+	blks "Eulogist/tools/netease_blocks/blocks"
+
 	"github.com/df-mc/worldupgrader/blockupgrader"
 	"github.com/sandertv/gophertunnel/minecraft/nbt"
 	"github.com/sandertv/gophertunnel/minecraft/protocol"
@@ -165,7 +168,23 @@ func (networkEncoding) decodePalette(buf *bytes.Buffer, blockSize paletteSize, _
 		if err := protocol.Varint32(buf, &temp); err != nil {
 			return nil, fmt.Errorf("error decoding palette entry: %w", err)
 		}
-		blocks[i] = uint32(temp)
+
+		// Added by Happy2018new
+		{
+			blockName, blockStates, found := blks.RuntimeIDToState(uint32(temp))
+			if !found {
+				blocks[i] = uint32(temp)
+				continue
+			}
+
+			standardRuntimeID, found := StateToRuntimeID(fmt.Sprintf("minecraft:%s", blockName), blockStates)
+			if !found {
+				blocks[i] = uint32(temp)
+				continue
+			}
+
+			blocks[i] = standardRuntimeID
+		}
 	}
 	return &Palette{values: blocks, size: blockSize}, nil
 }

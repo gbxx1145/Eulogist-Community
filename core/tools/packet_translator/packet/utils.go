@@ -145,6 +145,7 @@ func ConvertToStandardSkin(from neteaseProtocol.Skin) standardProtocol.Skin {
 		PlayFabID:         from.PlayFabID,
 		SkinResourcePatch: from.SkinResourcePatch,
 		SkinImageWidth:    from.SkinImageWidth,
+		SkinImageHeight:   from.SkinImageHeight,
 		SkinData:          from.SkinData,
 		Animations: ConvertSlice(
 			from.Animations,

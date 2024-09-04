@@ -214,7 +214,6 @@ func (pk *StartGame) ToStandardPacket(netease neteasePacket.Packet) standardPack
 	p.ServerAuthoritativeInventory = input.ServerAuthoritativeInventory
 	p.GameVersion = input.GameVersion
 	p.PropertyData = input.PropertyData
-	p.ServerBlockStateChecksum = input.ServerBlockStateChecksum
 	p.ClientSideGeneration = input.ClientSideGeneration
 	p.WorldTemplateID = input.WorldTemplateID
 	p.ChatRestrictionLevel = input.ChatRestrictionLevel
@@ -251,6 +250,8 @@ func (pk *StartGame) ToStandardPacket(netease neteasePacket.Packet) standardPack
 			return standardProtocol.ItemEntry(from)
 		},
 	)
+
+	p.ServerBlockStateChecksum = 0
 
 	return &p
 }

@@ -6,6 +6,8 @@ import (
 	"Eulogist/core/minecraft/protocol"
 	"Eulogist/core/minecraft/protocol/packet"
 	raknet_connection "Eulogist/core/raknet"
+	"Eulogist/core/raknet/handshake"
+	raknet_wrapper "Eulogist/core/raknet/wrapper"
 	"Eulogist/core/tools/skin_process"
 	"context"
 	"crypto/ecdsa"
@@ -56,7 +58,7 @@ func ConnectToServer(basicConfig BasicConfig) (*MinecraftServer, error) {
 	}
 	// 设置数据
 	mcServer.authResponse = authResponse
-	mcServer.Raknet = raknet_connection.NewRaknet()
+	mcServer.Raknet = raknet_connection.NewNetEaseRaknetWrapper()
 	mcServer.SetConnection(connection, clientkey)
 	go mcServer.ProcessIncomingPackets()
 	// 返回值
@@ -83,7 +85,7 @@ func (m *MinecraftServer) FinishHandshake() error {
 	// 向网易租赁服请求网络设置，
 	// 这是赞颂者登录到网易租赁服的第一个数据包
 	m.WriteSinglePacket(
-		raknet_connection.MinecraftPacket{
+		raknet_wrapper.MinecraftPacket[packet.Packet]{
 			Packet: &packet.RequestNetworkSettings{ClientProtocol: protocol.CurrentProtocol},
 		},
 	)
@@ -93,12 +95,12 @@ func (m *MinecraftServer) FinishHandshake() error {
 			// 处理初始连接数据包
 			switch p := pk.Packet.(type) {
 			case *packet.NetworkSettings:
-				m.identityData, m.clientData, err = m.HandleNetworkSettings(p, m.authResponse, m.playerSkin)
+				m.identityData, m.clientData, err = handshake.HandleNetworkSettings(m.Raknet, p, m.authResponse, m.playerSkin)
 				if err != nil {
 					return fmt.Errorf("FinishHandshake: %v", err)
 				}
 			case *packet.ServerToClientHandshake:
-				err = m.HandleServerToClientHandshake(p)
+				err = handshake.HandleServerToClientHandshake(m.Raknet, p)
 				if err != nil {
 					return fmt.Errorf("FinishHandshake: %v", err)
 				}
@@ -108,7 +110,7 @@ func (m *MinecraftServer) FinishHandshake() error {
 			}
 			// 检查连接状态
 			select {
-			case <-m.GetContext().Done():
+			case <-m.Context.Done():
 				return fmt.Errorf("FinishHandshake: NetEase Minecraft Rental Server closed their connection to eulogist")
 			default:
 			}

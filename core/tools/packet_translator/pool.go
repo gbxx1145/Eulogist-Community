@@ -207,9 +207,13 @@ var StandardPacketIDToNetEasePacketID = map[uint32]uint32{
 }
 
 // ...
+var NetEasePacketIDToStandardPacketID map[uint32]uint32
+
+// ...
 var TranslatorPool = map[uint32]Translator{
 	standardPacket.IDAddActor:                 &packet.AddActor{},
 	standardPacket.IDAddEntity:                &packet.AddEntity{},
+	standardPacket.IDAddPlayer:                &packet.AddPlayer{},
 	standardPacket.IDAddVolumeEntity:          &packet.AddVolumeEntity{},
 	standardPacket.IDAnimate:                  &packet.Animate{},
 	standardPacket.IDChangeMobProperty:        &packet.ChangeMobProperty{},
@@ -238,4 +242,12 @@ var TranslatorPool = map[uint32]Translator{
 	standardPacket.IDText:                     &packet.Text{},
 	standardPacket.IDUpdateBlockSynced:        &packet.UpdateBlockSynced{},
 	standardPacket.IDUpdateSubChunkBlocks:     &packet.UpdateSubChunkBlocks{},
+}
+
+// ...
+func init() {
+	NetEasePacketIDToStandardPacketID = make(map[uint32]uint32)
+	for key, value := range StandardPacketIDToNetEasePacketID {
+		NetEasePacketIDToStandardPacketID[value] = key
+	}
 }

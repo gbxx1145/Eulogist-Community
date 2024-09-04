@@ -10,6 +10,8 @@ import (
 	"bytes"
 	"fmt"
 
+	_ "Eulogist/tools/chunk_process/block_state"
+
 	"github.com/mitchellh/mapstructure"
 	"github.com/sandertv/gophertunnel/minecraft/nbt"
 )
@@ -72,7 +74,10 @@ func DecodeNetEaseSubChunk(pk *neteasePacket.SubChunk) {
 		multipleBlockNBT := make([]map[string]any, 0)
 
 		buf := bytes.NewBuffer(value.RawPayload)
-		chunkGet, _ := chunk.DecodeSubChunkPublic(blocks.AIR_RUNTIMEID, buf, LookUpCubeRange(pk.Dimension))
+		chunkGet, err := chunk.DecodeSubChunkPublic(blocks.AIR_RUNTIMEID, buf, LookUpCubeRange(pk.Dimension))
+		if err != nil {
+			return
+		}
 
 		for len(buf.Bytes()) > 0 {
 			var blockNBT map[string]any
@@ -97,7 +102,10 @@ func DecodeNetEaseSubChunk(pk *neteasePacket.SubChunk) {
 func DecodeNetEaseLevelChunk(pk *neteasePacket.LevelChunk) {
 	multipleBlockNBT := make([]map[string]any, 0)
 	buf := bytes.NewBuffer(pk.RawPayload)
-	chunkGet, _ := chunk.NetworkDecode(blocks.AIR_RUNTIMEID, buf, int(pk.SubChunkCount), LookUpCubeRange(0))
+	chunkGet, err := chunk.NetworkDecode(blocks.AIR_RUNTIMEID, buf, int(pk.SubChunkCount), LookUpCubeRange(0))
+	if err != nil {
+		return
+	}
 
 	// Length of 1 byte for the border block count.
 	borderBlockCount, _ := buf.ReadByte()

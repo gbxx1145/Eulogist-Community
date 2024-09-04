@@ -1,12 +1,13 @@
 package mc_client
 
 import (
-	"Eulogist/core/minecraft/protocol/login"
-	raknet_connection "Eulogist/core/raknet"
+	raknet_wrapper "Eulogist/core/raknet/wrapper"
 	"Eulogist/core/tools/skin_process"
 	"net"
 
-	"Eulogist/core/minecraft/raknet"
+	"github.com/sandertv/go-raknet"
+	"github.com/sandertv/gophertunnel/minecraft/protocol/login"
+	"github.com/sandertv/gophertunnel/minecraft/protocol/packet"
 )
 
 type MinecraftClient struct {
@@ -24,5 +25,5 @@ type MinecraftClient struct {
 	entityUniqueID  int64
 	entityRuntimeID uint64
 
-	*raknet_connection.Raknet
+	*raknet_wrapper.Raknet[packet.Packet]
 }

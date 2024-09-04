@@ -57,6 +57,8 @@ func (pk *PlayerList) ToStandardPacket(netease neteasePacket.Packet) standardPac
 				PlatformChatID: from.PlatformChatID,
 				BuildPlatform:  from.BuildPlatform,
 				Skin:           ConvertToStandardSkin(from.Skin),
+				Teacher:        from.Teacher,
+				Host:           from.Host,
 			}
 		},
 	)
