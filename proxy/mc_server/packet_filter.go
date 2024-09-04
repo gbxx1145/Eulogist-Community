@@ -6,6 +6,7 @@ import (
 	"Eulogist/core/raknet/marshal"
 	raknet_wrapper "Eulogist/core/raknet/wrapper"
 	"Eulogist/core/tools/packet_translator"
+	translator "Eulogist/core/tools/packet_translator/packet"
 	"Eulogist/core/tools/py_rpc"
 	"bytes"
 	"fmt"
@@ -164,6 +165,39 @@ func (m *MinecraftServer) FiltePacketsAndSendCopy(
 				if pk.EventData != 0 {
 					shouldSendCopy = false
 				}
+			}
+		case *neteasePacket.InventoryContent:
+			// 初始化
+			allExist := true
+			pks := []raknet_wrapper.MinecraftPacket[standardPacket.Packet]{}
+			// 遍历物品变动表中的每个物品堆栈实例
+			for slot, item := range pk.Content {
+				// 如果物品的固定网络堆栈 ID 为 0，说明这是个空气，
+				// 如果为 -1，说明当前物品未被更改。
+				// allExist 指示是否有某个物品未被更改
+				if item.Stack.NetworkID == 0 || item.Stack.NetworkID == -1 {
+					if item.Stack.NetworkID == -1 {
+						allExist = false
+					}
+					continue
+				}
+				// 当 allExist 为假时，
+				// 说明存在某个物品未被更改。
+				// 对于国际版，国际版不能识别这样的物品，
+				// 因此，我们采用该方式来逐个更新产生变化的槽位
+				pks = append(pks, raknet_wrapper.MinecraftPacket[standardPacket.Packet]{
+					Packet: &standardPacket.InventorySlot{
+						WindowID: pk.WindowID,
+						Slot:     uint32(slot),
+						NewItem:  translator.ConvertToStandardItemInstance(item),
+					},
+				})
+			}
+			// 当存在某个物品未被更改时，
+			// 我们采用该方式来逐个更新产生变化的槽位
+			if !allExist {
+				writePacketsToClient(pks)
+				shouldSendCopy = false
 			}
 		default:
 			// 默认情况下，
