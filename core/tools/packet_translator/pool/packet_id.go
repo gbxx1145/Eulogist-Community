@@ -32,6 +32,8 @@ var StandardPacketIDToNetEasePacketID = map[uint32]uint32{
 	standardPacket.IDTickSync:          neteasePacket.IDTickSync,
 	// ---
 	standardPacket.IDLevelEvent:           neteasePacket.IDLevelEvent,
+	standardPacket.IDBlockEvent:           neteasePacket.IDBlockEvent,
+	standardPacket.IDActorEvent:           neteasePacket.IDActorEvent,
 	standardPacket.IDMobEffect:            neteasePacket.IDMobEffect,
 	standardPacket.IDUpdateAttributes:     neteasePacket.IDUpdateAttributes,
 	standardPacket.IDInventoryTransaction: neteasePacket.IDInventoryTransaction,
