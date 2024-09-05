@@ -39,5 +39,4 @@ var TranslatorPool = map[uint32]Translator{
 	standardPacket.IDSubChunk:                 &packet.SubChunk{},
 	standardPacket.IDText:                     &packet.Text{},
 	standardPacket.IDUpdateBlockSynced:        &packet.UpdateBlockSynced{},
-	standardPacket.IDUpdateSubChunkBlocks:     &packet.UpdateSubChunkBlocks{},
 }

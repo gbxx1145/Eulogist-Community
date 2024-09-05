@@ -2,6 +2,7 @@ package mc_server
 
 import (
 	neteasePacket "Eulogist/core/minecraft/netease/protocol/packet"
+	standardProtocol "Eulogist/core/minecraft/standard/protocol"
 	"Eulogist/core/raknet/handshake"
 	"Eulogist/core/raknet/marshal"
 	raknet_wrapper "Eulogist/core/raknet/wrapper"
@@ -168,18 +169,44 @@ func (m *MinecraftServer) FiltePacketsAndSendCopy(
 				pk.NewBlockRuntimeID = standardRuntimeID
 			}
 		case *neteasePacket.UpdateSubChunkBlocks:
-			for index, value := range pk.Blocks {
+			// 初始化
+			pks := []raknet_wrapper.MinecraftPacket[standardPacket.Packet]{}
+			// 处理前景层的方块
+			for _, value := range pk.Blocks {
 				standardRuntimeID, found := packet_translator.ConvertToStandardBlockRuntimeID(value.BlockRuntimeID)
 				if found {
-					pk.Blocks[index].BlockRuntimeID = standardRuntimeID
+					pks = append(pks, raknet_wrapper.MinecraftPacket[standardPacket.Packet]{
+						Packet: &standardPacket.UpdateBlockSynced{
+							Position:          standardProtocol.BlockPos(value.BlockPos),
+							NewBlockRuntimeID: standardRuntimeID,
+							Flags:             value.Flags,
+							Layer:             0,
+							EntityUniqueID:    int64(value.SyncedUpdateEntityUniqueID),
+							TransitionType:    uint64(value.SyncedUpdateType),
+						},
+					})
 				}
 			}
-			for index, value := range pk.Extra {
+			// 处理背景层的方块
+			for _, value := range pk.Extra {
 				standardRuntimeID, found := packet_translator.ConvertToStandardBlockRuntimeID(value.BlockRuntimeID)
 				if found {
-					pk.Extra[index].BlockRuntimeID = standardRuntimeID
+					pks = append(pks, raknet_wrapper.MinecraftPacket[standardPacket.Packet]{
+						Packet: &standardPacket.UpdateBlockSynced{
+							Position:          standardProtocol.BlockPos(value.BlockPos),
+							NewBlockRuntimeID: standardRuntimeID,
+							Flags:             value.Flags,
+							Layer:             1,
+							EntityUniqueID:    int64(value.SyncedUpdateEntityUniqueID),
+							TransitionType:    uint64(value.SyncedUpdateType),
+						},
+					})
 				}
 			}
+			// 发送多方块更改至客户端，
+			// 并指定当前数据包不抄送
+			writePacketsToClient(pks)
+			shouldSendCopy = false
 		case *neteasePacket.UpdateBlockSynced:
 			standardRuntimeID, found := packet_translator.ConvertToStandardBlockRuntimeID(pk.NewBlockRuntimeID)
 			if found {
