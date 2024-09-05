@@ -1,6 +1,7 @@
 package Eulogist
 
 import (
+	packet_translate_struct "Eulogist/core/tools/packet_translator/struct"
 	Client "Eulogist/proxy/mc_client"
 	Server "Eulogist/proxy/mc_server"
 	"fmt"
@@ -85,6 +86,7 @@ func Eulogist() error {
 	client.SetNeteaseUID(server.GetNeteaseUID())
 	client.SetPlayerSkin(server.GetPlayerSkin())
 	client.SetOutfitInfo(server.GetOutfitInfo())
+	server.SetStandardBedrockIdentity(client.GetStandardBedrockIdentity())
 	waitGroup.Add(2)
 
 	// 处理网易租赁服到赞颂者的数据包
@@ -106,6 +108,10 @@ func Eulogist() error {
 				}
 				if entityRuntimeID := server.GetEntityRuntimeID(); entityRuntimeID != 0 {
 					client.SetEntityRuntimeID(entityRuntimeID)
+				}
+				if serverSkin := server.GetServerSkin(); serverSkin != nil {
+					standardServerSkin := packet_translate_struct.ConvertToStandardSkin(*serverSkin)
+					client.SetServerSkin(&standardServerSkin)
 				}
 				return nil
 			}

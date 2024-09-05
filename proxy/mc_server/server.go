@@ -1,6 +1,21 @@
 package mc_server
 
-import "Eulogist/core/tools/skin_process"
+import (
+	neteaseProtocol "Eulogist/core/minecraft/netease/protocol"
+	"Eulogist/core/tools/skin_process"
+
+	"github.com/google/uuid"
+)
+
+// ...
+func (m *MinecraftServer) SetStandardBedrockIdentity(standardBedrockIdentity uuid.UUID) {
+	m.standardBedrockIdentity = standardBedrockIdentity
+}
+
+// ...
+func (m *MinecraftServer) GetStandardBedrockIdentity() uuid.UUID {
+	return m.standardBedrockIdentity
+}
 
 // ...
 func (m *MinecraftServer) GetNeteaseUID() string {
@@ -25,6 +40,16 @@ func (m *MinecraftServer) GetPlayerSkin() *skin_process.Skin {
 // ...
 func (m *MinecraftServer) SetPlayerSkin(skin *skin_process.Skin) {
 	m.playerSkin = skin
+}
+
+// ...
+func (m *MinecraftServer) GetServerSkin() *neteaseProtocol.Skin {
+	return m.serverSkin
+}
+
+// ...
+func (m *MinecraftServer) SetServerSkin(serverSkin *neteaseProtocol.Skin) {
+	m.serverSkin = serverSkin
 }
 
 // ...

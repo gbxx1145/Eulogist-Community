@@ -9,8 +9,9 @@ import (
 	"fmt"
 	"net"
 
-	"Eulogist/core/minecraft/standard/protocol"
+	standardProtocol "Eulogist/core/minecraft/standard/protocol"
 
+	"github.com/google/uuid"
 	"github.com/sandertv/go-raknet"
 )
 
@@ -32,7 +33,7 @@ func (m *MinecraftClient) CreateListener() error {
 	listener.PongData([]byte(
 		fmt.Sprintf(
 			"MCPE;%v;%v;%v;%v;%v;%v;Gophertunnel;%v;%v;%v;%v;",
-			"Eulogist", protocol.CurrentProtocol, protocol.CurrentVersion, "0", "1",
+			"Eulogist", standardProtocol.CurrentProtocol, standardProtocol.CurrentVersion, "0", "1",
 			listener.ID(), "Creative", 1, address.Port, address.Port,
 		),
 	))
@@ -71,6 +72,17 @@ func (m *MinecraftClient) GetServerPort() int {
 }
 
 // ...
+func (m *MinecraftClient) SetStandardBedrockIdentity(standardBedrockIdentity uuid.UUID) {
+	m.identityData.Identity = standardBedrockIdentity.String()
+}
+
+// ...
+func (m *MinecraftClient) GetStandardBedrockIdentity() uuid.UUID {
+	uuidGet, _ := uuid.Parse(m.identityData.Identity)
+	return uuidGet
+}
+
+// ...
 func (m *MinecraftClient) GetNeteaseUID() string {
 	return m.neteaseUID
 }
@@ -93,6 +105,16 @@ func (m *MinecraftClient) GetPlayerSkin() *skin_process.Skin {
 // ...
 func (m *MinecraftClient) SetPlayerSkin(skin *skin_process.Skin) {
 	m.playerSkin = skin
+}
+
+// ...
+func (m *MinecraftClient) GetServerSkin() *standardProtocol.Skin {
+	return m.serverSkin
+}
+
+// ...
+func (m *MinecraftClient) SetServerSkin(serverSkin *standardProtocol.Skin) {
+	m.serverSkin = serverSkin
 }
 
 // ...

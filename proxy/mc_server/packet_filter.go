@@ -158,6 +158,25 @@ func (m *MinecraftServer) FiltePacketsAndSendCopy(
 					pk.Items[index].Item.BlockRuntimeID = int32(standardRuntimeID)
 				}
 			}
+		case *neteasePacket.PlayerList:
+			for _, value := range pk.Entries {
+				if value.EntityUniqueID == m.GetEntityUniqueID() {
+					m.SetServerSkin(&value.Skin)
+				}
+			}
+		case *neteasePacket.PlayStatus:
+			if pk.Status == neteasePacket.PlayStatusPlayerSpawn {
+				writePacketsToClient([]raknet_wrapper.MinecraftPacket[standardPacket.Packet]{
+					{
+						Packet: &standardPacket.PlayerSkin{
+							UUID:        m.GetStandardBedrockIdentity(),
+							Skin:        packet_translate_struct.ConvertToStandardSkin(*m.GetServerSkin()),
+							OldSkinName: "",
+							NewSkinName: "",
+						},
+					},
+				})
+			}
 		case *neteasePacket.AddItemActor:
 			standardRuntimeID, found := packet_translator.ConvertToStandardBlockRuntimeID(uint32(pk.Item.Stack.BlockRuntimeID))
 			if found {

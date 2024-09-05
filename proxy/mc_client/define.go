@@ -5,6 +5,7 @@ import (
 	"Eulogist/core/tools/skin_process"
 	"net"
 
+	standardProtocol "Eulogist/core/minecraft/standard/protocol"
 	"Eulogist/core/minecraft/standard/protocol/login"
 	"Eulogist/core/minecraft/standard/protocol/packet"
 
@@ -21,6 +22,7 @@ type MinecraftClient struct {
 
 	neteaseUID string
 	playerSkin *skin_process.Skin
+	serverSkin *standardProtocol.Skin
 	outfitInfo map[string]*int
 
 	entityUniqueID  int64

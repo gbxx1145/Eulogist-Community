@@ -106,6 +106,9 @@ func (m *MinecraftClient) FiltePacketsAndSendCopy(
 			}
 		case *standardPacket.RequestPermissions:
 			pk.PermissionLevel = pk.PermissionLevel / 2
+		case *standardPacket.PlayerSkin:
+			m.WriteSinglePacket(minecraftPacket)
+			shouldSendCopy = false
 		default:
 			// 默认情况下，我们需要将
 			// 数据包同步到网易租赁服
