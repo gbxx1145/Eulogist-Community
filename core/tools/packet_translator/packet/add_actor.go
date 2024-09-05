@@ -105,6 +105,7 @@ func (pk *AddActor) ToStandardPacket(netease neteasePacket.Packet) standardPacke
 		},
 	)
 
+	// Something can not resolve. --Happy2018new
 	for key := range p.EntityMetadata {
 		switch key {
 		case 0x0, 0x3, 0x4, 0x7, 0x8, 0x9, 0xf, 0x1a, 0x26, 0x2a, 0x35, 0x36, 0x51, 0x54, 0x5c:
