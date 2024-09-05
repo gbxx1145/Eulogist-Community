@@ -145,34 +145,43 @@ func ToStandardStackRequestAction(
 ) standardProtocol.StackRequestAction {
 	switch data := from.(type) {
 	case *neteaseProtocol.TakeStackRequestAction:
+		data.Source.ContainerID = packet_translate_pool.NetEaseContainerIDStandardContainerID[data.Source.ContainerID]
+		data.Destination.ContainerID = packet_translate_pool.NetEaseContainerIDStandardContainerID[data.Destination.ContainerID]
 		action := standardProtocol.TakeStackRequestAction{}
 		action.Count = data.Count
 		action.Source = standardProtocol.StackRequestSlotInfo(data.Source)
 		action.Destination = standardProtocol.StackRequestSlotInfo(data.Destination)
 		return &action
 	case *neteaseProtocol.PlaceStackRequestAction:
+		data.Source.ContainerID = packet_translate_pool.NetEaseContainerIDStandardContainerID[data.Source.ContainerID]
+		data.Destination.ContainerID = packet_translate_pool.NetEaseContainerIDStandardContainerID[data.Destination.ContainerID]
 		action := standardProtocol.PlaceStackRequestAction{}
 		action.Count = data.Count
 		action.Source = standardProtocol.StackRequestSlotInfo(data.Source)
 		action.Destination = standardProtocol.StackRequestSlotInfo(data.Destination)
 		return &action
 	case *neteaseProtocol.SwapStackRequestAction:
+		data.Source.ContainerID = packet_translate_pool.NetEaseContainerIDStandardContainerID[data.Source.ContainerID]
+		data.Destination.ContainerID = packet_translate_pool.NetEaseContainerIDStandardContainerID[data.Destination.ContainerID]
 		return &standardProtocol.SwapStackRequestAction{
 			Source:      standardProtocol.StackRequestSlotInfo(data.Source),
 			Destination: standardProtocol.StackRequestSlotInfo(data.Destination),
 		}
 	case *neteaseProtocol.DropStackRequestAction:
+		data.Source.ContainerID = packet_translate_pool.NetEaseContainerIDStandardContainerID[data.Source.ContainerID]
 		return &standardProtocol.DropStackRequestAction{
 			Count:    data.Count,
 			Source:   standardProtocol.StackRequestSlotInfo(data.Source),
 			Randomly: data.Randomly,
 		}
 	case *neteaseProtocol.DestroyStackRequestAction:
+		data.Source.ContainerID = packet_translate_pool.NetEaseContainerIDStandardContainerID[data.Source.ContainerID]
 		return &standardProtocol.DestroyStackRequestAction{
 			Count:  data.Count,
 			Source: standardProtocol.StackRequestSlotInfo(data.Source),
 		}
 	case *neteaseProtocol.ConsumeStackRequestAction:
+		data.Source.ContainerID = packet_translate_pool.NetEaseContainerIDStandardContainerID[data.Source.ContainerID]
 		return &standardProtocol.ConsumeStackRequestAction{
 			DestroyStackRequestAction: standardProtocol.DestroyStackRequestAction{
 				Count:  data.DestroyStackRequestAction.Count,
@@ -184,12 +193,16 @@ func ToStandardStackRequestAction(
 			ResultsSlot: data.ResultsSlot,
 		}
 	case *neteaseProtocol.PlaceInContainerStackRequestAction:
+		data.Source.ContainerID = packet_translate_pool.NetEaseContainerIDStandardContainerID[data.Source.ContainerID]
+		data.Destination.ContainerID = packet_translate_pool.NetEaseContainerIDStandardContainerID[data.Destination.ContainerID]
 		action := standardProtocol.PlaceInContainerStackRequestAction{}
 		action.Count = data.Count
 		action.Source = standardProtocol.StackRequestSlotInfo(data.Source)
 		action.Destination = standardProtocol.StackRequestSlotInfo(data.Destination)
 		return &action
 	case *neteaseProtocol.TakeOutContainerStackRequestAction:
+		data.Source.ContainerID = packet_translate_pool.NetEaseContainerIDStandardContainerID[data.Source.ContainerID]
+		data.Destination.ContainerID = packet_translate_pool.NetEaseContainerIDStandardContainerID[data.Destination.ContainerID]
 		action := standardProtocol.TakeOutContainerStackRequestAction{}
 		action.Count = data.Count
 		action.Source = standardProtocol.StackRequestSlotInfo(data.Source)
