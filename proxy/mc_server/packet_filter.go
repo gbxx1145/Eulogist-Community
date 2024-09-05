@@ -270,6 +270,17 @@ func (m *MinecraftServer) FiltePacketsAndSendCopy(
 			if found {
 				pk.NewItem.Stack.BlockRuntimeID = int32(standardRuntimeID)
 			}
+		case *neteasePacket.ItemStackResponse:
+			for index, value := range pk.Responses {
+				for i, v := range value.ContainerInfo {
+					pk.Responses[index].ContainerInfo[i].ContainerID = packet_translate_pool.NetEaseContainerIDStandardContainerID[v.ContainerID]
+				}
+			}
+		case *neteasePacket.ClientBoundMapItemData:
+			if pk.Pixels.IsEmpty {
+				pk.Height = 0
+				pk.Width = 0
+			}
 		case *neteasePacket.InventoryContent:
 			// 初始化
 			allExist := true
@@ -307,12 +318,6 @@ func (m *MinecraftServer) FiltePacketsAndSendCopy(
 			if !allExist {
 				writePacketsToClient(pks)
 				shouldSendCopy = false
-			}
-		case *neteasePacket.ItemStackResponse:
-			for index, value := range pk.Responses {
-				for i, v := range value.ContainerInfo {
-					pk.Responses[index].ContainerInfo[i].ContainerID = packet_translate_pool.NetEaseContainerIDStandardContainerID[v.ContainerID]
-				}
 			}
 		default:
 			// 默认情况下，
