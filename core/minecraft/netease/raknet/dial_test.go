@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"Eulogist/core/minecraft/raknet"
+	"Eulogist/core/minecraft/netease/raknet"
 )
 
 func TestPing(t *testing.T) {

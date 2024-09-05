@@ -11,7 +11,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"Eulogist/core/minecraft/raknet/internal/message"
+	"Eulogist/core/minecraft/netease/raknet/internal/message"
 )
 
 // UpstreamDialer is an interface for anything compatible with net.Dialer.

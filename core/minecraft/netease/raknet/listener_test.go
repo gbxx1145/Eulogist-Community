@@ -1,7 +1,7 @@
 package raknet_test
 
 import (
-	"Eulogist/core/minecraft/raknet"
+	"Eulogist/core/minecraft/netease/raknet"
 	"fmt"
 	"testing"
 	"time"

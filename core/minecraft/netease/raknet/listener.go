@@ -1,7 +1,7 @@
 package raknet
 
 import (
-	"Eulogist/core/minecraft/raknet/internal/message"
+	"Eulogist/core/minecraft/netease/raknet/internal/message"
 	"bytes"
 	"fmt"
 	"log"
