@@ -1,10 +1,10 @@
 package packet
 
 import (
-	neteasePacket "Eulogist/core/minecraft/protocol/packet"
+	neteasePacket "Eulogist/core/minecraft/netease/protocol/packet"
 	packet_translate_struct "Eulogist/core/tools/packet_translator/struct"
 
-	standardPacket "Eulogist/core/standard/protocol/packet"
+	standardPacket "Eulogist/core/minecraft/standard/protocol/packet"
 )
 
 type InventorySlot struct{}

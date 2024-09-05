@@ -1,8 +1,8 @@
 package packet_translate_struct
 
 import (
-	neteaseProtocol "Eulogist/core/minecraft/protocol"
-	standardProtocol "Eulogist/core/standard/protocol"
+	neteaseProtocol "Eulogist/core/minecraft/netease/protocol"
+	standardProtocol "Eulogist/core/minecraft/standard/protocol"
 	"Eulogist/tools/chunk_process/chunk"
 	"Eulogist/tools/netease_blocks/blocks"
 	"fmt"

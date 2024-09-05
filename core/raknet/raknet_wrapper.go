@@ -1,11 +1,11 @@
 package raknet_connection
 
 import (
-	neteasePacket "Eulogist/core/minecraft/protocol/packet"
+	neteasePacket "Eulogist/core/minecraft/netease/protocol/packet"
 	"Eulogist/core/raknet/marshal"
 	raknet_wrapper "Eulogist/core/raknet/wrapper"
 
-	standardPacket "Eulogist/core/standard/protocol/packet"
+	standardPacket "Eulogist/core/minecraft/standard/protocol/packet"
 )
 
 // 获取一个基于网易 Minecraft 协议的 Raknet 包装器

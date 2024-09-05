@@ -1,8 +1,8 @@
 package marshal
 
 import (
-	"Eulogist/core/minecraft/protocol"
-	"Eulogist/core/minecraft/protocol/packet"
+	"Eulogist/core/minecraft/netease/protocol"
+	"Eulogist/core/minecraft/netease/protocol/packet"
 	raknet_wrapper "Eulogist/core/raknet/wrapper"
 	"bytes"
 	"sync/atomic"

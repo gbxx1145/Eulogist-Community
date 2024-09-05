@@ -1,16 +1,16 @@
 package chunk_process
 
 import (
-	"Eulogist/core/minecraft/protocol"
-	"Eulogist/core/minecraft/protocol/block_actors"
-	neteasePacket "Eulogist/core/minecraft/protocol/packet"
+	"Eulogist/core/minecraft/netease/protocol"
+	"Eulogist/core/minecraft/netease/protocol/block_actors"
+	neteasePacket "Eulogist/core/minecraft/netease/protocol/packet"
 	"Eulogist/tools/chunk_process/chunk"
 	"Eulogist/tools/chunk_process/cube"
 	"Eulogist/tools/netease_blocks/blocks"
 	"bytes"
 	"fmt"
 
-	"Eulogist/core/standard/nbt"
+	"Eulogist/core/minecraft/standard/nbt"
 
 	"github.com/mitchellh/mapstructure"
 )

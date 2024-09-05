@@ -9,7 +9,7 @@ import (
 	"fmt"
 	"net"
 
-	"Eulogist/core/standard/protocol"
+	"Eulogist/core/minecraft/standard/protocol"
 
 	"github.com/sandertv/go-raknet"
 )

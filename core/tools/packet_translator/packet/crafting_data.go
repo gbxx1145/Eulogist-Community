@@ -1,12 +1,12 @@
 package packet
 
 import (
-	neteaseProtocol "Eulogist/core/minecraft/protocol"
-	neteasePacket "Eulogist/core/minecraft/protocol/packet"
+	neteaseProtocol "Eulogist/core/minecraft/netease/protocol"
+	neteasePacket "Eulogist/core/minecraft/netease/protocol/packet"
 	packet_translate_struct "Eulogist/core/tools/packet_translator/struct"
 
-	standardProtocol "Eulogist/core/standard/protocol"
-	standardPacket "Eulogist/core/standard/protocol/packet"
+	standardProtocol "Eulogist/core/minecraft/standard/protocol"
+	standardPacket "Eulogist/core/minecraft/standard/protocol/packet"
 )
 
 type CraftingData struct{}

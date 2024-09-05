@@ -1,9 +1,9 @@
 package packet_translator
 
 import (
-	neteasePacket "Eulogist/core/minecraft/protocol/packet"
+	neteasePacket "Eulogist/core/minecraft/netease/protocol/packet"
 
-	standardPacket "Eulogist/core/standard/protocol/packet"
+	standardPacket "Eulogist/core/minecraft/standard/protocol/packet"
 )
 
 // 数据包翻译器，

@@ -7,7 +7,7 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"Eulogist/core/standard/protocol/packet"
+	"Eulogist/core/minecraft/standard/protocol/packet"
 )
 
 // 描述一个简单的，但可以支持不同 Minecraft

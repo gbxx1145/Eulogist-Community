@@ -1,10 +1,10 @@
 package packet
 
 import (
-	neteaseProtocol "Eulogist/core/minecraft/protocol"
-	neteasePacket "Eulogist/core/minecraft/protocol/packet"
+	neteaseProtocol "Eulogist/core/minecraft/netease/protocol"
+	neteasePacket "Eulogist/core/minecraft/netease/protocol/packet"
 
-	standardPacket "Eulogist/core/standard/protocol/packet"
+	standardPacket "Eulogist/core/minecraft/standard/protocol/packet"
 )
 
 type CompletedUsingItem struct{}

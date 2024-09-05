@@ -5,8 +5,8 @@ import (
 	"bytes"
 	"sync/atomic"
 
-	"Eulogist/core/standard/protocol"
-	"Eulogist/core/standard/protocol/packet"
+	"Eulogist/core/minecraft/standard/protocol"
+	"Eulogist/core/minecraft/standard/protocol/packet"
 )
 
 // List all packets which include packets from server

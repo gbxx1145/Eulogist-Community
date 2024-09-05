@@ -1,7 +1,7 @@
 package mc_server
 
 import (
-	neteasePacket "Eulogist/core/minecraft/protocol/packet"
+	neteasePacket "Eulogist/core/minecraft/netease/protocol/packet"
 	"Eulogist/core/raknet/handshake"
 	"Eulogist/core/raknet/marshal"
 	raknet_wrapper "Eulogist/core/raknet/wrapper"
@@ -12,7 +12,7 @@ import (
 	"bytes"
 	"fmt"
 
-	standardPacket "Eulogist/core/standard/protocol/packet"
+	standardPacket "Eulogist/core/minecraft/standard/protocol/packet"
 )
 
 // DefaultTranslate 按默认方式翻译数据包为国际版的版本。

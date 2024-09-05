@@ -2,8 +2,8 @@ package handshake
 
 import (
 	fb_client "Eulogist/core/fb_auth/mv4/client"
-	"Eulogist/core/minecraft/protocol"
-	"Eulogist/core/minecraft/protocol/login"
+	"Eulogist/core/minecraft/netease/protocol"
+	"Eulogist/core/minecraft/netease/protocol/login"
 	"Eulogist/core/tools/skin_process"
 	"bytes"
 	"crypto/ecdsa"

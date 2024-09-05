@@ -6,8 +6,8 @@ import (
 	"encoding/binary"
 	"fmt"
 
-	"Eulogist/core/standard/nbt"
-	"Eulogist/core/standard/protocol"
+	"Eulogist/core/minecraft/standard/nbt"
+	"Eulogist/core/minecraft/standard/protocol"
 
 	"github.com/df-mc/worldupgrader/blockupgrader"
 )

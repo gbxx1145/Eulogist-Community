@@ -4,7 +4,7 @@ import (
 	"bytes"
 	_ "embed"
 
-	"Eulogist/core/standard/nbt"
+	"Eulogist/core/minecraft/standard/nbt"
 )
 
 // legacyBlockEntry represents a block entry used in versions prior to 1.13.

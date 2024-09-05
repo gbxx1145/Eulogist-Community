@@ -2,8 +2,8 @@ package mc_server
 
 import (
 	fb_client "Eulogist/core/fb_auth/mv4/client"
-	"Eulogist/core/minecraft/protocol/login"
-	"Eulogist/core/minecraft/protocol/packet"
+	"Eulogist/core/minecraft/netease/protocol/login"
+	"Eulogist/core/minecraft/netease/protocol/packet"
 	raknet_wrapper "Eulogist/core/raknet/wrapper"
 	"Eulogist/core/tools/skin_process"
 )

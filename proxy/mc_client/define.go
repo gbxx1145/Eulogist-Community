@@ -5,8 +5,8 @@ import (
 	"Eulogist/core/tools/skin_process"
 	"net"
 
-	"Eulogist/core/standard/protocol/login"
-	"Eulogist/core/standard/protocol/packet"
+	"Eulogist/core/minecraft/standard/protocol/login"
+	"Eulogist/core/minecraft/standard/protocol/packet"
 
 	"github.com/sandertv/go-raknet"
 )

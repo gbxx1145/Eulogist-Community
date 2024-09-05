@@ -12,7 +12,7 @@ import (
 	"strings"
 	"unsafe"
 
-	"Eulogist/core/standard/nbt"
+	"Eulogist/core/minecraft/standard/nbt"
 
 	"github.com/segmentio/fasthash/fnv1"
 )

@@ -1,8 +1,8 @@
 package packet_translate_pool
 
 import (
-	neteasePacket "Eulogist/core/minecraft/protocol/packet"
-	standardPacket "Eulogist/core/standard/protocol/packet"
+	neteasePacket "Eulogist/core/minecraft/netease/protocol/packet"
+	standardPacket "Eulogist/core/minecraft/standard/protocol/packet"
 )
 
 // ...

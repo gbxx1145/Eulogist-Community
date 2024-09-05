@@ -3,7 +3,7 @@ package packet_translator
 import (
 	"Eulogist/core/tools/packet_translator/packet"
 
-	standardPacket "Eulogist/core/standard/protocol/packet"
+	standardPacket "Eulogist/core/minecraft/standard/protocol/packet"
 )
 
 // ...

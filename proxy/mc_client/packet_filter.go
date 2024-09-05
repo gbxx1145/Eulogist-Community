@@ -8,10 +8,10 @@ import (
 	"bytes"
 	"fmt"
 
-	neteasePacket "Eulogist/core/minecraft/protocol/packet"
+	neteasePacket "Eulogist/core/minecraft/netease/protocol/packet"
 
-	standardProtocol "Eulogist/core/standard/protocol"
-	standardPacket "Eulogist/core/standard/protocol/packet"
+	standardProtocol "Eulogist/core/minecraft/standard/protocol"
+	standardPacket "Eulogist/core/minecraft/standard/protocol/packet"
 )
 
 // DefaultTranslate 按默认方式翻译数据包为网易的版本。

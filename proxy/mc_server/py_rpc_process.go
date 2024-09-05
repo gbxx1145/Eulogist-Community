@@ -2,7 +2,7 @@ package mc_server
 
 import (
 	fbauth "Eulogist/core/fb_auth/mv4"
-	"Eulogist/core/minecraft/protocol/packet"
+	"Eulogist/core/minecraft/netease/protocol/packet"
 	raknet_wrapper "Eulogist/core/raknet/wrapper"
 	"Eulogist/core/tools/py_rpc"
 	"encoding/json"

@@ -7,7 +7,7 @@ import (
 	"net"
 	"sync/atomic"
 
-	"Eulogist/core/standard/protocol/packet"
+	"Eulogist/core/minecraft/standard/protocol/packet"
 )
 
 // 初始化一个空的 Raknet。

@@ -3,8 +3,8 @@ package mc_server
 import (
 	fbauth "Eulogist/core/fb_auth/mv4"
 	fb_client "Eulogist/core/fb_auth/mv4/client"
-	"Eulogist/core/minecraft/protocol"
-	"Eulogist/core/minecraft/protocol/packet"
+	"Eulogist/core/minecraft/netease/protocol"
+	"Eulogist/core/minecraft/netease/protocol/packet"
 	raknet_connection "Eulogist/core/raknet"
 	"Eulogist/core/raknet/handshake"
 	raknet_wrapper "Eulogist/core/raknet/wrapper"
@@ -17,7 +17,7 @@ import (
 	"fmt"
 	"time"
 
-	"Eulogist/core/minecraft/raknet"
+	"Eulogist/core/minecraft/netease/raknet"
 )
 
 // ConnectToServer 用于连接到租赁服号为 serverCode，
