@@ -11,19 +11,10 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/klauspost/compress v1.17.9
 	github.com/mitchellh/mapstructure v1.5.0
-	github.com/muhammadmuzzammil1998/jsonc v1.0.0
 	github.com/pterm/pterm v0.12.79
 	github.com/ugorji/go/codec v1.2.12
-	golang.org/x/net v0.21.0
-	golang.org/x/oauth2 v0.4.0
 	golang.org/x/text v0.16.0
 	gopkg.in/square/go-jose.v2 v2.6.0
-)
-
-require (
-	github.com/golang/protobuf v1.5.2 // indirect
-	google.golang.org/appengine v1.6.7 // indirect
-	google.golang.org/protobuf v1.28.1 // indirect
 )
 
 require (
