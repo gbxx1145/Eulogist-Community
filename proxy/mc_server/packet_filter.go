@@ -166,11 +166,15 @@ func (m *MinecraftServer) FiltePacketsAndSendCopy(
 			}
 		case *neteasePacket.PlayStatus:
 			if pk.Status == neteasePacket.PlayStatusPlayerSpawn {
+				skinData := m.GetServerSkin()
+				if skinData == nil || !skinData.Trusted {
+					break
+				}
 				writePacketsToClient([]raknet_wrapper.MinecraftPacket[standardPacket.Packet]{
 					{
 						Packet: &standardPacket.PlayerSkin{
 							UUID:        m.GetStandardBedrockIdentity(),
-							Skin:        packet_translate_struct.ConvertToStandardSkin(*m.GetServerSkin()),
+							Skin:        packet_translate_struct.ConvertToStandardSkin(*skinData),
 							OldSkinName: "",
 							NewSkinName: "",
 						},
@@ -329,6 +333,10 @@ func (m *MinecraftServer) FiltePacketsAndSendCopy(
 		// 提交子结果
 		errResults = append(errResults, err)
 		if shouldSendCopy {
+			// 确定当前数据包是否处理成功
+			if minecraftPacket.Packet == nil {
+				continue
+			}
 			// 查找当前数据包对应的国际版 ID
 			standardPacketID, found := packet_translate_pool.NetEasePacketIDToStandardPacketID[minecraftPacket.Packet.ID()]
 			if !found {

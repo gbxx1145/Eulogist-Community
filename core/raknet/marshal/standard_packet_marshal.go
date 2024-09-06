@@ -3,10 +3,13 @@ package marshal
 import (
 	raknet_wrapper "Eulogist/core/raknet/wrapper"
 	"bytes"
+	"runtime/debug"
 	"sync/atomic"
 
 	"Eulogist/core/minecraft/standard/protocol"
 	"Eulogist/core/minecraft/standard/protocol/packet"
+
+	"github.com/pterm/pterm"
 )
 
 // List all packets which include packets from server
@@ -41,7 +44,10 @@ func DecodeStandardPacket(buf []byte, shieldID *atomic.Int32) (
 		defer func() {
 			r := recover()
 			if r != nil {
-				minecraftPacket = nil
+				pterm.Warning.Printf(
+					"DecodeStandardPacket: Failed to unmarshal packet which numbered %d, and the error log is %v\n\n[Stack Info]\n%s\n",
+					packetHeader.PacketID, r, string(debug.Stack()),
+				)
 			}
 		}()
 		minecraftPacket = packetFunc()
@@ -62,7 +68,13 @@ func EncodeStandardPacket(
 	packetHeader.Write(buffer)
 	func() {
 		defer func() {
-			recover()
+			r := recover()
+			if r != nil {
+				pterm.Warning.Printf(
+					"EncodeStandardPacket: Failed to unmarshal packet which numbered %d, and the error log is %v\n\n[Stack Info]\n%s\n",
+					packetHeader.PacketID, r, string(debug.Stack()),
+				)
+			}
 		}()
 		pk.Packet.Marshal(protocol.NewWriter(buffer, shieldID.Load()))
 	}()

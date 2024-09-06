@@ -5,6 +5,7 @@ import (
 	Client "Eulogist/proxy/mc_client"
 	Server "Eulogist/proxy/mc_server"
 	"fmt"
+	"runtime/debug"
 	"sync"
 
 	"github.com/pterm/pterm"
@@ -42,6 +43,7 @@ func Eulogist() error {
 		if err != nil {
 			return fmt.Errorf("Eulogist: %v", err)
 		}
+		defer server.CloseConnection()
 
 		pterm.Success.Println("Success to create connection with NetEase Minecraft Bedrock Rental Server, now we try to create handshake with it.")
 
@@ -60,6 +62,7 @@ func Eulogist() error {
 		if err != nil {
 			return fmt.Errorf("Eulogist: %v", err)
 		}
+		defer client.CloseConnection()
 		// 打印赞颂者准备完成的信息
 		pterm.Success.Printf(
 			"Eulogist is ready! Please connect to Eulogist manually.\nEulogist server address: %s:%d\n",
@@ -92,9 +95,13 @@ func Eulogist() error {
 	// 处理网易租赁服到赞颂者的数据包
 	go func() {
 		defer func() {
-			server.CloseConnection()
-			client.CloseConnection()
 			waitGroup.Add(-1)
+			if r := recover(); r != nil {
+				pterm.Warning.Printf(
+					"Eulogist/GoFunc/RentalServerToEulogist: err = %v\n\n[Stack Info]\n%s\n",
+					r, string(debug.Stack()),
+				)
+			}
 		}()
 		for {
 			// 初始化一个函数，
@@ -140,9 +147,13 @@ func Eulogist() error {
 	// 处理 Minecraft 客户端到赞颂者的数据包
 	go func() {
 		defer func() {
-			client.CloseConnection()
-			server.CloseConnection()
 			waitGroup.Add(-1)
+			if r := recover(); r != nil {
+				pterm.Warning.Printf(
+					"Eulogist/GoFunc/MinecraftClientToEulogist: err = %v\n\n[Stack Info]\n%s\n",
+					r, string(debug.Stack()),
+				)
+			}
 		}()
 		for {
 			// 初始化一个函数，

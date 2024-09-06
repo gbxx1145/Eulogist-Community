@@ -116,6 +116,10 @@ func (m *MinecraftClient) FiltePacketsAndSendCopy(
 		// 提交子结果
 		errResults = append(errResults, err)
 		if shouldSendCopy {
+			// 确定当前数据包是否处理成功
+			if minecraftPacket.Packet == nil {
+				continue
+			}
 			// 取得当前数据包相关联的 ID
 			standardPacketID := minecraftPacket.Packet.ID()
 			neteasePacketID := packet_translate_pool.StandardPacketIDToNetEasePacketID[standardPacketID]

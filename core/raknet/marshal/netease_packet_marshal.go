@@ -5,7 +5,10 @@ import (
 	"Eulogist/core/minecraft/netease/protocol/packet"
 	raknet_wrapper "Eulogist/core/raknet/wrapper"
 	"bytes"
+	"runtime/debug"
 	"sync/atomic"
+
+	"github.com/pterm/pterm"
 )
 
 // 将负载为 buf 的网易 Minecraft 数据包解码，
@@ -29,7 +32,10 @@ func DecodeNetEasePacket(buf []byte, shieldID *atomic.Int32) (
 		defer func() {
 			r := recover()
 			if r != nil {
-				minecraftPacket = nil
+				pterm.Warning.Printf(
+					"DecodeNetEasePacket: Failed to unmarshal packet which numbered %d, and the error log is %v\n\n[Stack Info]\n%s\n",
+					packetHeader.PacketID, r, string(debug.Stack()),
+				)
 			}
 		}()
 		minecraftPacket = packetFunc()
@@ -50,7 +56,13 @@ func EncodeNetEasePacket(
 	packetHeader.Write(buffer)
 	func() {
 		defer func() {
-			recover()
+			r := recover()
+			if r != nil {
+				pterm.Warning.Printf(
+					"EncodeNetEasePacket: Failed to unmarshal packet which numbered %d, and the error log is %v\n\n[Stack Info]\n%s\n",
+					packetHeader.PacketID, r, string(debug.Stack()),
+				)
+			}
 		}()
 		pk.Packet.Marshal(protocol.NewWriter(buffer, shieldID.Load()))
 	}()
