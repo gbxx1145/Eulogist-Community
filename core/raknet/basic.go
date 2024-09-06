@@ -181,7 +181,7 @@ func (r *Raknet) WritePackets(pk []MinecraftPacket) {
 				r := recover()
 				if r != nil {
 					pterm.Warning.Printf(
-						"WritePackets: Failed to unmarshal packet %T, and the error log is %v\n\n[Stack Info]\n%s\n",
+						"WritePackets: Failed to marshal packet %T, and the error log is %v\n\n[Stack Info]\n%s\n",
 						singlePacket, r, string(debug.Stack()),
 					)
 					fmt.Println()
