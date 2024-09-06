@@ -5,6 +5,7 @@ import (
 	"Eulogist/core/minecraft/netease/protocol/packet"
 	raknet_wrapper "Eulogist/core/raknet/wrapper"
 	"bytes"
+	"fmt"
 	"runtime/debug"
 	"sync/atomic"
 
@@ -31,11 +32,21 @@ func DecodeNetEasePacket(buf []byte, shieldID *atomic.Int32) (
 	func() {
 		defer func() {
 			r := recover()
-			if r != nil {
+			if r == nil {
+				return
+			}
+			if packetFunc == nil {
 				pterm.Warning.Printf(
 					"DecodeNetEasePacket: Failed to unmarshal packet which numbered %d, and the error log is %v\n\n[Stack Info]\n%s\n",
 					packetHeader.PacketID, r, string(debug.Stack()),
 				)
+				fmt.Println()
+			} else {
+				pterm.Warning.Printf(
+					"DecodeNetEasePacket: Failed to unmarshal packet %T, and the error log is %v\n\n[Stack Info]\n%s\n",
+					packetFunc(), r, string(debug.Stack()),
+				)
+				fmt.Println()
 			}
 		}()
 		minecraftPacket = packetFunc()
@@ -59,9 +70,10 @@ func EncodeNetEasePacket(
 			r := recover()
 			if r != nil {
 				pterm.Warning.Printf(
-					"EncodeNetEasePacket: Failed to unmarshal packet which numbered %d, and the error log is %v\n\n[Stack Info]\n%s\n",
-					packetHeader.PacketID, r, string(debug.Stack()),
+					"EncodeNetEasePacket: Failed to marshal packet %T, and the error log is %v\n\n[Stack Info]\n%s\n",
+					pk, r, string(debug.Stack()),
 				)
+				fmt.Println()
 			}
 		}()
 		pk.Packet.Marshal(protocol.NewWriter(buffer, shieldID.Load()))

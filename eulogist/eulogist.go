@@ -101,6 +101,7 @@ func Eulogist() error {
 					"Eulogist/GoFunc/RentalServerToEulogist: err = %v\n\n[Stack Info]\n%s\n",
 					r, string(debug.Stack()),
 				)
+				fmt.Println()
 			}
 		}()
 		for {
@@ -153,6 +154,7 @@ func Eulogist() error {
 					"Eulogist/GoFunc/MinecraftClientToEulogist: err = %v\n\n[Stack Info]\n%s\n",
 					r, string(debug.Stack()),
 				)
+				fmt.Println()
 			}
 		}()
 		for {
