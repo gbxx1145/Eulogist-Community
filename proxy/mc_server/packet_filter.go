@@ -238,9 +238,12 @@ func (m *MinecraftServer) FiltePacketsAndSendCopy(
 				if found {
 					pk.EventData = int32(standardRuntimeID)
 				}
-			case neteasePacket.LevelEventParticlesCrackBlock, neteasePacket.LevelEventStopBlockCracking:
-				if pk.EventData != 0 {
-					shouldSendCopy = false
+			case neteasePacket.LevelEventParticlesCrackBlock:
+				blockFace := pk.EventData >> 24
+				blockRuntimeID := pk.EventData & 0xffffff
+				standardRuntimeID, found := packet_translator.ConvertToStandardBlockRuntimeID(uint32(blockRuntimeID))
+				if found {
+					pk.EventData = int32(standardRuntimeID) | blockFace<<24
 				}
 			}
 		case *neteasePacket.InventorySlot:
