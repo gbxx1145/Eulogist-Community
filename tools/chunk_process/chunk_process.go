@@ -65,7 +65,8 @@ func TranslateNBT(origNbt map[string]interface{}) (out map[string]interface{}, e
 	return out, nil
 }
 
-// DecodeNetEaseSubChunk 解析区块 SubChunk
+// DecodeNetEaseSubChunk 解析区块 SubChunk。
+//
 // 解析过程中将会自动将方块的运行时 ID 与国际版对齐，
 // 然后，再将其中包含的方块实体数据翻译为正常形式，
 // 最终，将翻译结果回写到其自身
@@ -136,7 +137,7 @@ func DecodeNetEaseLevelChunk(pk *neteasePacket.LevelChunk) {
 			return
 		}
 		// 似乎为 pk.RawPayload 填写空值也能使 Minecraft 正常工作，
-		// 目前尚不清楚该字段的变化会给实际的地形表现产生何种影响。
+		// 目前尚不清楚该字段的变化会给实际的地形表现产生何种影响
 		pk.RawPayload = chunk.EncodeBiomes(chunkGet, chunk.NetworkEncoding)
 		return
 	}
