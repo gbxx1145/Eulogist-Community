@@ -23,6 +23,14 @@ func (pk *CraftingData) ToNetEaseRecipe(
 				data.Input,
 				packet_translate_struct.ToNetEaseItemDescriptorCount,
 			),
+			Output: packet_translate_struct.ConvertSlice(
+				data.Output,
+				packet_translate_struct.ConvertToNetEaseItemStack,
+			),
+			UUID:            data.UUID,
+			Block:           data.Block,
+			Priority:        data.Priority,
+			RecipeNetworkID: data.RecipeNetworkID,
 		}
 	case *standardProtocol.ShapedRecipe:
 		return &neteaseProtocol.ShapedRecipe{
@@ -39,6 +47,10 @@ func (pk *CraftingData) ToNetEaseRecipe(
 					return packet_translate_struct.ConvertToNetEaseItemStack(from)
 				},
 			),
+			UUID:            data.UUID,
+			Block:           data.Block,
+			Priority:        data.Priority,
+			RecipeNetworkID: data.RecipeNetworkID,
 		}
 	case *standardProtocol.FurnaceRecipe:
 		return &neteaseProtocol.FurnaceRecipe{
@@ -67,6 +79,14 @@ func (pk *CraftingData) ToNetEaseRecipe(
 					data.ShapelessRecipe.Input,
 					packet_translate_struct.ToNetEaseItemDescriptorCount,
 				),
+				Output: packet_translate_struct.ConvertSlice(
+					data.Output,
+					packet_translate_struct.ConvertToNetEaseItemStack,
+				),
+				UUID:            data.ShapelessRecipe.UUID,
+				Block:           data.ShapelessRecipe.Block,
+				Priority:        data.ShapelessRecipe.Priority,
+				RecipeNetworkID: data.ShapelessRecipe.RecipeNetworkID,
 			},
 		}
 	case *standardProtocol.ShapelessChemistryRecipe:
@@ -77,6 +97,14 @@ func (pk *CraftingData) ToNetEaseRecipe(
 					data.ShapelessRecipe.Input,
 					packet_translate_struct.ToNetEaseItemDescriptorCount,
 				),
+				Output: packet_translate_struct.ConvertSlice(
+					data.Output,
+					packet_translate_struct.ConvertToNetEaseItemStack,
+				),
+				UUID:            data.ShapelessRecipe.UUID,
+				Block:           data.ShapelessRecipe.Block,
+				Priority:        data.ShapelessRecipe.Priority,
+				RecipeNetworkID: data.ShapelessRecipe.RecipeNetworkID,
 			},
 		}
 	case *standardProtocol.ShapedChemistryRecipe:
@@ -95,6 +123,10 @@ func (pk *CraftingData) ToNetEaseRecipe(
 						return packet_translate_struct.ConvertToNetEaseItemStack(from)
 					},
 				),
+				UUID:            data.ShapedRecipe.UUID,
+				Block:           data.ShapedRecipe.Block,
+				Priority:        data.ShapedRecipe.Priority,
+				RecipeNetworkID: data.ShapedRecipe.RecipeNetworkID,
 			},
 		}
 	case *standardProtocol.SmithingTransformRecipe:
@@ -133,6 +165,14 @@ func (pk *CraftingData) ToStandardRecipe(
 				data.Input,
 				packet_translate_struct.ToStandardItemDescriptorCount,
 			),
+			Output: packet_translate_struct.ConvertSlice(
+				data.Output,
+				packet_translate_struct.ConvertToStandardItemStack,
+			),
+			UUID:            data.UUID,
+			Block:           data.Block,
+			Priority:        data.Priority,
+			RecipeNetworkID: data.RecipeNetworkID,
 		}
 	case *neteaseProtocol.ShapedRecipe:
 		return &standardProtocol.ShapedRecipe{
@@ -149,6 +189,10 @@ func (pk *CraftingData) ToStandardRecipe(
 					return packet_translate_struct.ConvertToStandardItemStack(from)
 				},
 			),
+			UUID:            data.UUID,
+			Block:           data.Block,
+			Priority:        data.Priority,
+			RecipeNetworkID: data.RecipeNetworkID,
 		}
 	case *neteaseProtocol.FurnaceRecipe:
 		return &standardProtocol.FurnaceRecipe{
@@ -177,6 +221,14 @@ func (pk *CraftingData) ToStandardRecipe(
 					data.ShapelessRecipe.Input,
 					packet_translate_struct.ToStandardItemDescriptorCount,
 				),
+				Output: packet_translate_struct.ConvertSlice(
+					data.Output,
+					packet_translate_struct.ConvertToStandardItemStack,
+				),
+				UUID:            data.ShapelessRecipe.UUID,
+				Block:           data.ShapelessRecipe.Block,
+				Priority:        data.ShapelessRecipe.Priority,
+				RecipeNetworkID: data.ShapelessRecipe.RecipeNetworkID,
 			},
 		}
 	case *neteaseProtocol.ShapelessChemistryRecipe:
@@ -187,6 +239,14 @@ func (pk *CraftingData) ToStandardRecipe(
 					data.ShapelessRecipe.Input,
 					packet_translate_struct.ToStandardItemDescriptorCount,
 				),
+				Output: packet_translate_struct.ConvertSlice(
+					data.Output,
+					packet_translate_struct.ConvertToStandardItemStack,
+				),
+				UUID:            data.ShapelessRecipe.UUID,
+				Block:           data.ShapelessRecipe.Block,
+				Priority:        data.ShapelessRecipe.Priority,
+				RecipeNetworkID: data.ShapelessRecipe.RecipeNetworkID,
 			},
 		}
 	case *neteaseProtocol.ShapedChemistryRecipe:
@@ -205,6 +265,10 @@ func (pk *CraftingData) ToStandardRecipe(
 						return packet_translate_struct.ConvertToStandardItemStack(from)
 					},
 				),
+				UUID:            data.ShapedRecipe.UUID,
+				Block:           data.ShapedRecipe.Block,
+				Priority:        data.ShapedRecipe.Priority,
+				RecipeNetworkID: data.ShapedRecipe.RecipeNetworkID,
 			},
 		}
 	case *neteaseProtocol.SmithingTransformRecipe:
