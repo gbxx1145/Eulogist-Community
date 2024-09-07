@@ -37,7 +37,12 @@ func (*ClientBoundDebugRenderer) ID() uint32 {
 }
 
 func (pk *ClientBoundDebugRenderer) Marshal(io protocol.IO) {
-	io.Varuint32(&pk.Type)
+	// PhoenixBuilder specific changes.
+	// Author: Liliya233, Happy2018new
+	{
+		io.Uint32(&pk.Type)
+		// io.Varuint32(&pk.Type)
+	}
 	if pk.Type == ClientBoundDebugRendererAddCube {
 		io.String(&pk.Text)
 		io.Vec3(&pk.Position)

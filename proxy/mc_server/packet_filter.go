@@ -39,9 +39,13 @@ func (m *MinecraftServer) DefaultTranslate(
 	packetHeader.Write(headerBuffer)
 
 	// 获得该数据包在国际版协议下的二进制负载，
-	// 然后将其按国际版协议再次解析，然后返回值
+	// 然后将其按国际版协议再次解析
 	packetBytes := append(headerBuffer.Bytes(), packetBuffer.Bytes()...)
-	return marshal.DecodeStandardPacket(packetBytes, &m.ShieldID)
+	result := marshal.DecodeStandardPacket(packetBytes, &m.ShieldID)
+
+	// 返回值
+	result.Bytes = nil
+	return result
 }
 
 /*
