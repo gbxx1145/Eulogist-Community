@@ -10,6 +10,7 @@ import (
 	packet_translate_pool "Eulogist/core/tools/packet_translator/pool"
 	packet_translate_struct "Eulogist/core/tools/packet_translator/struct"
 	"Eulogist/core/tools/py_rpc"
+	"Eulogist/tools/chunk_process"
 	"bytes"
 	"fmt"
 
@@ -181,6 +182,8 @@ func (m *MinecraftServer) FiltePacketsAndSendCopy(
 					},
 				})
 			}
+		case *neteasePacket.LevelChunk:
+			chunk_process.DecodeNetEaseLevelChunk(pk)
 		case *neteasePacket.AddItemActor:
 			standardRuntimeID, found := packet_translator.ConvertToStandardBlockRuntimeID(uint32(pk.Item.Stack.BlockRuntimeID))
 			if found {
