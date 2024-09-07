@@ -44,7 +44,9 @@ func (m *MinecraftServer) DefaultTranslate(
 	result := marshal.DecodeStandardPacket(packetBytes, &m.ShieldID)
 
 	// 返回值
-	result.Bytes = nil
+	if result.Packet != nil {
+		result.Bytes = nil
+	}
 	return result
 }
 
