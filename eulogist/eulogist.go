@@ -144,16 +144,24 @@ func Eulogist() error {
 
 	// 处理网易租赁服到赞颂者的数据包
 	go func() {
+		// 关闭已建立的所有连接
 		defer func() {
 			waitGroup.Add(-1)
-			if r := recover(); r != nil {
-				pterm.Warning.Printf(
+			server.CloseConnection()
+			client.CloseConnection()
+		}()
+		// 显示程序崩溃错误信息
+		defer func() {
+			r := recover()
+			if r != nil {
+				pterm.Error.Printf(
 					"Eulogist/GoFunc/RentalServerToEulogist: err = %v\n\n[Stack Info]\n%s\n",
 					r, string(debug.Stack()),
 				)
 				fmt.Println()
 			}
 		}()
+		// 数据包抄送
 		for {
 			// 初始化一个函数，
 			// 用于同步数据到 Minecraft 客户端
@@ -193,16 +201,24 @@ func Eulogist() error {
 
 	// 处理 Minecraft 客户端到赞颂者的数据包
 	go func() {
+		// 关闭已建立的所有连接
 		defer func() {
 			waitGroup.Add(-1)
-			if r := recover(); r != nil {
-				pterm.Warning.Printf(
+			client.CloseConnection()
+			server.CloseConnection()
+		}()
+		// 显示程序崩溃错误信息
+		defer func() {
+			r := recover()
+			if r != nil {
+				pterm.Error.Printf(
 					"Eulogist/GoFunc/MinecraftClientToEulogist: err = %v\n\n[Stack Info]\n%s\n",
 					r, string(debug.Stack()),
 				)
 				fmt.Println()
 			}
 		}()
+		// 数据包抄送
 		for {
 			// 初始化一个函数，
 			// 用于同步数据到网易租赁服
