@@ -90,16 +90,23 @@ func GenerateEulogistConfig() (config *EulogistConfig, err error) {
 	return &cfg, nil
 }
 
-// GenerateNetEaseConfig 根据赞颂者的配置 config，
+// GenerateNetEaseConfig 根据皮肤路径 skinPath、
+// 皮肤手臂是否纤细 skinIsSlim 及赞颂者开放的服务器地址，
 // 在当前目录下生成用于启动 Minecraft 客户端的配置文件，
 // 并返回该配置文件的绝对路径
-func GenerateNetEaseConfig(config *EulogistConfig, ip string, port int) (configPath string, err error) {
+func GenerateNetEaseConfig(
+	skinPath string,
+	skinIsSlim bool,
+	ip string,
+	port int,
+) (configPath string, err error) {
 	cfg := DefaultNetEaseConfig()
 
 	cfg.RoomInfo.IP = ip
 	cfg.RoomInfo.Port = port
+	cfg.SkinInfo.Slim = skinIsSlim
 
-	if !FileExist(config.SkinPath) {
+	if !FileExist(skinPath) {
 		currentPath, _ := os.Getwd()
 		cfg.SkinInfo.SkinPath = fmt.Sprintf(`%s\steve.png`, currentPath)
 		err = os.WriteFile("steve.png", skin_process.SteveSkin, 0600)
@@ -107,7 +114,7 @@ func GenerateNetEaseConfig(config *EulogistConfig, ip string, port int) (configP
 			return "", fmt.Errorf("GenerateNetEaseConfig: %v", err)
 		}
 	} else {
-		cfg.SkinInfo.SkinPath = config.SkinPath
+		cfg.SkinInfo.SkinPath = skinPath
 	}
 
 	err = WriteJsonFile("netease.cppconfig", cfg)

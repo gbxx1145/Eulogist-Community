@@ -7,8 +7,11 @@ import (
 
 // ----------------------------------------------------------------------------------------------------
 
-//go:embed default_skin_resource_patch.json
-var DefaultSkinResourcePatch []byte
+//go:embed default_wide_skin_resource_patch.json
+var DefaultWideSkinResourcePatch []byte
+
+//go:embed default_slim_skin_resource_patch.json
+var DefaultSlimSkinResourcePatch []byte
 
 //go:embed default_skin_geometry.json
 var DefaultSkinGeometry []byte
@@ -29,6 +32,8 @@ type Skin struct {
 	SkinUUID string
 	// 皮肤项目的 UUID
 	SkinItemID string
+	// 皮肤的手臂是否纤细
+	SkinIsSlim bool
 	// 皮肤的一维密集像素矩阵
 	SkinPixels []byte
 	// 皮肤的骨架信息

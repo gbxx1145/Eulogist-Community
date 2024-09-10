@@ -19,7 +19,6 @@ func Eulogist() error {
 	var err error
 	var config *EulogistConfig
 	var neteaseConfigPath string
-	var neteaseSkinFileName string
 	var waitGroup sync.WaitGroup
 	var client *Client.MinecraftClient
 	var server *Server.MinecraftServer
@@ -62,12 +61,21 @@ func Eulogist() error {
 
 	// 根据配置文件的启动类型决定启动方式
 	if config.LaunchType == LaunchTypeNormal {
+		// 初始化
+		var playerSkin *skin_process.Skin
+		var neteaseSkinFileName string
+		var skinIsSlim bool
+		var useAccountSkin bool
 		// 检查 Minecraft 客户端是否存在
 		if !FileExist(config.NEMCPath) {
 			return fmt.Errorf("Eulogist: Client not found, maybe you did not download or the the path is incorrect")
 		}
-		// 生成皮肤文件
-		if playerSkin := server.GetPlayerSkin(); !FileExist(config.SkinPath) && playerSkin != nil {
+		// 取得皮肤数据
+		playerSkin = server.GetPlayerSkin()
+		useAccountSkin = (!FileExist(config.SkinPath) && playerSkin != nil)
+		// 皮肤处理
+		if useAccountSkin {
+			// 生成皮肤文件
 			if skin_process.IsZIPFile(playerSkin.FullSkinData) {
 				neteaseSkinFileName = "skin.zip"
 			} else {
@@ -79,6 +87,8 @@ func Eulogist() error {
 			}
 			currentPath, _ := os.Getwd()
 			config.SkinPath = fmt.Sprintf(`%s\%s`, currentPath, neteaseSkinFileName)
+			// 皮肤纤细处理
+			skinIsSlim = playerSkin.SkinIsSlim
 		}
 		// 启动 Eulogist 服务器
 		client, clientWasConnected, err = Client.RunServer()
@@ -87,7 +97,7 @@ func Eulogist() error {
 		}
 		defer client.CloseConnection()
 		// 生成网易配置文件
-		neteaseConfigPath, err = GenerateNetEaseConfig(config, client.GetServerIP(), client.GetServerPort())
+		neteaseConfigPath, err = GenerateNetEaseConfig(config.SkinPath, skinIsSlim, client.GetServerIP(), client.GetServerPort())
 		if err != nil {
 			return fmt.Errorf("Eulogist: %v", err)
 		}
