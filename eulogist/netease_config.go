@@ -29,7 +29,9 @@ type SkinInfo struct {
 	// 对于高级皮肤(如 4D 皮肤)，
 	// 这指向一个 ZIP 压缩包
 	SkinPath string `json:"skin"`
-	// 是否为 slim 版本的皮肤
+	// 描述皮肤是否纤细。
+	// 不过，对于网易来说，
+	// 几乎所有皮肤都是纤细的
 	Slim bool `json:"slim"`
 }
 
@@ -47,6 +49,9 @@ func DefaultNetEaseConfig() NetEaseConfig {
 			UserID:   -1,
 			UserName: "Eulogist",
 			Urs:      "***",
+		},
+		SkinInfo: SkinInfo{
+			Slim: true,
 		},
 		Misc: Misc{MultiplayerGameType: 100},
 	}
