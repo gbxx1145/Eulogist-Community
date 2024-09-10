@@ -137,7 +137,7 @@ func defaultClientData(
 		d.SkinItemID = skin.SkinItemID
 	}
 	if d.SkinResourcePatch == "" {
-		d.SkinResourcePatch = base64.StdEncoding.EncodeToString(skin_process.DefaultSkinResourcePatch)
+		d.SkinResourcePatch = base64.StdEncoding.EncodeToString(skin_process.DefaultWideSkinResourcePatch)
 	}
 	if d.SkinGeometry == "" {
 		d.SkinGeometry = base64.StdEncoding.EncodeToString(skin_process.DefaultSkinGeometry)
