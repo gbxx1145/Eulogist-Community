@@ -57,6 +57,7 @@ var StandardPacketIDToNetEasePacketID = map[uint32]uint32{
 	standardPacket.IDPlayerHotBar:                neteasePacket.IDPlayerHotBar,
 	standardPacket.IDInventoryContent:            neteasePacket.IDInventoryContent,
 	standardPacket.IDInventorySlot:               neteasePacket.IDInventorySlot,
+	standardPacket.IDContainerSetData:            neteasePacket.IDContainerSetData,
 	standardPacket.IDCraftingData:                neteasePacket.IDCraftingData,
 	standardPacket.IDCraftingEvent:               neteasePacket.IDCraftingEvent,
 	standardPacket.IDGUIDataPickItem:             neteasePacket.IDGUIDataPickItem,
