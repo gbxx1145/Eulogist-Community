@@ -32,6 +32,12 @@ func GetSkinFromAuthResponse(authResponse *fb_client.AuthResponse, skin *Skin) e
 		skin.FullSkinData, skin.SkinGeometry = res, DefaultSkinGeometry
 		skin.SkinIsSlim = authResponse.SkinInfo.SkinIsSlim
 		skinImageData = res
+		// 设置皮肤默认资源路径
+		if skin.SkinIsSlim {
+			skin.SkinResourcePatch = DefaultSlimSkinResourcePatch
+		} else {
+			skin.SkinResourcePatch = DefaultWideSkinResourcePatch
+		}
 		// 如果这是一个高级的皮肤(比如 4D 皮肤)，
 		// 那么 res 是一个压缩包，
 		// 我们需要处理这个压缩包以得到皮肤文件
@@ -66,12 +72,6 @@ func ConvertZIPToSkin(skin *Skin) (skinImageData []byte, err error) {
 	)
 	if err != nil {
 		return nil, fmt.Errorf("ConvertZIPToSkin: %v", err)
-	}
-	// 设置皮肤默认资源路径
-	if skin.SkinIsSlim {
-		skin.SkinResourcePatch = DefaultSlimSkinResourcePatch
-	} else {
-		skin.SkinResourcePatch = DefaultWideSkinResourcePatch
 	}
 	// 查找皮肤内容
 	for _, file := range reader.File {
