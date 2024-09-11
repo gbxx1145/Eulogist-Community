@@ -300,9 +300,8 @@ func (m *MinecraftServer) FiltePacketsAndSendCopy(
 			pks := []raknet_wrapper.MinecraftPacket[standardPacket.Packet]{}
 			// 遍历物品变动表中的每个物品堆栈实例
 			for slot, item := range pk.Content {
-				// 如果物品的固定网络堆栈 ID 为 0，说明这是个空气，
-				// 如果为 -1，说明当前物品未被更改。
-				// allExist 指示是否有某个物品未被更改
+				// 如果物品的固定网络堆栈 ID 为 -1，
+				// 说明当前物品未被更改
 				if item.Stack.NetworkID == -1 {
 					allExist = false
 					continue
