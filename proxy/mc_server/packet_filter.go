@@ -303,10 +303,8 @@ func (m *MinecraftServer) FiltePacketsAndSendCopy(
 				// 如果物品的固定网络堆栈 ID 为 0，说明这是个空气，
 				// 如果为 -1，说明当前物品未被更改。
 				// allExist 指示是否有某个物品未被更改
-				if item.Stack.NetworkID == 0 || item.Stack.NetworkID == -1 {
-					if item.Stack.NetworkID == -1 {
-						allExist = false
-					}
+				if item.Stack.NetworkID == -1 {
+					allExist = false
 					continue
 				}
 				// 更新每个物品堆栈实例对应的 block runtime id
