@@ -69,6 +69,11 @@ func (r *Raknet[T]) CloseConnection() {
 另，此函数应当只被调用一次
 */
 func (r *Raknet[T]) ProcessIncomingPackets() {
+	// 确保该函数不会返回恐慌
+	defer func() {
+		recover()
+	}()
+	// 不断处理到来的一个或多个数据包
 	for {
 		// 从底层 Raknet 连接读取数据包
 		packets, err := r.Decoder.Decode()
