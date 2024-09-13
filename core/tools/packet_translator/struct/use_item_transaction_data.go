@@ -3,6 +3,7 @@ package packet_translate_struct
 import (
 	neteaseProtocol "Eulogist/core/minecraft/netease/protocol"
 	standardProtocol "Eulogist/core/minecraft/standard/protocol"
+	packet_translate_pool "Eulogist/core/tools/packet_translator/pool"
 )
 
 // 将 from 转换为 neteaseProtocol.UseItemTransactionData
@@ -12,7 +13,10 @@ func ConvertToNetEaseUseItemTransactionData(from *standardProtocol.UseItemTransa
 		LegacySetItemSlots: ConvertSlice(
 			from.LegacySetItemSlots,
 			func(from standardProtocol.LegacySetItemSlot) neteaseProtocol.LegacySetItemSlot {
-				return neteaseProtocol.LegacySetItemSlot(from)
+				return neteaseProtocol.LegacySetItemSlot{
+					ContainerID: packet_translate_pool.StandardContainerIDToNetEaseContainerID[from.ContainerID],
+					Slots:       from.Slots,
+				}
 			},
 		),
 		Actions: ConvertSlice(
@@ -37,7 +41,10 @@ func ConvertToStandardUseItemTransactionData(from *neteaseProtocol.UseItemTransa
 		LegacySetItemSlots: ConvertSlice(
 			from.LegacySetItemSlots,
 			func(from neteaseProtocol.LegacySetItemSlot) standardProtocol.LegacySetItemSlot {
-				return standardProtocol.LegacySetItemSlot(from)
+				return standardProtocol.LegacySetItemSlot{
+					ContainerID: packet_translate_pool.NetEaseContainerIDStandardContainerID[from.ContainerID],
+					Slots:       from.Slots,
+				}
 			},
 		),
 		Actions: ConvertSlice(

@@ -3,6 +3,7 @@ package packet
 import (
 	neteaseProtocol "Eulogist/core/minecraft/netease/protocol"
 	neteasePacket "Eulogist/core/minecraft/netease/protocol/packet"
+	packet_translate_pool "Eulogist/core/tools/packet_translator/pool"
 	packet_translate_struct "Eulogist/core/tools/packet_translator/struct"
 
 	standardProtocol "Eulogist/core/minecraft/standard/protocol"
@@ -20,7 +21,10 @@ func (pk *InventoryTransaction) ToNetEasePacket(standard standardPacket.Packet) 
 	p.LegacySetItemSlots = packet_translate_struct.ConvertSlice(
 		input.LegacySetItemSlots,
 		func(from standardProtocol.LegacySetItemSlot) neteaseProtocol.LegacySetItemSlot {
-			return neteaseProtocol.LegacySetItemSlot(from)
+			return neteaseProtocol.LegacySetItemSlot{
+				ContainerID: packet_translate_pool.StandardContainerIDToNetEaseContainerID[from.ContainerID],
+				Slots:       from.Slots,
+			}
 		},
 	)
 	p.Actions = packet_translate_struct.ConvertSlice(
@@ -65,7 +69,10 @@ func (pk *InventoryTransaction) ToStandardPacket(netease neteasePacket.Packet) s
 	p.LegacySetItemSlots = packet_translate_struct.ConvertSlice(
 		input.LegacySetItemSlots,
 		func(from neteaseProtocol.LegacySetItemSlot) standardProtocol.LegacySetItemSlot {
-			return standardProtocol.LegacySetItemSlot(from)
+			return standardProtocol.LegacySetItemSlot{
+				ContainerID: packet_translate_pool.NetEaseContainerIDStandardContainerID[from.ContainerID],
+				Slots:       from.Slots,
+			}
 		},
 	)
 	p.Actions = packet_translate_struct.ConvertSlice(
