@@ -18,8 +18,6 @@ func (pk *ResourcePackStack) ToNetEasePacket(standard standardPacket.Packet) net
 	p.TexturePackRequired = input.TexturePackRequired
 	p.BaseGameVersion = input.BaseGameVersion
 	p.ExperimentsPreviouslyToggled = input.ExperimentsPreviouslyToggled
-	p.Unknown1 = false
-	p.Unknown2 = false
 
 	p.BehaviourPacks = packet_translate_struct.ConvertSlice(
 		input.BehaviourPacks,
@@ -39,6 +37,9 @@ func (pk *ResourcePackStack) ToNetEasePacket(standard standardPacket.Packet) net
 			return neteaseProtocol.ExperimentData(from)
 		},
 	)
+
+	p.Unknown1 = false
+	p.Unknown2 = false
 
 	return &p
 }
