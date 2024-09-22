@@ -130,8 +130,8 @@ const (
 	IDAddEntity
 	IDRemoveEntity
 	IDClientCacheStatus
-	IDMapCreateLockedCopy
 	IDOnScreenTextureAnimation
+	IDMapCreateLockedCopy
 	IDStructureTemplateDataRequest
 	IDStructureTemplateDataResponse
 	_
