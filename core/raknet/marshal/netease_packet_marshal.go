@@ -71,7 +71,7 @@ func EncodeNetEasePacket(
 			if r != nil {
 				pterm.Warning.Printf(
 					"EncodeNetEasePacket: Failed to marshal packet %T, and the error log is %v\n\n[Stack Info]\n%s\n",
-					pk, r, string(debug.Stack()),
+					pk.Packet, r, string(debug.Stack()),
 				)
 				fmt.Println()
 			}
