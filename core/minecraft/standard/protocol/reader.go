@@ -149,10 +149,14 @@ func (r *Reader) SubChunkPos(x *SubChunkPos) {
 	r.Varint32(&x[2])
 }
 
-// SoundPos reads an mgl32.Vec3 that serves as a position for a sound.
-func (r *Reader) SoundPos(x *mgl32.Vec3) {
+// PhoenixBuilder specific changes.
+// Author: Happy2018new
+// Comment: Maybe is a mistake on upstrame, so we correct this here.
+//
+// USoundPos reads an mgl32.Vec3 that serves as a position for a sound.
+func (r *Reader) USoundPos(x *mgl32.Vec3) {
 	var b BlockPos
-	r.BlockPos(&b)
+	r.UBlockPos(&b)
 	*x = mgl32.Vec3{float32(b[0]) / 8, float32(b[1]) / 8, float32(b[2]) / 8}
 }
 

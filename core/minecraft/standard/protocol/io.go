@@ -36,7 +36,13 @@ type IO interface {
 	UBlockPos(x *BlockPos)
 	ChunkPos(x *ChunkPos)
 	SubChunkPos(x *SubChunkPos)
-	SoundPos(x *mgl32.Vec3)
+
+	// PhoenixBuilder specific changes.
+	// Author: Happy2018new
+	// Comment: Maybe is a mistake on upstrame, so we correct this here.
+	USoundPos(x *mgl32.Vec3)
+	// SoundPos(x *mgl32.Vec3)
+
 	ByteFloat(x *float32)
 	Bytes(p *[]byte)
 	NBT(m *map[string]any, encoding nbt.Encoding)

@@ -121,10 +121,14 @@ func (w *Writer) SubChunkPos(x *SubChunkPos) {
 	w.Varint32(&x[2])
 }
 
-// SoundPos writes an mgl32.Vec3 that serves as a position for a sound.
-func (w *Writer) SoundPos(x *mgl32.Vec3) {
+// PhoenixBuilder specific changes.
+// Author: Happy2018new
+// Comment: Maybe is a mistake on upstrame, so we correct this here.
+//
+// USoundPos writes an mgl32.Vec3 that serves as a position for a sound.
+func (w *Writer) USoundPos(x *mgl32.Vec3) {
 	b := BlockPos{int32((*x)[0] * 8), int32((*x)[1] * 8), int32((*x)[2] * 8)}
-	w.BlockPos(&b)
+	w.UBlockPos(&b)
 }
 
 // RGBA writes a color.RGBA x as a uint32 to the underlying buffer.
