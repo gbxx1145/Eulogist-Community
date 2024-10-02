@@ -193,8 +193,6 @@ func (a *AchievementAwardedEvent) Marshal(r IO) {
 
 // EntityInteractEvent is the event data sent for entity interactions.
 type EntityInteractEvent struct {
-	// InteractedEntityID ...
-	InteractedEntityID int64
 	// InteractionType ...
 	InteractionType int32
 	// InteractionEntityType ...
@@ -207,7 +205,6 @@ type EntityInteractEvent struct {
 
 // Marshal ...
 func (e *EntityInteractEvent) Marshal(r IO) {
-	r.Varint64(&e.InteractedEntityID)
 	r.Varint32(&e.InteractionType)
 	r.Varint32(&e.InteractionEntityType)
 	r.Varint32(&e.EntityVariant)
@@ -267,18 +264,18 @@ func (m *MobKilledEvent) Marshal(r IO) {
 
 // CauldronUsedEvent is the event data sent when a cauldron is used.
 type CauldronUsedEvent struct {
-	// Colour ...
-	Colour uint32
 	// PotionID ...
 	PotionID int32
+	// Colour ...
+	Colour int32
 	// FillLevel ...
 	FillLevel int32
 }
 
 // Marshal ...
 func (c *CauldronUsedEvent) Marshal(r IO) {
-	r.Varuint32(&c.Colour)
 	r.Varint32(&c.PotionID)
+	r.Varint32(&c.Colour)
 	r.Varint32(&c.FillLevel)
 }
 
@@ -350,12 +347,12 @@ func (p *PatternRemovedEvent) Marshal(r IO) {}
 
 // SlashCommandExecutedEvent is the event data sent when a slash command is executed.
 type SlashCommandExecutedEvent struct {
+	// CommandName ...
+	CommandName string
 	// SuccessCount ...
 	SuccessCount int32
 	// MessageCount indicates the amount of OutputMessages present.
 	MessageCount int32
-	// CommandName ...
-	CommandName string
 	// OutputMessages is a list of messages joint with ;.
 	OutputMessages string
 }
@@ -369,10 +366,24 @@ func (s *SlashCommandExecutedEvent) Marshal(r IO) {
 }
 
 // FishBucketedEvent is the event data sent when a fish is bucketed.
-type FishBucketedEvent struct{}
+type FishBucketedEvent struct {
+	// Pattern ...
+	Pattern int32
+	// Preset ...
+	Preset int32
+	// BucketedEntityType ...
+	BucketedEntityType int32
+	// Release ...
+	Release bool
+}
 
 // Marshal ...
-func (f *FishBucketedEvent) Marshal(r IO) {}
+func (f *FishBucketedEvent) Marshal(r IO) {
+	r.Varint32(&f.Pattern)
+	r.Varint32(&f.Preset)
+	r.Varint32(&f.BucketedEntityType)
+	r.Bool(&f.Release)
+}
 
 // MobBornEvent is the event data sent when a mob is born.
 type MobBornEvent struct {
@@ -464,23 +475,60 @@ func (ra *RaidUpdateEvent) Marshal(r IO) {
 	r.Bool(&ra.WonRaid)
 }
 
-// MovementAnomalyEvent is an event used to detect movement anomalies.
-type MovementAnomalyEvent struct{}
+// MovementAnomalyEvent is an event used for updating the other party on movement data.
+type MovementAnomalyEvent struct {
+	// EventType ...
+	EventType uint8
+	// CheatingScore ...
+	CheatingScore float32
+	// AveragePositionDelta ...
+	AveragePositionDelta float32
+	// TotalPositionDelta ...
+	TotalPositionDelta float32
+	// MinPositionDelta ...
+	MinPositionDelta float32
+	// MaxPositionDelta ...
+	MaxPositionDelta float32
+}
 
 // Marshal ...
-func (m *MovementAnomalyEvent) Marshal(r IO) {}
+func (m *MovementAnomalyEvent) Marshal(r IO) {
+	r.Uint8(&m.EventType)
+	r.Float32(&m.CheatingScore)
+	r.Float32(&m.AveragePositionDelta)
+	r.Float32(&m.TotalPositionDelta)
+	r.Float32(&m.MinPositionDelta)
+	r.Float32(&m.MaxPositionDelta)
+}
 
 // MovementCorrectedEvent is an event used to correct movement anomalies.
-type MovementCorrectedEvent struct{}
+type MovementCorrectedEvent struct {
+	// PositionDelta ...
+	PositionDelta float32
+	// CheatingScore ...
+	CheatingScore float32
+	// ScoreThreshold ...
+	ScoreThreshold float32
+	// DistanceThreshold ...
+	DistanceThreshold float32
+	// DurationThreshold ...
+	DurationThreshold int32
+}
 
 // Marshal ...
-func (m *MovementCorrectedEvent) Marshal(r IO) {}
+func (m *MovementCorrectedEvent) Marshal(r IO) {
+	r.Float32(&m.PositionDelta)
+	r.Float32(&m.CheatingScore)
+	r.Float32(&m.ScoreThreshold)
+	r.Float32(&m.DistanceThreshold)
+	r.Varint32(&m.DurationThreshold)
+}
 
 // ExtractHoneyEvent is an event used to extract honey from a hive.
 type ExtractHoneyEvent struct{}
 
 // Marshal ...
-func (e *ExtractHoneyEvent) Marshal(r IO) {}
+func (*ExtractHoneyEvent) Marshal(r IO) {}
 
 // TargetBlockHitEvent is an event used when a target block is hit by a arrow.
 type TargetBlockHitEvent struct {
@@ -520,12 +568,12 @@ const (
 
 // WaxedOrUnwaxedCopperEvent is an event sent by the server when a copper block is waxed or unwaxed.
 type WaxedOrUnwaxedCopperEvent struct {
-	CopperBlockID int32
+	Type uint16
 }
 
 // Marshal ...
 func (w *WaxedOrUnwaxedCopperEvent) Marshal(r IO) {
-	r.Varint32(&w.CopperBlockID)
+	r.Uint16(&w.Type)
 }
 
 // CodeBuilderRuntimeActionEvent is an event sent by the server when a code builder runtime action is performed.
@@ -563,7 +611,7 @@ func (s *StriderRiddenInLavaInOverworldEvent) Marshal(r IO) {}
 type SneakCloseToSculkSensorEvent struct{}
 
 // Marshal ...
-func (s *SneakCloseToSculkSensorEvent) Marshal(r IO) {}
+func (*SneakCloseToSculkSensorEvent) Marshal(r IO) {}
 
 // CarefulRestorationEvent is an event sent by the server when a player performs a careful restoration.
 type CarefulRestorationEvent struct{}
