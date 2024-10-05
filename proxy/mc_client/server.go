@@ -53,6 +53,16 @@ func (m *MinecraftClient) WaitConnect() error {
 	if err != nil {
 		return fmt.Errorf("WaitConnect: %v", err)
 	}
+	// 丢弃其他连接
+	go func() {
+		for {
+			conn, err := m.listener.Accept()
+			if err != nil {
+				return
+			}
+			_ = conn.Close()
+		}
+	}()
 	// 初始化变量
 	serverKey, _ := ecdsa.GenerateKey(elliptic.P384(), rand.Reader)
 	m.SetConnection(conn, serverKey)
