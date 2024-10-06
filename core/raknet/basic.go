@@ -168,6 +168,10 @@ func (r *Raknet) ReadPackets() []MinecraftPacket {
 // 除非负载为空，则此时再转而编码对应的数据包，
 // 然后写入到 Raknet 底层连接
 func (r *Raknet) WritePackets(pk []MinecraftPacket) {
+	// 如果当前不存在要传输的数据包
+	if len(pk) == 0 {
+		return
+	}
 	// 准备
 	packetBytes := make([][]byte, len(pk))
 	for index, singlePacket := range pk {
