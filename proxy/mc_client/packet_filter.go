@@ -35,8 +35,8 @@ func (m *MinecraftClient) DefaultTranslate(
 	headerBuffer := bytes.NewBuffer([]byte{})
 	packetHeader.Write(headerBuffer)
 
-	// 获得该数据包在国际版协议下的二进制负载，
-	// 然后将其按国际版协议再次解析
+	// 获得该数据包在网易版协议下的二进制负载，
+	// 然后将其按网易版协议再次解析
 	packetBytes := append(headerBuffer.Bytes(), packetBuffer.Bytes()...)
 	result := marshal.DecodeNetEasePacket(packetBytes, &m.ShieldID)
 
