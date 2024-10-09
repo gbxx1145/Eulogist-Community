@@ -39,4 +39,7 @@ var TranslatorPool = map[uint32]Translator{
 	standardPacket.IDSubChunk:                 &packet.SubChunk{},
 	standardPacket.IDText:                     &packet.Text{},
 	standardPacket.IDUpdateBlockSynced:        &packet.UpdateBlockSynced{},
+	standardPacket.IDEducationSettings:        &packet.EducationSettings{},
+	standardPacket.IDLessonProgress:           &packet.LessonProgress{},
+	standardPacket.IDAgentAction:              &packet.AgentAction{},
 }
