@@ -56,12 +56,12 @@ func (m *MinecraftClient) WaitClientHandshakeDown() error {
 				// 于是我们返回值
 				return nil
 			}
-			// 检查连接状态
-			select {
-			case <-m.GetContext().Done():
-				return fmt.Errorf("WaitClientHandshakeDown: Minecraft closed its connection to eulogist")
-			default:
-			}
+		}
+		// 检查连接状态
+		select {
+		case <-m.GetContext().Done():
+			return fmt.Errorf("WaitClientHandshakeDown: Minecraft closed its connection to eulogist")
+		default:
 		}
 	}
 }

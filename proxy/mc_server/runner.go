@@ -106,12 +106,12 @@ func (m *MinecraftServer) FinishHandshake() error {
 				// 于是我们返回值
 				return nil
 			}
-			// 检查连接状态
-			select {
-			case <-m.GetContext().Done():
-				return fmt.Errorf("FinishHandshake: NetEase Minecraft Rental Server closed their connection to eulogist")
-			default:
-			}
+		}
+		// 检查连接状态
+		select {
+		case <-m.GetContext().Done():
+			return fmt.Errorf("FinishHandshake: NetEase Minecraft Rental Server closed their connection to eulogist")
+		default:
 		}
 	}
 }
