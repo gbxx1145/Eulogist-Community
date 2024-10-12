@@ -41,4 +41,6 @@ var TranslatorPool = map[uint32]Translator{
 	standardPacket.IDUpdateBlockSynced:        &packet.UpdateBlockSynced{},
 	standardPacket.IDEducationSettings:        &packet.EducationSettings{},
 	standardPacket.IDLessonProgress:           &packet.LessonProgress{},
+	standardPacket.IDSetActorData:             &packet.SetActorData{},
+	standardPacket.IDAddItemActor:             &packet.AddItemActor{},
 }

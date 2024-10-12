@@ -9,28 +9,15 @@ import (
 	standardPacket "Eulogist/core/minecraft/standard/protocol/packet"
 )
 
-type AddActor struct{}
+type SetActorData struct{}
 
-func (pk *AddActor) ToNetEasePacket(standard standardPacket.Packet) neteasePacket.Packet {
-	p := neteasePacket.AddActor{}
-	input := standard.(*standardPacket.AddActor)
+func (pk *SetActorData) ToNetEasePacket(standard standardPacket.Packet) neteasePacket.Packet {
+	p := neteasePacket.SetActorData{}
+	input := standard.(*standardPacket.SetActorData)
 
 	p.EntityRuntimeID = input.EntityRuntimeID
-	p.EntityUniqueID = input.EntityUniqueID
-	p.EntityType = input.EntityType
-	p.Position = input.Position
-	p.Velocity = input.Velocity
-	p.Pitch = input.Pitch
-	p.Yaw = input.Yaw
-	p.HeadYaw = input.HeadYaw
-	p.BodyYaw = input.BodyYaw
+	p.Tick = input.Tick
 
-	p.Attributes = packet_translate_struct.ConvertSlice(
-		input.Attributes,
-		func(from standardProtocol.AttributeValue) neteaseProtocol.AttributeValue {
-			return neteaseProtocol.AttributeValue(from)
-		},
-	)
 	p.EntityProperties = neteaseProtocol.EntityProperties{
 		IntegerProperties: packet_translate_struct.ConvertSlice(
 			input.EntityProperties.IntegerProperties,
@@ -45,19 +32,6 @@ func (pk *AddActor) ToNetEasePacket(standard standardPacket.Packet) neteasePacke
 			},
 		),
 	}
-	p.EntityLinks = packet_translate_struct.ConvertSlice(
-		input.EntityLinks,
-		func(from standardProtocol.EntityLink) neteaseProtocol.EntityLink {
-			return neteaseProtocol.EntityLink(from)
-		},
-	)
-
-	p.Unknown1 = ""
-	p.Unknown2 = ""
-	p.Unknown3 = ""
-	p.Unknown4 = false
-	p.Unknown5 = false
-	p.Unknown6 = false
 
 	p.EntityMetadata = make(map[uint32]any)
 	for key, value := range input.EntityMetadata {
@@ -71,26 +45,13 @@ func (pk *AddActor) ToNetEasePacket(standard standardPacket.Packet) neteasePacke
 	return &p
 }
 
-func (pk *AddActor) ToStandardPacket(netease neteasePacket.Packet) standardPacket.Packet {
-	p := standardPacket.AddActor{}
-	input := netease.(*neteasePacket.AddActor)
+func (pk *SetActorData) ToStandardPacket(netease neteasePacket.Packet) standardPacket.Packet {
+	p := standardPacket.SetActorData{}
+	input := netease.(*neteasePacket.SetActorData)
 
 	p.EntityRuntimeID = input.EntityRuntimeID
-	p.EntityUniqueID = input.EntityUniqueID
-	p.EntityType = input.EntityType
-	p.Position = input.Position
-	p.Velocity = input.Velocity
-	p.Pitch = input.Pitch
-	p.Yaw = input.Yaw
-	p.HeadYaw = input.HeadYaw
-	p.BodyYaw = input.BodyYaw
+	p.Tick = input.Tick
 
-	p.Attributes = packet_translate_struct.ConvertSlice(
-		input.Attributes,
-		func(from neteaseProtocol.AttributeValue) standardProtocol.AttributeValue {
-			return standardProtocol.AttributeValue(from)
-		},
-	)
 	p.EntityProperties = standardProtocol.EntityProperties{
 		IntegerProperties: packet_translate_struct.ConvertSlice(
 			input.EntityProperties.IntegerProperties,
@@ -105,12 +66,6 @@ func (pk *AddActor) ToStandardPacket(netease neteasePacket.Packet) standardPacke
 			},
 		),
 	}
-	p.EntityLinks = packet_translate_struct.ConvertSlice(
-		input.EntityLinks,
-		func(from neteaseProtocol.EntityLink) standardProtocol.EntityLink {
-			return standardProtocol.EntityLink(from)
-		},
-	)
 
 	p.EntityMetadata = make(map[uint32]any)
 	for key, value := range input.EntityMetadata {

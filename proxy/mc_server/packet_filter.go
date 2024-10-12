@@ -1,6 +1,7 @@
 package mc_server
 
 import (
+	neteaseProtocol "Eulogist/core/minecraft/netease/protocol"
 	neteasePacket "Eulogist/core/minecraft/netease/protocol/packet"
 	standardProtocol "Eulogist/core/minecraft/standard/protocol"
 	"Eulogist/core/raknet/handshake"
@@ -145,6 +146,37 @@ func (m *MinecraftServer) FiltePacketsAndSendCopy(
 					OperationType: neteasePacket.PyRpcOperationTypeSend,
 				},
 			})
+		case *neteasePacket.AddActor:
+			m.AddWorldEntity(Entity{
+				EntityType:      pk.EntityType,
+				EntityRuntimeID: pk.EntityRuntimeID,
+				EntityUniqueID:  pk.EntityUniqueID,
+			})
+			if pk.EntityType == "minecraft:falling_block" {
+				if entityFlags, ok := pk.EntityMetadata[neteaseProtocol.EntityDataKeyFlags].(int64); ok {
+					pk.EntityMetadata[neteaseProtocol.EntityDataKeyFlags] = entityFlags ^ 0x1000000000000 // Ingore collision
+				}
+				if fallingBlockRuntimeID, ok := pk.EntityMetadata[neteaseProtocol.EntityDataKeyVariant].(int32); ok {
+					standardRuntimeID, found := packet_translator.ConvertToStandardBlockRuntimeID(uint32(fallingBlockRuntimeID))
+					if found {
+						pk.EntityMetadata[neteaseProtocol.EntityDataKeyVariant] = int32(standardRuntimeID)
+					}
+				}
+			}
+		case *neteasePacket.SetActorData:
+			if entity := m.GetWorldEntityByRuntimeID(pk.EntityRuntimeID); entity != nil && entity.EntityType == "minecraft:falling_block" {
+				if entityFlags, ok := pk.EntityMetadata[neteaseProtocol.EntityDataKeyFlags].(int64); ok {
+					pk.EntityMetadata[neteaseProtocol.EntityDataKeyFlags] = entityFlags ^ 0x1000000000000 // Ingore collision
+				}
+				if fallingBlockRuntimeID, ok := pk.EntityMetadata[neteaseProtocol.EntityDataKeyVariant].(int32); ok {
+					standardRuntimeID, found := packet_translator.ConvertToStandardBlockRuntimeID(uint32(fallingBlockRuntimeID))
+					if found {
+						pk.EntityMetadata[neteaseProtocol.EntityDataKeyVariant] = int32(standardRuntimeID)
+					}
+				}
+			}
+		case *neteasePacket.RemoveActor:
+			m.DeleteWorldEntityByUniqueID(pk.EntityUniqueID)
 		case *neteasePacket.UpdatePlayerGameType:
 			if pk.PlayerUniqueID == m.entityUniqueID {
 				// 如果玩家的唯一 ID 与数据包中记录的值匹配，

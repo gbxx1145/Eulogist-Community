@@ -29,7 +29,21 @@ type MinecraftServer struct {
 	entityUniqueID  int64
 	entityRuntimeID uint64
 
+	persistenceData PersistenceData
+
 	*raknet_wrapper.Raknet[packet.Packet]
+}
+
+// 描述单个实体的数据
+type Entity struct {
+	EntityType      string // 该实体的英文 ID
+	EntityRuntimeID uint64 // 该实体的运行时 ID
+	EntityUniqueID  int64  // 该实体的唯一 ID
+}
+
+// 当前用户的持久化数据
+type PersistenceData struct {
+	WorldEntity []*Entity // 已保存的实体数据
 }
 
 // ...

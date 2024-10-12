@@ -25,7 +25,6 @@ func (pk *AddPlayer) ToNetEasePacket(standard standardPacket.Packet) neteasePack
 	p.Yaw = input.Yaw
 	p.HeadYaw = input.HeadYaw
 	p.GameType = input.GameType
-	p.EntityMetadata = input.EntityMetadata
 	p.DeviceID = input.DeviceID
 	p.BuildPlatform = input.BuildPlatform
 	p.HeldItem = packet_translate_struct.ConvertToNetEaseItemInstance(input.HeldItem)
@@ -67,6 +66,15 @@ func (pk *AddPlayer) ToNetEasePacket(standard standardPacket.Packet) neteasePack
 	p.Unknown3 = false
 	p.Unknown4 = false
 
+	p.EntityMetadata = make(map[uint32]any)
+	for key, value := range input.EntityMetadata {
+		if v, ok := value.(standardProtocol.BlockPos); ok {
+			p.EntityMetadata[key] = neteaseProtocol.BlockPos(v)
+		} else {
+			p.EntityMetadata[key] = value
+		}
+	}
+
 	return &p
 }
 
@@ -84,7 +92,6 @@ func (pk *AddPlayer) ToStandardPacket(netease neteasePacket.Packet) standardPack
 	p.Yaw = input.Yaw
 	p.HeadYaw = input.HeadYaw
 	p.GameType = input.GameType
-	p.EntityMetadata = input.EntityMetadata
 	p.DeviceID = input.DeviceID
 	p.BuildPlatform = input.BuildPlatform
 	p.HeldItem = packet_translate_struct.ConvertToStandardItemInstance(input.HeldItem)
@@ -121,12 +128,12 @@ func (pk *AddPlayer) ToStandardPacket(netease neteasePacket.Packet) standardPack
 		},
 	)
 
-	// Something can not resolve. --Happy2018new
-	for key := range p.EntityMetadata {
-		switch key {
-		case 0x0, 0x3, 0x4, 0x7, 0x8, 0x9, 0xf, 0x1a, 0x26, 0x2a, 0x35, 0x36, 0x51, 0x54, 0x5c:
-		default:
-			delete(p.EntityMetadata, key)
+	p.EntityMetadata = make(map[uint32]any)
+	for key, value := range input.EntityMetadata {
+		if v, ok := value.(neteaseProtocol.BlockPos); ok {
+			p.EntityMetadata[key] = standardProtocol.BlockPos(v)
+		} else {
+			p.EntityMetadata[key] = value
 		}
 	}
 

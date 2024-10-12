@@ -81,3 +81,52 @@ func (m *MinecraftServer) GetEntityRuntimeID() uint64 {
 func (m *MinecraftServer) SetEntityRuntimeID(entityRuntimeID uint64) {
 	m.entityRuntimeID = entityRuntimeID
 }
+
+// ...
+func (m *MinecraftServer) AddWorldEntity(entityData Entity) {
+	m.persistenceData.WorldEntity = append(m.persistenceData.WorldEntity, &entityData)
+}
+
+// ...
+func (m *MinecraftServer) GetWorldEntityByRuntimeID(entityRuntimeID uint64) *Entity {
+	for _, value := range m.persistenceData.WorldEntity {
+		if value.EntityRuntimeID == entityRuntimeID {
+			return value
+		}
+	}
+	return nil
+}
+
+// ...
+func (m *MinecraftServer) GetWorldEntityByUniqueID(entityUniqueID int64) *Entity {
+	for _, value := range m.persistenceData.WorldEntity {
+		if value.EntityUniqueID == entityUniqueID {
+			return value
+		}
+	}
+	return nil
+}
+
+// ...
+func (m *MinecraftServer) DeleteWorldEntityByRuntimeID(entityRuntimeID uint64) {
+	newer := make([]*Entity, 0)
+	for _, value := range m.persistenceData.WorldEntity {
+		if value.EntityRuntimeID == entityRuntimeID {
+			continue
+		}
+		newer = append(newer, value)
+	}
+	m.persistenceData.WorldEntity = newer
+}
+
+// ...
+func (m *MinecraftServer) DeleteWorldEntityByUniqueID(entityUniqueID int64) {
+	newer := make([]*Entity, 0)
+	for _, value := range m.persistenceData.WorldEntity {
+		if value.EntityUniqueID == entityUniqueID {
+			continue
+		}
+		newer = append(newer, value)
+	}
+	m.persistenceData.WorldEntity = newer
+}
