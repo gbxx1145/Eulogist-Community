@@ -189,13 +189,6 @@ func (m *MinecraftServer) FiltePacketsAndSendCopy(
 				})
 				shouldSendCopy = false
 			}
-		case *neteasePacket.CreativeContent:
-			for index, value := range pk.Items {
-				standardRuntimeID, found := packet_translator.ConvertToStandardBlockRuntimeID(uint32(value.Item.BlockRuntimeID))
-				if found {
-					pk.Items[index].Item.BlockRuntimeID = int32(standardRuntimeID)
-				}
-			}
 		case *neteasePacket.PlayerList:
 			for _, value := range pk.Entries {
 				if value.EntityUniqueID == m.GetEntityUniqueID() {
@@ -218,11 +211,6 @@ func (m *MinecraftServer) FiltePacketsAndSendCopy(
 						},
 					},
 				})
-			}
-		case *neteasePacket.AddItemActor:
-			standardRuntimeID, found := packet_translator.ConvertToStandardBlockRuntimeID(uint32(pk.Item.Stack.BlockRuntimeID))
-			if found {
-				pk.Item.Stack.BlockRuntimeID = int32(standardRuntimeID)
 			}
 		case *neteasePacket.UpdateBlock:
 			standardRuntimeID, found := packet_translator.ConvertToStandardBlockRuntimeID(pk.NewBlockRuntimeID)
@@ -288,11 +276,6 @@ func (m *MinecraftServer) FiltePacketsAndSendCopy(
 					pk.EventData = int32(standardRuntimeID) | blockFace<<24
 				}
 			}
-		case *neteasePacket.InventorySlot:
-			standardRuntimeID, found := packet_translator.ConvertToStandardBlockRuntimeID(uint32(pk.NewItem.Stack.BlockRuntimeID))
-			if found {
-				pk.NewItem.Stack.BlockRuntimeID = int32(standardRuntimeID)
-			}
 		case *neteasePacket.MobArmourEquipment:
 			standardRuntimeID, found := packet_translator.ConvertToStandardBlockRuntimeID(uint32(pk.Helmet.Stack.BlockRuntimeID))
 			if found {
@@ -337,11 +320,6 @@ func (m *MinecraftServer) FiltePacketsAndSendCopy(
 				if item.Stack.NetworkID == -1 {
 					allExist = false
 					continue
-				}
-				// 更新每个物品堆栈实例对应的 block runtime id
-				standardRuntimeID, found := packet_translator.ConvertToStandardBlockRuntimeID(uint32(item.Stack.BlockRuntimeID))
-				if found {
-					pk.Content[slot].Stack.BlockRuntimeID = int32(standardRuntimeID)
 				}
 				// 当 allExist 为假时，
 				// 说明存在某个物品未被更改。

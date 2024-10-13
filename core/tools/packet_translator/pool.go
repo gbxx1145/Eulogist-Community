@@ -22,6 +22,7 @@ var TranslatorPool = map[uint32]Translator{
 	standardPacket.IDContainerOpen:            &packet.ContainerOpen{},
 	standardPacket.IDCraftingData:             &packet.CraftingData{},
 	standardPacket.IDInventoryTransaction:     &packet.InventoryTransaction{},
+	standardPacket.IDInventoryContent:         &packet.InventoryContent{},
 	standardPacket.IDItemStackRequest:         &packet.ItemStackRequest{},
 	standardPacket.IDOnScreenTextureAnimation: &packet.OnScreenTextureAnimation{},
 	standardPacket.IDPlaySound:                &packet.PlaySound{},
@@ -43,4 +44,5 @@ var TranslatorPool = map[uint32]Translator{
 	standardPacket.IDLessonProgress:           &packet.LessonProgress{},
 	standardPacket.IDSetActorData:             &packet.SetActorData{},
 	standardPacket.IDAddItemActor:             &packet.AddItemActor{},
+	standardPacket.IDInventorySlot:            &packet.InventorySlot{},
 }
