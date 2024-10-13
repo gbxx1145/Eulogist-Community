@@ -189,6 +189,13 @@ func (m *MinecraftServer) FiltePacketsAndSendCopy(
 				})
 				shouldSendCopy = false
 			}
+		case *neteasePacket.CreativeContent:
+			for index, value := range pk.Items {
+				standardRuntimeID, found := packet_translator.ConvertToStandardBlockRuntimeID(uint32(value.Item.BlockRuntimeID))
+				if found {
+					pk.Items[index].Item.BlockRuntimeID = int32(standardRuntimeID)
+				}
+			}
 		case *neteasePacket.PlayerList:
 			for _, value := range pk.Entries {
 				if value.EntityUniqueID == m.GetEntityUniqueID() {
