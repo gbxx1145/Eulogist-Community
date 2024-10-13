@@ -339,6 +339,24 @@ func (m *MinecraftServer) FiltePacketsAndSendCopy(
 				writePacketsToClient(pks)
 				shouldSendCopy = false
 			}
+			// 针对副手物品的特殊处理，
+			// 因为客户端看起来只接受有更改的物品
+			if pk.WindowID == neteaseProtocol.WindowIDOffHand && allExist {
+				newerPacket := standardPacket.InventoryContent{
+					WindowID: pk.WindowID,
+					Content:  make([]standardProtocol.ItemInstance, 1),
+				}
+				newerPacket.Content[0].Stack = packet_translate_struct.ConvertToStandardItemStack(pk.Content[0].Stack)
+				newerPacket.Content[0].Stack.NBTData = map[string]any{"Happy2018new": "Liliya233"}
+				sendCopy = append(
+					sendCopy,
+					[]raknet_wrapper.MinecraftPacket[standardPacket.Packet]{
+						{Packet: &newerPacket},
+						{Packet: packet_translator.TranslatorPool[standardPacket.IDInventoryContent].ToStandardPacket(pk)},
+					}...,
+				)
+				shouldSendCopy = false
+			}
 		default:
 			// 默认情况下，
 			// 我们需要将数据包同步到客户端
