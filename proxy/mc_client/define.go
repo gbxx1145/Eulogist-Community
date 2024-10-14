@@ -1,7 +1,7 @@
 package mc_client
 
 import (
-	raknet_connection "Eulogist/core/raknet"
+	raknet_wrapper "Eulogist/core/raknet/wrapper"
 	"Eulogist/proxy/persistence_data"
 	"net"
 
@@ -15,5 +15,5 @@ type MinecraftClient struct {
 	Address         *net.UDPAddr
 	PersistenceData *persistence_data.PersistenceData
 
-	*raknet_connection.Raknet
+	*raknet_wrapper.Raknet
 }

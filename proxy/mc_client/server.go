@@ -1,7 +1,7 @@
 package mc_client
 
 import (
-	raknet_connection "Eulogist/core/raknet"
+	raknet_wrapper "Eulogist/core/raknet/wrapper"
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/rand"
@@ -29,7 +29,7 @@ func (m *MinecraftClient) CreateListener() error {
 	m.listener = listener
 	m.connected = make(chan struct{}, 1)
 	m.Address = address
-	m.Raknet = raknet_connection.NewRaknet()
+	m.Raknet = raknet_wrapper.NewRaknet()
 	// 返回成功
 	return nil
 }

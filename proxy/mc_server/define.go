@@ -2,7 +2,7 @@ package mc_server
 
 import (
 	fb_client "Eulogist/core/fb_auth/mv4/client"
-	raknet_connection "Eulogist/core/raknet"
+	raknet_wrapper "Eulogist/core/raknet/wrapper"
 	"Eulogist/proxy/persistence_data"
 )
 
@@ -12,7 +12,7 @@ type MinecraftServer struct {
 	getCheckNumEverPassed bool
 
 	PersistenceData *persistence_data.PersistenceData
-	*raknet_connection.Raknet
+	*raknet_wrapper.Raknet
 }
 
 // ...

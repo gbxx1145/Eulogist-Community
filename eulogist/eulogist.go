@@ -175,8 +175,8 @@ func Eulogist() error {
 			// 初始化一个函数，
 			// 用于同步数据到 Minecraft 客户端
 			syncFunc := func() error {
-				if shieldID := server.GetShieldID(); shieldID != 0 {
-					client.SetShieldID(shieldID)
+				if shieldID := server.GetShieldID().Load(); shieldID != 0 {
+					client.GetShieldID().Store(shieldID)
 				}
 				return nil
 			}

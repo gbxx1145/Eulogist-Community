@@ -5,7 +5,8 @@ import (
 	fb_client "Eulogist/core/fb_auth/mv4/client"
 	"Eulogist/core/minecraft/protocol"
 	"Eulogist/core/minecraft/protocol/packet"
-	raknet_connection "Eulogist/core/raknet"
+	"Eulogist/core/raknet/handshake"
+	raknet_wrapper "Eulogist/core/raknet/wrapper"
 	"Eulogist/core/tools/skin_process"
 	"Eulogist/proxy/persistence_data"
 	"context"
@@ -64,7 +65,7 @@ func ConnectToServer(
 	// 同步数据
 	mcServer.PersistenceData.BotComponent = authResponse.BotComponent
 	mcServer.authResponse = authResponse
-	mcServer.Raknet = raknet_connection.NewRaknet()
+	mcServer.Raknet = raknet_wrapper.NewRaknet()
 	// 设置底层连接并启动数据包解析
 	mcServer.Raknet.SetConnection(connection, clientkey)
 	go mcServer.Raknet.ProcessIncomingPackets()
@@ -92,7 +93,7 @@ func (m *MinecraftServer) FinishHandshake() error {
 	// 向网易租赁服请求网络设置，
 	// 这是赞颂者登录到网易租赁服的第一个数据包
 	m.WriteSinglePacket(
-		raknet_connection.MinecraftPacket{
+		raknet_wrapper.MinecraftPacket{
 			Packet: &packet.RequestNetworkSettings{ClientProtocol: protocol.CurrentProtocol},
 		},
 	)
@@ -102,7 +103,9 @@ func (m *MinecraftServer) FinishHandshake() error {
 			// 处理初始连接数据包
 			switch p := pk.Packet.(type) {
 			case *packet.NetworkSettings:
-				identityData, clientData, err := m.HandleNetworkSettings(p, m.authResponse, m.PersistenceData.SkinData.NeteaseSkin)
+				identityData, clientData, err := handshake.HandleNetworkSettings(
+					m.Raknet, p, m.authResponse, m.PersistenceData.SkinData.NeteaseSkin,
+				)
 				if err != nil {
 					return fmt.Errorf("FinishHandshake: %v", err)
 				}
@@ -111,7 +114,7 @@ func (m *MinecraftServer) FinishHandshake() error {
 					ClientData:   clientData,
 				}
 			case *packet.ServerToClientHandshake:
-				err = m.HandleServerToClientHandshake(p)
+				err = handshake.HandleServerToClientHandshake(m.Raknet, p)
 				if err != nil {
 					return fmt.Errorf("FinishHandshake: %v", err)
 				}

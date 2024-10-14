@@ -2,7 +2,7 @@ package mc_client
 
 import (
 	"Eulogist/core/minecraft/protocol/packet"
-	raknet_connection "Eulogist/core/raknet"
+	raknet_wrapper "Eulogist/core/raknet/wrapper"
 	"encoding/json"
 	"fmt"
 )
@@ -25,13 +25,13 @@ syncFunc 用于将数据同步到网易租赁服，
 分别对应 packets 中每一个数据包的处理成功情况
 */
 func (m *MinecraftClient) FiltePacketsAndSendCopy(
-	packets []raknet_connection.MinecraftPacket,
-	writePacketsToServer func(packets []raknet_connection.MinecraftPacket),
+	packets []raknet_wrapper.MinecraftPacket,
+	writePacketsToServer func(packets []raknet_wrapper.MinecraftPacket),
 	syncFunc func() error,
 ) (errResults []error, syncError error) {
 	// 初始化
 	errResults = make([]error, 0)
-	sendCopy := make([]raknet_connection.MinecraftPacket, 0)
+	sendCopy := make([]raknet_wrapper.MinecraftPacket, 0)
 	// 处理每个数据包
 	for _, minecraftPacket := range packets {
 		// 初始化

@@ -1,8 +1,6 @@
-package raknet_connection
+package raknet_wrapper
 
 import (
-	"Eulogist/core/minecraft/protocol"
-	"Eulogist/core/minecraft/protocol/packet"
 	"bytes"
 	"context"
 	"crypto/ecdsa"
@@ -10,6 +8,9 @@ import (
 	"fmt"
 	"net"
 	"runtime/debug"
+
+	"Eulogist/core/minecraft/protocol"
+	"Eulogist/core/minecraft/protocol/packet"
 
 	"github.com/pterm/pterm"
 )
@@ -41,27 +42,15 @@ func (r *Raknet) CloseConnection() {
 	defer r.closedLock.Unlock()
 
 	r.cancel()
-	r.connection.Close()
 
-	if !r.closed {
+	if r.connection != nil {
+		r.connection.Close()
+	}
+
+	if !r.closed && r.packets != nil {
 		close(r.packets)
 		r.closed = true
 	}
-}
-
-// 获取当前的上下文
-func (r *Raknet) GetContext() context.Context {
-	return r.context
-}
-
-// 获取当前的 Shield ID
-func (r *Raknet) GetShieldID() int32 {
-	return r.shieldID.Load()
-}
-
-// 设置 Shield ID
-func (r *Raknet) SetShieldID(shieldID int32) {
-	r.shieldID.Store(shieldID)
 }
 
 /*
