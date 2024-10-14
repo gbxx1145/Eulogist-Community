@@ -30,13 +30,9 @@ func EncodeLogin(
 	identity := login.IdentityData{}
 	client := login.ClientData{}
 
-	// 设置默认的身份数据
+	// 设置默认的身份和客户端数据
 	defaultIdentityData(&identity)
-	// 设置默认的客户端数据
-	err = defaultClientData(&client, authResponse, skin)
-	if err != nil {
-		return nil, nil, nil, fmt.Errorf("EncodeLogin: %v", err)
-	}
+	defaultClientData(&client, authResponse, skin)
 
 	// 我们以 Android 设备登录，这将在 JWT 链中的 titleId 字段中显示。
 	// 这些字段无法被编辑，而我们也仅仅是强制以 Android 数据进行登录
@@ -73,7 +69,7 @@ func defaultClientData(
 	d *login.ClientData,
 	authResponse *fb_client.AuthResponse,
 	skin *skin_process.Skin,
-) error {
+) {
 	rand.Seed(time.Now().Unix())
 
 	d.ServerAddress = authResponse.RentalServerIP
@@ -108,8 +104,6 @@ func defaultClientData(
 		d.SkinImageHeight = 32
 		d.SkinImageWidth = 64
 	}
-
-	return nil
 }
 
 // setAndroidData 确保传入的 login.ClientData
