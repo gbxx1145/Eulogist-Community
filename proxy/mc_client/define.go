@@ -18,5 +18,5 @@ type MinecraftClient struct {
 	Address         *net.UDPAddr
 	PersistenceData *persistence_data.PersistenceData
 
-	*raknet_wrapper.Raknet[packet.Packet]
+	Conn *raknet_wrapper.Raknet[packet.Packet]
 }

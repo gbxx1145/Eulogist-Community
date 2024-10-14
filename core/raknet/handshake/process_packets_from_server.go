@@ -35,10 +35,10 @@ func HandleNetworkSettings(
 	if !ok {
 		return nil, nil, fmt.Errorf("HandleNetworkSettings: unknown compression algorithm: %v", pk.CompressionAlgorithm)
 	}
-	r.Encoder().EnableCompression(alg)
-	r.Decoder().EnableCompression(alg)
+	r.GetEncoder().EnableCompression(alg)
+	r.GetDecoder().EnableCompression(alg)
 	// 编码登录请求
-	loginRequest, identityData, clientData, err = EncodeLogin(authResponse, r.Key(), skin)
+	loginRequest, identityData, clientData, err = EncodeLogin(authResponse, r.GetKey(), skin)
 	if err != nil {
 		return nil, nil, fmt.Errorf("HandleNetworkSettings: %v", err)
 	}
@@ -82,13 +82,13 @@ func HandleServerToClientHandshake(
 		return fmt.Errorf("HandleServerToClientHandshake: error base64 decoding ServerToClientHandshake salt: %v", err)
 	}
 	// 计算共享密钥
-	x, _ := pub.Curve.ScalarMult(pub.X, pub.Y, r.Key().D.Bytes())
+	x, _ := pub.Curve.ScalarMult(pub.X, pub.Y, r.GetKey().D.Bytes())
 	sharedSecret := append(bytes.Repeat([]byte{0}, 48-len(x.Bytes())), x.Bytes()...)
 	// 创建加密密钥
 	keyBytes := sha256.Sum256(append(salt, sharedSecret...))
 	// 启用加密
-	r.Encoder().EnableEncryption(keyBytes)
-	r.Decoder().EnableEncryption(keyBytes)
+	r.GetEncoder().EnableEncryption(keyBytes)
+	r.GetDecoder().EnableEncryption(keyBytes)
 	// 发送回应的 ClientToServerHandshake 包
 	r.WriteSinglePacket(raknet_wrapper.MinecraftPacket[packet.Packet]{Packet: &packet.ClientToServerHandshake{}})
 	// 返回值
@@ -106,7 +106,7 @@ func HandleStartGame(
 
 	for _, item := range pk.Items {
 		if item.Name == "minecraft:shield" {
-			r.ShieldID().Store(int32(item.RuntimeID))
+			r.GetShieldID().Store(int32(item.RuntimeID))
 		}
 	}
 

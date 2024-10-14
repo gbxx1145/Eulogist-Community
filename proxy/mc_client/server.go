@@ -39,7 +39,7 @@ func (m *MinecraftClient) CreateListener() error {
 	m.listener = listener
 	m.connected = make(chan struct{}, 1)
 	m.Address = address
-	m.Raknet = raknet_connection.NewStandardRaknetWrapper()
+	m.Conn = raknet_connection.NewStandardRaknetWrapper()
 	// 返回成功
 	return nil
 }
@@ -63,7 +63,7 @@ func (m *MinecraftClient) WaitConnect() error {
 	}()
 	// 初始化变量
 	serverKey, _ := ecdsa.GenerateKey(elliptic.P384(), rand.Reader)
-	m.SetConnection(conn, serverKey)
+	m.Conn.SetConnection(conn, serverKey)
 	m.connected <- struct{}{}
 	// 返回成功
 	return nil

@@ -45,7 +45,7 @@ func Eulogist() error {
 		if err != nil {
 			return fmt.Errorf("Eulogist: %v", err)
 		}
-		defer server.CloseConnection()
+		defer server.Conn.CloseConnection()
 
 		pterm.Success.Println("Success to create connection with NetEase Minecraft Bedrock Rental Server, now we try to create handshake with it.")
 
@@ -64,7 +64,7 @@ func Eulogist() error {
 		if err != nil {
 			return fmt.Errorf("Eulogist: %v", err)
 		}
-		defer client.CloseConnection()
+		defer client.Conn.CloseConnection()
 		// 打印赞颂者准备完成的信息
 		pterm.Success.Printf(
 			"Eulogist is ready! Please connect to Eulogist manually.\nEulogist server address: %s:%d\n",
@@ -94,8 +94,8 @@ func Eulogist() error {
 		// 关闭已建立的所有连接
 		defer func() {
 			waitGroup.Add(-1)
-			server.CloseConnection()
-			client.CloseConnection()
+			server.Conn.CloseConnection()
+			client.Conn.CloseConnection()
 		}()
 		// 显示程序崩溃错误信息
 		defer func() {
@@ -113,14 +113,14 @@ func Eulogist() error {
 			// 初始化一个函数，
 			// 用于同步数据到 Minecraft 客户端
 			syncFunc := func() error {
-				if shieldID := server.ShieldID().Load(); shieldID != 0 {
-					client.ShieldID().Store(shieldID)
+				if shieldID := server.Conn.GetShieldID().Load(); shieldID != 0 {
+					client.Conn.GetShieldID().Store(shieldID)
 				}
 				return nil
 			}
 			// 读取、过滤数据包，
 			// 然后抄送其到 Minecraft 客户端
-			errResults, syncError := server.FiltePacketsAndSendCopy(server.ReadPackets(), client.WritePackets, syncFunc)
+			errResults, syncError := server.FiltePacketsAndSendCopy(server.Conn.ReadPackets(), client.Conn.WritePackets, syncFunc)
 			if syncError != nil {
 				pterm.Warning.Printf("Eulogist: Failed to sync data when process packets from server, and the error log is %v", syncError)
 			}
@@ -131,9 +131,9 @@ func Eulogist() error {
 			}
 			// 检查连接状态
 			select {
-			case <-server.Context().Done():
+			case <-server.Conn.GetContext().Done():
 				return
-			case <-client.Context().Done():
+			case <-client.Conn.GetContext().Done():
 				return
 			default:
 			}
@@ -145,8 +145,8 @@ func Eulogist() error {
 		// 关闭已建立的所有连接
 		defer func() {
 			waitGroup.Add(-1)
-			client.CloseConnection()
-			server.CloseConnection()
+			client.Conn.CloseConnection()
+			server.Conn.CloseConnection()
 		}()
 		// 显示程序崩溃错误信息
 		defer func() {
@@ -168,7 +168,7 @@ func Eulogist() error {
 			}
 			// 读取、过滤数据包，
 			// 然后抄送其到网易租赁服
-			errResults, syncError := client.FiltePacketsAndSendCopy(client.ReadPackets(), server.WritePackets, syncFunc)
+			errResults, syncError := client.FiltePacketsAndSendCopy(client.Conn.ReadPackets(), server.Conn.WritePackets, syncFunc)
 			if syncError != nil {
 				pterm.Warning.Printf("Eulogist: Failed to sync data when process packets from client, and the error log is %v", syncError)
 			}
@@ -179,9 +179,9 @@ func Eulogist() error {
 			}
 			// 检查连接状态
 			select {
-			case <-client.Context().Done():
+			case <-client.Conn.GetContext().Done():
 				return
-			case <-server.Context().Done():
+			case <-server.Conn.GetContext().Done():
 				return
 			default:
 			}

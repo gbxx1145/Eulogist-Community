@@ -8,31 +8,31 @@ import (
 )
 
 // ...
-func (r *Raknet[T]) Encoder() *packet.Encoder {
+func (r *Raknet[T]) GetEncoder() *packet.Encoder {
 	return r.encoder
 }
 
 // ...
-func (r *Raknet[T]) Decoder() *packet.Decoder {
+func (r *Raknet[T]) GetDecoder() *packet.Decoder {
 	return r.decoder
 }
 
 // ...
-func (r *Raknet[T]) Key() *ecdsa.PrivateKey {
+func (r *Raknet[T]) GetKey() *ecdsa.PrivateKey {
 	return r.key
 }
 
 // ...
-func (r *Raknet[T]) Salt() []byte {
+func (r *Raknet[T]) GetSalt() []byte {
 	return r.salt
 }
 
 // ...
-func (r *Raknet[T]) ShieldID() *atomic.Int32 {
+func (r *Raknet[T]) GetShieldID() *atomic.Int32 {
 	return &r.shieldID
 }
 
 // ...
-func (r *Raknet[T]) Context() context.Context {
+func (r *Raknet[T]) GetContext() context.Context {
 	return r.context
 }

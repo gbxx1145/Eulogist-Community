@@ -23,7 +23,7 @@ func (m *MinecraftClient) DefaultTranslate(
 ) raknet_wrapper.MinecraftPacket[neteasePacket.Packet] {
 	// 数据包可能已被修改，
 	// 因此此处需要重新编码它的二进制形式
-	pk.Bytes = marshal.EncodeStandardPacket(pk, m.ShieldID())
+	pk.Bytes = marshal.EncodeStandardPacket(pk, m.Conn.GetShieldID())
 
 	// 从数据包的二进制负载前端读取其在国际版协议下的数据包 ID。
 	// 这一部分将会被替换为网易版协议下的数据包 ID
@@ -38,7 +38,7 @@ func (m *MinecraftClient) DefaultTranslate(
 	// 获得该数据包在网易版协议下的二进制负载，
 	// 然后将其按网易版协议再次解析
 	packetBytes := append(headerBuffer.Bytes(), packetBuffer.Bytes()...)
-	result := marshal.DecodeNetEasePacket(packetBytes, m.ShieldID())
+	result := marshal.DecodeNetEasePacket(packetBytes, m.Conn.GetShieldID())
 
 	// 返回值
 	if result.Packet != nil {
@@ -113,7 +113,7 @@ func (m *MinecraftClient) FiltePacketsAndSendCopy(
 		case *standardPacket.RequestPermissions:
 			pk.PermissionLevel = pk.PermissionLevel / 2
 		case *standardPacket.PlayerSkin:
-			m.WriteSinglePacket(minecraftPacket)
+			m.Conn.WriteSinglePacket(minecraftPacket)
 			shouldSendCopy = false
 		default:
 			// 默认情况下，我们需要将

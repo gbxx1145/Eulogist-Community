@@ -29,7 +29,7 @@ func (m *MinecraftServer) DefaultTranslate(
 ) raknet_wrapper.MinecraftPacket[standardPacket.Packet] {
 	// 数据包可能已被修改，
 	// 因此此处需要重新编码它的二进制形式
-	pk.Bytes = marshal.EncodeNetEasePacket(pk, m.ShieldID())
+	pk.Bytes = marshal.EncodeNetEasePacket(pk, m.Conn.GetShieldID())
 
 	// 从数据包的二进制负载前端读取其在网易协议下的数据包 ID。
 	// 这一部分将会被替换为国际版协议下的数据包 ID
@@ -44,7 +44,7 @@ func (m *MinecraftServer) DefaultTranslate(
 	// 获得该数据包在国际版协议下的二进制负载，
 	// 然后将其按国际版协议再次解析
 	packetBytes := append(headerBuffer.Bytes(), packetBuffer.Bytes()...)
-	result := marshal.DecodeStandardPacket(packetBytes, m.ShieldID())
+	result := marshal.DecodeStandardPacket(packetBytes, m.Conn.GetShieldID())
 
 	// 返回值
 	if result.Packet != nil {
@@ -93,10 +93,10 @@ func (m *MinecraftServer) FiltePacketsAndSendCopy(
 			shouldSendCopy = false
 		case *neteasePacket.StartGame:
 			// 预处理
-			m.PersistenceData.LoginData.PlayerUniqueID, m.PersistenceData.LoginData.PlayerRuntimeID = handshake.HandleStartGame(m.Raknet, pk)
+			m.PersistenceData.LoginData.PlayerUniqueID, m.PersistenceData.LoginData.PlayerRuntimeID = handshake.HandleStartGame(m.Conn, pk)
 			playerSkin := m.PersistenceData.SkinData.NeteaseSkin
 			// 发送简要身份证明
-			m.WriteSinglePacket(raknet_wrapper.MinecraftPacket[neteasePacket.Packet]{
+			m.Conn.WriteSinglePacket(raknet_wrapper.MinecraftPacket[neteasePacket.Packet]{
 				Packet: &neteasePacket.NeteaseJson{
 					Data: []byte(
 						fmt.Sprintf(
@@ -108,7 +108,7 @@ func (m *MinecraftServer) FiltePacketsAndSendCopy(
 			})
 			// 其他组件处理
 			if playerSkin == nil {
-				m.WriteSinglePacket(raknet_wrapper.MinecraftPacket[neteasePacket.Packet]{
+				m.Conn.WriteSinglePacket(raknet_wrapper.MinecraftPacket[neteasePacket.Packet]{
 					Packet: &neteasePacket.PyRpc{
 						Value:         py_rpc.Marshal(&py_rpc.SyncUsingMod{}),
 						OperationType: neteasePacket.PyRpcOperationTypeSend,
@@ -126,7 +126,7 @@ func (m *MinecraftServer) FiltePacketsAndSendCopy(
 					}
 				}
 				// 组件处理
-				m.WriteSinglePacket(raknet_wrapper.MinecraftPacket[neteasePacket.Packet]{
+				m.Conn.WriteSinglePacket(raknet_wrapper.MinecraftPacket[neteasePacket.Packet]{
 					Packet: &neteasePacket.PyRpc{
 						Value: py_rpc.Marshal(&py_rpc.SyncUsingMod{
 							modUUIDs,
@@ -141,7 +141,7 @@ func (m *MinecraftServer) FiltePacketsAndSendCopy(
 			}
 			// 上报自身已完成组件加载，
 			// 尽管我们实际上并没有加载任何组件
-			m.WriteSinglePacket(raknet_wrapper.MinecraftPacket[neteasePacket.Packet]{
+			m.Conn.WriteSinglePacket(raknet_wrapper.MinecraftPacket[neteasePacket.Packet]{
 				Packet: &neteasePacket.PyRpc{
 					Value:         py_rpc.Marshal(&py_rpc.ClientLoadAddonsFinishedFromGac{}),
 					OperationType: neteasePacket.PyRpcOperationTypeSend,

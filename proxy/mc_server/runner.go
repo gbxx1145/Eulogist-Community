@@ -66,10 +66,10 @@ func ConnectToServer(
 	// 同步数据
 	mcServer.PersistenceData.BotComponent = authResponse.BotComponent
 	mcServer.authResponse = authResponse
-	mcServer.Raknet = raknet_connection.NewNetEaseRaknetWrapper()
+	mcServer.Conn = raknet_connection.NewNetEaseRaknetWrapper()
 	// 设置底层连接并启动数据包解析
-	mcServer.SetConnection(connection, clientkey)
-	go mcServer.ProcessIncomingPackets()
+	mcServer.Conn.SetConnection(connection, clientkey)
+	go mcServer.Conn.ProcessIncomingPackets()
 	// 返回值
 	return &mcServer, nil
 }
@@ -93,19 +93,19 @@ func (m *MinecraftServer) FinishHandshake() error {
 	var err error
 	// 向网易租赁服请求网络设置，
 	// 这是赞颂者登录到网易租赁服的第一个数据包
-	m.WriteSinglePacket(
+	m.Conn.WriteSinglePacket(
 		raknet_wrapper.MinecraftPacket[packet.Packet]{
 			Packet: &packet.RequestNetworkSettings{ClientProtocol: protocol.CurrentProtocol},
 		},
 	)
 	// 处理来自 bot 端的登录相关数据包
 	for {
-		for _, pk := range m.ReadPackets() {
+		for _, pk := range m.Conn.ReadPackets() {
 			// 处理初始连接数据包
 			switch p := pk.Packet.(type) {
 			case *packet.NetworkSettings:
 				identityData, clientData, err := handshake.HandleNetworkSettings(
-					m.Raknet, p, m.authResponse, m.PersistenceData.SkinData.NeteaseSkin,
+					m.Conn, p, m.authResponse, m.PersistenceData.SkinData.NeteaseSkin,
 				)
 				if err != nil {
 					return fmt.Errorf("FinishHandshake: %v", err)
@@ -115,7 +115,7 @@ func (m *MinecraftServer) FinishHandshake() error {
 					ClientData:   clientData,
 				}
 			case *packet.ServerToClientHandshake:
-				err = handshake.HandleServerToClientHandshake(m.Raknet, p)
+				err = handshake.HandleServerToClientHandshake(m.Conn, p)
 				if err != nil {
 					return fmt.Errorf("FinishHandshake: %v", err)
 				}
@@ -126,7 +126,7 @@ func (m *MinecraftServer) FinishHandshake() error {
 		}
 		// 检查连接状态
 		select {
-		case <-m.Context().Done():
+		case <-m.Conn.GetContext().Done():
 			return fmt.Errorf("FinishHandshake: NetEase Minecraft Rental Server closed their connection to eulogist")
 		default:
 		}

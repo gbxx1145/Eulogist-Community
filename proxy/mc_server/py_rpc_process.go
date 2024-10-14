@@ -24,7 +24,7 @@ func (m *MinecraftServer) OnPyRpc(p *packet.PyRpc) error {
 	case *py_rpc.StartType:
 		c.Content = fbauth.TransferData(m.fbClient, c.Content)
 		c.Type = py_rpc.StartTypeResponse
-		m.WriteSinglePacket(
+		m.Conn.WriteSinglePacket(
 			raknet_wrapper.MinecraftPacket[packet.Packet]{
 				Packet: &packet.PyRpc{
 					Value:         py_rpc.Marshal(c),
@@ -55,7 +55,7 @@ func (m *MinecraftServer) OnPyRpc(p *packet.PyRpc) error {
 			}
 		}
 		// 完成零知识证明(挑战)
-		m.WriteSinglePacket(
+		m.Conn.WriteSinglePacket(
 			raknet_wrapper.MinecraftPacket[packet.Packet]{
 				Packet: &packet.PyRpc{
 					Value:         py_rpc.Marshal(&py_rpc.SetMCPCheckNum{ret_p}),

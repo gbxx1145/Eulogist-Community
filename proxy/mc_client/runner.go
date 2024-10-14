@@ -38,7 +38,7 @@ func RunServer(persistenceData *persistence_data.PersistenceData) (
 		if err != nil {
 			panic(fmt.Sprintf("RunServer: %v", err))
 		}
-		client.ProcessIncomingPackets()
+		client.Conn.ProcessIncomingPackets()
 	}()
 	// return
 	return client, client.connected, nil
@@ -53,16 +53,16 @@ func (m *MinecraftClient) WaitClientHandshakeDown() error {
 	// 处理来自 Minecraft
 	// 客户端的登录相关的数据包
 	for {
-		for _, pk := range m.ReadPackets() {
+		for _, pk := range m.Conn.ReadPackets() {
 			// 处理初始连接数据包
 			switch p := pk.Packet.(type) {
 			case *packet.RequestNetworkSettings:
-				err = handshake.HandleRequestNetworkSettings(m.Raknet, p)
+				err = handshake.HandleRequestNetworkSettings(m.Conn, p)
 				if err != nil {
 					panic(fmt.Sprintf("WaitClientHandshakeDown: %v", err))
 				}
 			case *packet.Login:
-				identityData, clientData, err := handshake.HandleLogin(m.Raknet, p)
+				identityData, clientData, err := handshake.HandleLogin(m.Conn, p)
 				if err != nil {
 					panic(fmt.Sprintf("WaitClientHandshakeDown: %v", err))
 				}
@@ -78,7 +78,7 @@ func (m *MinecraftClient) WaitClientHandshakeDown() error {
 		}
 		// 检查连接状态
 		select {
-		case <-m.Context().Done():
+		case <-m.Conn.GetContext().Done():
 			return fmt.Errorf("WaitClientHandshakeDown: Minecraft closed its connection to eulogist")
 		default:
 		}
