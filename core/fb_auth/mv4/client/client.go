@@ -8,10 +8,8 @@ import (
 
 // ...
 type ClientInfo struct {
-	FBUCUsername string
-	GrowthLevel  int
-	RespondTo    string
-	Uid          string
+	GrowthLevel int
+	RespondTo   string
 }
 
 // ...

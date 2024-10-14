@@ -2,18 +2,31 @@ package mc_client
 
 import (
 	"Eulogist/core/raknet/handshake"
+	"Eulogist/proxy/persistence_data"
 	"fmt"
 
 	"Eulogist/core/minecraft/standard/protocol/packet"
 )
 
-// RunServer 在 127.0.0.1 上运行一个代理服务器以等待
-// Minecraft 连接。服务器开放的端口将被自动设置，
-// 您可以使用 client.GetServerPort() 来取得开放的端口。
-// 当 Minecraft 连接时，管道 connected 将收到数据
-func RunServer() (client *MinecraftClient, connected chan struct{}, err error) {
+/*
+RunServer 在本机上运行一个代理服务器以等待 Minecraft 客户端连接。
+persistenceData 用于设置持久化数据，
+它应该与 MinecraftServer 使用同一个。
+
+服务器开放的端口将被自动设置，
+您可以使用 client.Address.Port 来取得开放的端口。
+
+当 Minecraft 连接时，管道 connected 将收到数据
+*/
+func RunServer(persistenceData *persistence_data.PersistenceData) (
+	client *MinecraftClient,
+	connected chan struct{},
+	err error,
+) {
 	// prepare
-	client = new(MinecraftClient)
+	client = &MinecraftClient{
+		PersistenceData: persistenceData,
+	}
 	// start listening
 	err = client.CreateListener()
 	if err != nil {
@@ -49,9 +62,13 @@ func (m *MinecraftClient) WaitClientHandshakeDown() error {
 					panic(fmt.Sprintf("WaitClientHandshakeDown: %v", err))
 				}
 			case *packet.Login:
-				m.identityData, m.clientData, err = handshake.HandleLogin(m.Raknet, p)
+				identityData, clientData, err := handshake.HandleLogin(m.Raknet, p)
 				if err != nil {
 					panic(fmt.Sprintf("WaitClientHandshakeDown: %v", err))
+				}
+				m.PersistenceData.LoginData.Client = persistence_data.LoginDataClientSide{
+					IdentityData: identityData,
+					ClientData:   clientData,
 				}
 			case *packet.ClientToServerHandshake:
 				// 连接已完成初始化，

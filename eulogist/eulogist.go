@@ -1,9 +1,9 @@
 package Eulogist
 
 import (
-	packet_translate_struct "Eulogist/core/tools/packet_translator/struct"
 	Client "Eulogist/proxy/mc_client"
 	Server "Eulogist/proxy/mc_server"
+	"Eulogist/proxy/persistence_data"
 	"fmt"
 	"runtime/debug"
 	"sync"
@@ -19,6 +19,7 @@ func Eulogist() error {
 	var client *Client.MinecraftClient
 	var server *Server.MinecraftServer
 	var clientWasConnected chan struct{}
+	var persistenceData *persistence_data.PersistenceData = new(persistence_data.PersistenceData)
 
 	// 读取配置文件
 	{
@@ -39,6 +40,7 @@ func Eulogist() error {
 				Token:          config.FBToken,
 				AuthServer:     LookUpAuthServerAddress(config.FBToken),
 			},
+			persistenceData,
 		)
 		if err != nil {
 			return fmt.Errorf("Eulogist: %v", err)
@@ -58,7 +60,7 @@ func Eulogist() error {
 	// 召唤——赞颂者
 	{
 		// 启动赞颂者
-		client, clientWasConnected, err = Client.RunServer()
+		client, clientWasConnected, err = Client.RunServer(persistenceData)
 		if err != nil {
 			return fmt.Errorf("Eulogist: %v", err)
 		}
@@ -66,7 +68,7 @@ func Eulogist() error {
 		// 打印赞颂者准备完成的信息
 		pterm.Success.Printf(
 			"Eulogist is ready! Please connect to Eulogist manually.\nEulogist server address: %s:%d\n",
-			client.GetServerIP(), client.GetServerPort(),
+			client.Address.IP.String(), client.Address.Port,
 		)
 	}
 
@@ -84,12 +86,7 @@ func Eulogist() error {
 		pterm.Success.Println("Success to create handshake with Minecraft Client, and then you will login to NetEase Minecraft Bedrock Rental Server.")
 	}
 
-	// 同步相关数据，
-	// 并设置等待队列
-	client.SetNeteaseUID(server.GetNeteaseUID())
-	client.SetPlayerSkin(server.GetPlayerSkin())
-	client.SetOutfitInfo(server.GetOutfitInfo())
-	server.SetStandardBedrockIdentity(client.GetStandardBedrockIdentity())
+	// 设置等待队列
 	waitGroup.Add(2)
 
 	// 处理网易租赁服到赞颂者的数据包
@@ -118,16 +115,6 @@ func Eulogist() error {
 			syncFunc := func() error {
 				if shieldID := server.ShieldID.Load(); shieldID != 0 {
 					client.ShieldID.Store(shieldID)
-				}
-				if entityUniqueID := server.GetEntityUniqueID(); entityUniqueID != 0 {
-					client.SetEntityUniqueID(entityUniqueID)
-				}
-				if entityRuntimeID := server.GetEntityRuntimeID(); entityRuntimeID != 0 {
-					client.SetEntityRuntimeID(entityRuntimeID)
-				}
-				if serverSkin := server.GetServerSkin(); serverSkin != nil {
-					standardServerSkin := packet_translate_struct.ConvertToStandardSkin(*serverSkin)
-					client.SetServerSkin(&standardServerSkin)
 				}
 				return nil
 			}

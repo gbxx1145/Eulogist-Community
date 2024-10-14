@@ -11,10 +11,13 @@ import (
 	packet_translate_pool "Eulogist/core/tools/packet_translator/pool"
 	packet_translate_struct "Eulogist/core/tools/packet_translator/struct"
 	"Eulogist/core/tools/py_rpc"
+	"Eulogist/proxy/persistence_data"
 	"bytes"
 	"fmt"
 
 	standardPacket "Eulogist/core/minecraft/standard/protocol/packet"
+
+	"github.com/google/uuid"
 )
 
 // DefaultTranslate 按默认方式翻译数据包为国际版的版本。
@@ -90,17 +93,15 @@ func (m *MinecraftServer) FiltePacketsAndSendCopy(
 			shouldSendCopy = false
 		case *neteasePacket.StartGame:
 			// 预处理
-			entityUniqueID, entityRuntimeID := handshake.HandleStartGame(m.Raknet, pk)
-			m.SetEntityUniqueID(entityUniqueID)
-			m.SetEntityRuntimeID(entityRuntimeID)
-			playerSkin := m.GetPlayerSkin()
+			m.PersistenceData.LoginData.PlayerUniqueID, m.PersistenceData.LoginData.PlayerRuntimeID = handshake.HandleStartGame(m.Raknet, pk)
+			playerSkin := m.PersistenceData.SkinData.NeteaseSkin
 			// 发送简要身份证明
 			m.WriteSinglePacket(raknet_wrapper.MinecraftPacket[neteasePacket.Packet]{
 				Packet: &neteasePacket.NeteaseJson{
 					Data: []byte(
 						fmt.Sprintf(
-							`{"eventName":"LOGIN_UID","resid":"","uid":"%s"}`,
-							m.GetNeteaseUID(),
+							`{"eventName":"LOGIN_UID","resid":"","uid":"%d"}`,
+							m.PersistenceData.LoginData.Server.IdentityData.Uid,
 						),
 					),
 				},
@@ -118,7 +119,7 @@ func (m *MinecraftServer) FiltePacketsAndSendCopy(
 				modUUIDs := make([]any, 0)
 				outfitInfo := make(map[string]int64, 0)
 				// 设置数据
-				for modUUID, outfitType := range m.GetOutfitInfo() {
+				for modUUID, outfitType := range m.PersistenceData.BotComponent {
 					modUUIDs = append(modUUIDs, modUUID)
 					if outfitType != nil {
 						outfitInfo[modUUID] = int64(*outfitType)
@@ -147,7 +148,7 @@ func (m *MinecraftServer) FiltePacketsAndSendCopy(
 				},
 			})
 		case *neteasePacket.AddActor:
-			m.AddWorldEntity(Entity{
+			m.PersistenceData.AddWorldEntity(persistence_data.EntityData{
 				EntityType:      pk.EntityType,
 				EntityRuntimeID: pk.EntityRuntimeID,
 				EntityUniqueID:  pk.EntityUniqueID,
@@ -164,21 +165,23 @@ func (m *MinecraftServer) FiltePacketsAndSendCopy(
 				}
 			}
 		case *neteasePacket.SetActorData:
-			if entity := m.GetWorldEntityByRuntimeID(pk.EntityRuntimeID); entity != nil && entity.EntityType == "minecraft:falling_block" {
-				if entityFlags, ok := pk.EntityMetadata[neteaseProtocol.EntityDataKeyFlags].(int64); ok {
-					pk.EntityMetadata[neteaseProtocol.EntityDataKeyFlags] = entityFlags ^ 0x1000000000000 // Ingore collision
-				}
-				if fallingBlockRuntimeID, ok := pk.EntityMetadata[neteaseProtocol.EntityDataKeyVariant].(int32); ok {
-					standardRuntimeID, found := packet_translator.ConvertToStandardBlockRuntimeID(uint32(fallingBlockRuntimeID))
-					if found {
-						pk.EntityMetadata[neteaseProtocol.EntityDataKeyVariant] = int32(standardRuntimeID)
-					}
+			entity := m.PersistenceData.GetWorldEntityByRuntimeID(pk.EntityRuntimeID)
+			if entity == nil || entity.EntityType != "minecraft:falling_block" {
+				break
+			}
+			if entityFlags, ok := pk.EntityMetadata[neteaseProtocol.EntityDataKeyFlags].(int64); ok {
+				pk.EntityMetadata[neteaseProtocol.EntityDataKeyFlags] = entityFlags ^ 0x1000000000000 // Ingore collision
+			}
+			if fallingBlockRuntimeID, ok := pk.EntityMetadata[neteaseProtocol.EntityDataKeyVariant].(int32); ok {
+				standardRuntimeID, found := packet_translator.ConvertToStandardBlockRuntimeID(uint32(fallingBlockRuntimeID))
+				if found {
+					pk.EntityMetadata[neteaseProtocol.EntityDataKeyVariant] = int32(standardRuntimeID)
 				}
 			}
 		case *neteasePacket.RemoveActor:
-			m.DeleteWorldEntityByUniqueID(pk.EntityUniqueID)
+			m.PersistenceData.DeleteWorldEntityByUniqueID(pk.EntityUniqueID)
 		case *neteasePacket.UpdatePlayerGameType:
-			if pk.PlayerUniqueID == m.entityUniqueID {
+			if pk.PlayerUniqueID == m.PersistenceData.LoginData.PlayerUniqueID {
 				// 如果玩家的唯一 ID 与数据包中记录的值匹配，
 				// 则向客户端发送 SetPlayerGameType 数据包，
 				// 并放弃当前数据包的发送，
@@ -198,20 +201,30 @@ func (m *MinecraftServer) FiltePacketsAndSendCopy(
 			}
 		case *neteasePacket.PlayerList:
 			for _, value := range pk.Entries {
-				if value.EntityUniqueID == m.GetEntityUniqueID() {
-					m.SetServerSkin(&value.Skin)
+				if value.EntityUniqueID == m.PersistenceData.LoginData.PlayerUniqueID {
+					m.PersistenceData.SkinData.ServerSkin = &value.Skin
 				}
 			}
 		case *neteasePacket.PlayStatus:
 			if pk.Status == neteasePacket.PlayStatusPlayerSpawn {
-				skinData := m.GetServerSkin()
+				// 初始化变量
+				var playerUUID uuid.UUID
+				skinData := m.PersistenceData.SkinData.ServerSkin
+				// 判断皮肤是否存在且皮肤是否可信
 				if skinData == nil || !skinData.Trusted {
 					break
 				}
+				// 解析 Minecraft 客户端处原本的玩家 UUID
+				playerUUID, err = uuid.Parse(m.PersistenceData.LoginData.Client.IdentityData.Identity)
+				if err != nil {
+					err = fmt.Errorf("FiltePacketsAndSendCopy: %v", err)
+					break
+				}
+				// 同步 Minecraft 客户端处的皮肤为网易账户对应的皮肤
 				writePacketsToClient([]raknet_wrapper.MinecraftPacket[standardPacket.Packet]{
 					{
 						Packet: &standardPacket.PlayerSkin{
-							UUID:        m.GetStandardBedrockIdentity(),
+							UUID:        playerUUID,
 							Skin:        packet_translate_struct.ConvertToStandardSkin(*skinData),
 							OldSkinName: "",
 							NewSkinName: "",

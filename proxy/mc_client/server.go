@@ -2,7 +2,6 @@ package mc_client
 
 import (
 	raknet_connection "Eulogist/core/raknet"
-	"Eulogist/core/tools/skin_process"
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/rand"
@@ -11,7 +10,6 @@ import (
 
 	standardProtocol "Eulogist/core/minecraft/standard/protocol"
 
-	"github.com/google/uuid"
 	"github.com/sandertv/go-raknet"
 )
 
@@ -39,8 +37,8 @@ func (m *MinecraftClient) CreateListener() error {
 	))
 	// 初始化变量
 	m.listener = listener
-	m.address = address
 	m.connected = make(chan struct{}, 1)
+	m.Address = address
 	m.Raknet = raknet_connection.NewStandardRaknetWrapper()
 	// 返回成功
 	return nil
@@ -69,90 +67,4 @@ func (m *MinecraftClient) WaitConnect() error {
 	m.connected <- struct{}{}
 	// 返回成功
 	return nil
-}
-
-// GetServerIP 获取服务器的 IP 地址
-func (m *MinecraftClient) GetServerIP() string {
-	return m.address.IP.String()
-}
-
-// GetServerPort 获取服务器的端口号
-func (m *MinecraftClient) GetServerPort() int {
-	return m.address.Port
-}
-
-// ...
-func (m *MinecraftClient) SetStandardBedrockIdentity(standardBedrockIdentity uuid.UUID) {
-	m.identityData.Identity = standardBedrockIdentity.String()
-}
-
-// ...
-func (m *MinecraftClient) GetStandardBedrockIdentity() uuid.UUID {
-	uuidGet, _ := uuid.Parse(m.identityData.Identity)
-	return uuidGet
-}
-
-// ...
-func (m *MinecraftClient) GetNeteaseUID() string {
-	return m.neteaseUID
-}
-
-// ...
-func (m *MinecraftClient) SetNeteaseUID(neteaseUID string) {
-	m.neteaseUID = neteaseUID
-}
-
-// ...
-func (m *MinecraftClient) InitPlayerSkin() {
-	m.playerSkin = &skin_process.Skin{}
-}
-
-// ...
-func (m *MinecraftClient) GetPlayerSkin() *skin_process.Skin {
-	return m.playerSkin
-}
-
-// ...
-func (m *MinecraftClient) SetPlayerSkin(skin *skin_process.Skin) {
-	m.playerSkin = skin
-}
-
-// ...
-func (m *MinecraftClient) GetServerSkin() *standardProtocol.Skin {
-	return m.serverSkin
-}
-
-// ...
-func (m *MinecraftClient) SetServerSkin(serverSkin *standardProtocol.Skin) {
-	m.serverSkin = serverSkin
-}
-
-// ...
-func (m *MinecraftClient) GetOutfitInfo() map[string]*int {
-	return m.outfitInfo
-}
-
-// ...
-func (m *MinecraftClient) SetOutfitInfo(outfitInfo map[string]*int) {
-	m.outfitInfo = outfitInfo
-}
-
-// ...
-func (m *MinecraftClient) GetEntityUniqueID() int64 {
-	return m.entityUniqueID
-}
-
-// ...
-func (m *MinecraftClient) SetEntityUniqueID(entityUniqueID int64) {
-	m.entityUniqueID = entityUniqueID
-}
-
-// ...
-func (m *MinecraftClient) GetEntityRuntimeID() uint64 {
-	return m.entityRuntimeID
-}
-
-// ...
-func (m *MinecraftClient) SetEntityRuntimeID(entityRuntimeID uint64) {
-	m.entityRuntimeID = entityRuntimeID
 }

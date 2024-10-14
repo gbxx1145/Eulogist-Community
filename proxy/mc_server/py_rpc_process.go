@@ -42,7 +42,7 @@ func (m *MinecraftServer) OnPyRpc(p *packet.PyRpc) error {
 		arg, _ := json.Marshal([]any{
 			c.FirstArg,
 			c.SecondArg.Arg,
-			m.entityUniqueID,
+			m.PersistenceData.LoginData.PlayerUniqueID,
 		})
 		ret := fbauth.TransferCheckNum(m.fbClient, string(arg))
 		// 解码响应并调整数据
