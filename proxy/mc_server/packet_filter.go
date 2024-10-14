@@ -47,10 +47,10 @@ func (m *MinecraftServer) FiltePacketsAndSendCopy(
 			}
 		case *packet.StartGame:
 			// 预处理
-			m.PersistenceData.LoginData.PlayerUniqueID, m.PersistenceData.LoginData.PlayerRuntimeID = handshake.HandleStartGame(m.Raknet, pk)
+			m.PersistenceData.LoginData.PlayerUniqueID, m.PersistenceData.LoginData.PlayerRuntimeID = handshake.HandleStartGame(m.Conn, pk)
 			playerSkin := m.PersistenceData.SkinData.NeteaseSkin
 			// 发送简要身份证明
-			m.WriteSinglePacket(raknet_wrapper.MinecraftPacket{
+			m.Conn.WriteSinglePacket(raknet_wrapper.MinecraftPacket{
 				Packet: &packet.NeteaseJson{
 					Data: []byte(
 						fmt.Sprintf(
@@ -62,7 +62,7 @@ func (m *MinecraftServer) FiltePacketsAndSendCopy(
 			})
 			// 其他组件处理
 			if playerSkin == nil {
-				m.WriteSinglePacket(raknet_wrapper.MinecraftPacket{
+				m.Conn.WriteSinglePacket(raknet_wrapper.MinecraftPacket{
 					Packet: &packet.PyRpc{
 						Value:         py_rpc.Marshal(&py_rpc.SyncUsingMod{}),
 						OperationType: packet.PyRpcOperationTypeSend,
@@ -80,7 +80,7 @@ func (m *MinecraftServer) FiltePacketsAndSendCopy(
 					}
 				}
 				// 组件处理
-				m.WriteSinglePacket(raknet_wrapper.MinecraftPacket{
+				m.Conn.WriteSinglePacket(raknet_wrapper.MinecraftPacket{
 					Packet: &packet.PyRpc{
 						Value: py_rpc.Marshal(&py_rpc.SyncUsingMod{
 							modUUIDs,

@@ -12,7 +12,7 @@ type MinecraftServer struct {
 	getCheckNumEverPassed bool
 
 	PersistenceData *persistence_data.PersistenceData
-	*raknet_wrapper.Raknet
+	Conn            *raknet_wrapper.Raknet
 }
 
 // ...
