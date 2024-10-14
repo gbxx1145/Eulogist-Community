@@ -94,7 +94,7 @@ func Eulogist() error {
 			skinIsSlim = playerSkin.SkinIsSlim
 		}
 		// 启动 Eulogist 服务器
-		client, clientWasConnected, err = Client.RunServer()
+		client, clientWasConnected, err = Client.RunServer(persistenceData)
 		if err != nil {
 			return fmt.Errorf("Eulogist: %v", err)
 		}
@@ -111,7 +111,7 @@ func Eulogist() error {
 		pterm.Success.Println("Eulogist is ready! Now we are going to start Minecraft Client.\nThen, the Minecraft Client will connect to Eulogist automatically.")
 	} else {
 		// 启动 Eulogist 服务器
-		client, clientWasConnected, err = Client.RunServer()
+		client, clientWasConnected, err = Client.RunServer(persistenceData)
 		if err != nil {
 			return fmt.Errorf("Eulogist: %v", err)
 		}
