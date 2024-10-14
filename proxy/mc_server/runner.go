@@ -7,6 +7,7 @@ import (
 	"Eulogist/core/minecraft/protocol/packet"
 	raknet_connection "Eulogist/core/raknet"
 	"Eulogist/core/tools/skin_process"
+	"Eulogist/proxy/persistence_data"
 	"context"
 	"crypto/ecdsa"
 	"crypto/elliptic"
@@ -18,16 +19,25 @@ import (
 	"Eulogist/core/minecraft/raknet"
 )
 
-// ConnectToServer 用于连接到租赁服号为 serverCode，
-// 服务器密码为 serverPassword 的网易租赁服。
-// token 指代 FB Token
-func ConnectToServer(basicConfig BasicConfig) (*MinecraftServer, error) {
+// ConnectToServer 用于连接到 basicConfig 所指代的租赁服。
+// persistenceData 用于设置持久化数据，
+// 它应该与 MinecraftClient 使用同一个
+func ConnectToServer(
+	basicConfig BasicConfig,
+	persistenceData *persistence_data.PersistenceData,
+) (*MinecraftServer, error) {
 	// 准备
-	var mcServer MinecraftServer
+	mcServer := MinecraftServer{
+		fbClient:        fb_client.CreateClient(basicConfig.AuthServer),
+		PersistenceData: persistenceData,
+	}
 	// 初始化
-	mcServer.fbClient = fb_client.CreateClient(basicConfig.AuthServer)
 	authenticator := fbauth.NewAccessWrapper(
-		mcServer.fbClient, basicConfig.ServerCode, basicConfig.ServerPassword, basicConfig.Token, "", "",
+		mcServer.fbClient,
+		basicConfig.ServerCode,
+		basicConfig.ServerPassword,
+		basicConfig.Token,
+		"", "",
 	)
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
@@ -38,27 +48,26 @@ func ConnectToServer(basicConfig BasicConfig) (*MinecraftServer, error) {
 	if err != nil {
 		return nil, fmt.Errorf("ConnectToServer: %v", err)
 	}
-	// 初始化皮肤信息
-	if len(authResponse.SkinInfo.SkinDownloadURL) > 0 {
-		mcServer.InitPlayerSkin()
-		err = skin_process.GetSkinFromAuthResponse(authResponse, mcServer.GetPlayerSkin())
+	// 设置皮肤信息
+	if len(authResponse.BotSkin.SkinDownloadURL) > 0 {
+		mcServer.PersistenceData.SkinData.NeteaseSkin = new(skin_process.Skin)
+		err = skin_process.GetSkinFromAuthResponse(authResponse, mcServer.PersistenceData.SkinData.NeteaseSkin)
 		if err != nil {
 			return nil, fmt.Errorf("ConnectToServer: %v", err)
 		}
 	}
-	// 初始化相关数据
-	mcServer.SetNeteaseUID(mcServer.fbClient.ClientInfo.Uid)
-	mcServer.SetOutfitInfo(authResponse.OutfitInfo)
 	// 连接到服务器
 	connection, err := raknet.DialContext(ctx, authResponse.RentalServerIP)
 	if err != nil {
 		return nil, fmt.Errorf("ConnectToServer: %v", err)
 	}
-	// 设置数据
+	// 同步数据
+	mcServer.PersistenceData.BotComponent = authResponse.BotComponent
 	mcServer.authResponse = authResponse
 	mcServer.Raknet = raknet_connection.NewRaknet()
-	mcServer.SetConnection(connection, clientkey)
-	go mcServer.ProcessIncomingPackets()
+	// 设置底层连接并启动数据包解析
+	mcServer.Raknet.SetConnection(connection, clientkey)
+	go mcServer.Raknet.ProcessIncomingPackets()
 	// 返回值
 	return &mcServer, nil
 }
@@ -93,9 +102,13 @@ func (m *MinecraftServer) FinishHandshake() error {
 			// 处理初始连接数据包
 			switch p := pk.Packet.(type) {
 			case *packet.NetworkSettings:
-				m.identityData, m.clientData, err = m.HandleNetworkSettings(p, m.authResponse, m.playerSkin)
+				identityData, clientData, err := m.HandleNetworkSettings(p, m.authResponse, m.PersistenceData.SkinData.NeteaseSkin)
 				if err != nil {
 					return fmt.Errorf("FinishHandshake: %v", err)
+				}
+				m.PersistenceData.LoginData.Server = persistence_data.LoginDataGeneral{
+					IdentityData: identityData,
+					ClientData:   clientData,
 				}
 			case *packet.ServerToClientHandshake:
 				err = m.HandleServerToClientHandshake(p)

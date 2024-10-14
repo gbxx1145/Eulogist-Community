@@ -46,17 +46,15 @@ func (m *MinecraftServer) FiltePacketsAndSendCopy(
 			}
 		case *packet.StartGame:
 			// 预处理
-			entityUniqueID, entityRuntimeID := m.HandleStartGame(pk)
-			m.SetEntityUniqueID(entityUniqueID)
-			m.SetEntityRuntimeID(entityRuntimeID)
-			playerSkin := m.GetPlayerSkin()
+			m.PersistenceData.LoginData.PlayerUniqueID, m.PersistenceData.LoginData.PlayerRuntimeID = m.HandleStartGame(pk)
+			playerSkin := m.PersistenceData.SkinData.NeteaseSkin
 			// 发送简要身份证明
 			m.WriteSinglePacket(raknet_connection.MinecraftPacket{
 				Packet: &packet.NeteaseJson{
 					Data: []byte(
 						fmt.Sprintf(
-							`{"eventName":"LOGIN_UID","resid":"","uid":"%s"}`,
-							m.GetNeteaseUID(),
+							`{"eventName":"LOGIN_UID","resid":"","uid":"%d"}`,
+							m.PersistenceData.LoginData.Server.IdentityData.Uid,
 						),
 					),
 				},
@@ -74,7 +72,7 @@ func (m *MinecraftServer) FiltePacketsAndSendCopy(
 				modUUIDs := make([]any, 0)
 				outfitInfo := make(map[string]int64, 0)
 				// 设置数据
-				for modUUID, outfitType := range m.GetOutfitInfo() {
+				for modUUID, outfitType := range m.PersistenceData.BotComponent {
 					modUUIDs = append(modUUIDs, modUUID)
 					if outfitType != nil {
 						outfitInfo[modUUID] = int64(*outfitType)
@@ -95,7 +93,7 @@ func (m *MinecraftServer) FiltePacketsAndSendCopy(
 				})
 			}
 		case *packet.UpdatePlayerGameType:
-			if pk.PlayerUniqueID == m.entityUniqueID {
+			if pk.PlayerUniqueID == m.PersistenceData.LoginData.PlayerUniqueID {
 				// 如果玩家的唯一 ID 与数据包中记录的值匹配，
 				// 则向客户端发送 SetPlayerGameType 数据包，
 				// 并放弃当前数据包的发送，

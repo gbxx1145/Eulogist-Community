@@ -62,7 +62,7 @@ func (m *MinecraftClient) FiltePacketsAndSendCopy(
 			}
 			// 将 NetEase UID 修正为真实值
 			if _, ok := jsonMap["uid"]; ok {
-				jsonMap["uid"] = m.GetNeteaseUID()
+				jsonMap["uid"] = fmt.Sprintf("%d", m.PersistenceData.LoginData.Server.IdentityData.Uid)
 			}
 			// 将 JSON 重新编码到 pk.Data
 			pk.Data, err = json.Marshal(jsonMap)

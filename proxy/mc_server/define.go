@@ -2,9 +2,8 @@ package mc_server
 
 import (
 	fb_client "Eulogist/core/fb_auth/mv4/client"
-	"Eulogist/core/minecraft/protocol/login"
 	raknet_connection "Eulogist/core/raknet"
-	"Eulogist/core/tools/skin_process"
+	"Eulogist/proxy/persistence_data"
 )
 
 type MinecraftServer struct {
@@ -12,16 +11,7 @@ type MinecraftServer struct {
 	authResponse          *fb_client.AuthResponse
 	getCheckNumEverPassed bool
 
-	identityData *login.IdentityData
-	clientData   *login.ClientData
-
-	neteaseUID string
-	playerSkin *skin_process.Skin
-	outfitInfo map[string]*int
-
-	entityUniqueID  int64
-	entityRuntimeID uint64
-
+	PersistenceData *persistence_data.PersistenceData
 	*raknet_connection.Raknet
 }
 
