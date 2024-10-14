@@ -13,25 +13,25 @@ import (
 // 描述一个简单的，但可以支持不同 Minecraft
 // 通信协议的基本 Raknet 连接实例
 type Raknet[T any] struct {
-	Connection net.Conn
-	ShieldID   atomic.Int32
+	connection net.Conn
+	shieldID   atomic.Int32
 
-	Context context.Context
-	Cancel  context.CancelFunc
+	context context.Context
+	cancel  context.CancelFunc
 
-	Closed     bool
-	ClosedLock sync.Mutex
+	closed     bool
+	closedLock sync.Mutex
 
-	Encoder *packet.Encoder
-	Decoder *packet.Decoder
+	encoder *packet.Encoder
+	decoder *packet.Decoder
 
-	DecodePacket func(buf []byte, shieldID *atomic.Int32) (pk MinecraftPacket[T])
-	EncodePacket func(pk MinecraftPacket[T], shieldID *atomic.Int32) (buf []byte)
+	decodePacket func(buf []byte, shieldID *atomic.Int32) (pk MinecraftPacket[T])
+	encodePacket func(pk MinecraftPacket[T], shieldID *atomic.Int32) (buf []byte)
 
-	Key  *ecdsa.PrivateKey
-	Salt []byte
+	key  *ecdsa.PrivateKey
+	salt []byte
 
-	Packets chan ([]MinecraftPacket[T])
+	packets chan ([]MinecraftPacket[T])
 }
 
 // 描述 Minecraft 数据包

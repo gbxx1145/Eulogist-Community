@@ -126,7 +126,7 @@ func (m *MinecraftServer) FinishHandshake() error {
 		}
 		// 检查连接状态
 		select {
-		case <-m.Context.Done():
+		case <-m.Context().Done():
 			return fmt.Errorf("FinishHandshake: NetEase Minecraft Rental Server closed their connection to eulogist")
 		default:
 		}

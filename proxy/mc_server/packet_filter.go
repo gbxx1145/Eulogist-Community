@@ -29,7 +29,7 @@ func (m *MinecraftServer) DefaultTranslate(
 ) raknet_wrapper.MinecraftPacket[standardPacket.Packet] {
 	// 数据包可能已被修改，
 	// 因此此处需要重新编码它的二进制形式
-	pk.Bytes = marshal.EncodeNetEasePacket(pk, &m.ShieldID)
+	pk.Bytes = marshal.EncodeNetEasePacket(pk, m.ShieldID())
 
 	// 从数据包的二进制负载前端读取其在网易协议下的数据包 ID。
 	// 这一部分将会被替换为国际版协议下的数据包 ID
@@ -44,7 +44,7 @@ func (m *MinecraftServer) DefaultTranslate(
 	// 获得该数据包在国际版协议下的二进制负载，
 	// 然后将其按国际版协议再次解析
 	packetBytes := append(headerBuffer.Bytes(), packetBuffer.Bytes()...)
-	result := marshal.DecodeStandardPacket(packetBytes, &m.ShieldID)
+	result := marshal.DecodeStandardPacket(packetBytes, m.ShieldID())
 
 	// 返回值
 	if result.Packet != nil {

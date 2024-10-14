@@ -20,39 +20,39 @@ func NewRaknet[T any](
 ) *Raknet[T] {
 	ctx, cancel := context.WithCancel(context.Background())
 	return &Raknet[T]{
-		Context:      ctx,
-		Cancel:       cancel,
-		DecodePacket: decodePacket,
-		EncodePacket: encodePacket,
+		context:      ctx,
+		cancel:       cancel,
+		decodePacket: decodePacket,
+		encodePacket: encodePacket,
 	}
 }
 
 // 将底层 Raknet 连接设置为 connection，
 // 并指定 服务器/客户端 私钥为 key
 func (r *Raknet[T]) SetConnection(connection net.Conn, key *ecdsa.PrivateKey) {
-	r.Connection = connection
-	r.Encoder = packet.NewEncoder(connection)
-	r.Decoder = packet.NewDecoder(connection)
-	r.Decoder.DisableBatchPacketLimit()
-	r.Packets = make(chan []MinecraftPacket[T], 255)
-	r.Key = key
-	_, _ = rand.Read(r.Salt)
+	r.connection = connection
+	r.encoder = packet.NewEncoder(connection)
+	r.decoder = packet.NewDecoder(connection)
+	r.decoder.DisableBatchPacketLimit()
+	r.packets = make(chan []MinecraftPacket[T], 255)
+	r.key = key
+	_, _ = rand.Read(r.salt)
 }
 
 // 关闭已建立的 Raknet 底层连接
 func (r *Raknet[T]) CloseConnection() {
-	r.ClosedLock.Lock()
-	defer r.ClosedLock.Unlock()
+	r.closedLock.Lock()
+	defer r.closedLock.Unlock()
 
-	r.Cancel()
+	r.cancel()
 
-	if r.Connection != nil {
-		r.Connection.Close()
+	if r.connection != nil {
+		r.connection.Close()
 	}
 
-	if !r.Closed && r.Packets != nil {
-		close(r.Packets)
-		r.Closed = true
+	if !r.closed && r.packets != nil {
+		close(r.packets)
+		r.closed = true
 	}
 }
 
@@ -76,7 +76,7 @@ func (r *Raknet[T]) ProcessIncomingPackets() {
 	// 不断处理到来的一个或多个数据包
 	for {
 		// 从底层 Raknet 连接读取数据包
-		packets, err := r.Decoder.Decode()
+		packets, err := r.decoder.Decode()
 		if err != nil {
 			// 此时从底层 Raknet 连接读取数据包遭遇了错误，
 			// 因此我们认为连接已被关闭
@@ -86,16 +86,16 @@ func (r *Raknet[T]) ProcessIncomingPackets() {
 		// 处理每个数据包
 		packetSlice := make([]MinecraftPacket[T], len(packets))
 		for index, data := range packets {
-			pk := r.DecodePacket(data, &r.ShieldID)
+			pk := r.decodePacket(data, &r.shieldID)
 			packetSlice[index] = pk
 		}
 		// 提交
 		select {
-		case <-r.Context.Done():
+		case <-r.context.Done():
 			r.CloseConnection()
 			return
 		default:
-			r.Packets <- packetSlice
+			r.packets <- packetSlice
 		}
 	}
 }
@@ -111,7 +111,7 @@ func (r *Raknet[T]) ProcessIncomingPackets() {
 而对于其他的数据包，我们将仅仅地保留它们的二进制负载
 */
 func (r *Raknet[T]) ReadPackets() []MinecraftPacket[T] {
-	return <-r.Packets
+	return <-r.packets
 }
 
 // 向底层 Raknet 连接写多个 Minecraft 数据包 pk。
@@ -133,10 +133,10 @@ func (r *Raknet[T]) WritePackets(pk []MinecraftPacket[T]) {
 		}
 		// 此时当前数据包不存在已编码的二进制负载，
 		// 因此我们主动编码它
-		packetBytes[index] = r.EncodePacket(singlePacket, &r.ShieldID)
+		packetBytes[index] = r.encodePacket(singlePacket, &r.shieldID)
 	}
 	// 将数据包写入底层 Raknet 连接
-	encodeError := r.Encoder.Encode(packetBytes)
+	encodeError := r.encoder.Encode(packetBytes)
 	if encodeError != nil {
 		// 此时向底层 Raknet 连接写入数据包遭遇了错误，
 		// 因此我们认为连接已被关闭

@@ -48,8 +48,8 @@ func HandleRequestNetworkSettings(
 		},
 	})
 	// 为数据包传输启用压缩
-	r.Encoder.EnableCompression(packet.DefaultCompression)
-	r.Decoder.EnableCompression(packet.DefaultCompression)
+	r.Encoder().EnableCompression(packet.DefaultCompression)
+	r.Decoder().EnableCompression(packet.DefaultCompression)
 	// 返回值
 	return nil
 }
@@ -89,11 +89,11 @@ func EnableEncryption(
 	clientPublicKey *ecdsa.PublicKey,
 ) error {
 	// 创建 JWT 签名器
-	signer, _ := jose.NewSigner(jose.SigningKey{Key: r.Key, Algorithm: jose.ES384}, &jose.SignerOptions{
-		ExtraHeaders: map[jose.HeaderKey]any{"x5u": login.MarshalPublicKey(&r.Key.PublicKey)},
+	signer, _ := jose.NewSigner(jose.SigningKey{Key: r.Key(), Algorithm: jose.ES384}, &jose.SignerOptions{
+		ExtraHeaders: map[jose.HeaderKey]any{"x5u": login.MarshalPublicKey(&r.Key().PublicKey)},
 	})
 	// 生成并序列化 JWT
-	serverJWT, err := jwt.Signed(signer).Claims(saltClaims{Salt: base64.RawStdEncoding.EncodeToString(r.Salt)}).CompactSerialize()
+	serverJWT, err := jwt.Signed(signer).Claims(saltClaims{Salt: base64.RawStdEncoding.EncodeToString(r.Salt())}).CompactSerialize()
 	if err != nil {
 		return fmt.Errorf("EnableEncryption: compact serialise server JWT: %w", err)
 	}
@@ -102,12 +102,12 @@ func EnableEncryption(
 		Packet: &packet.ServerToClientHandshake{JWT: []byte(serverJWT)},
 	})
 	// 计算公钥
-	x, _ := clientPublicKey.Curve.ScalarMult(clientPublicKey.X, clientPublicKey.Y, r.Key.D.Bytes())
+	x, _ := clientPublicKey.Curve.ScalarMult(clientPublicKey.X, clientPublicKey.Y, r.Key().D.Bytes())
 	sharedSecret := append(bytes.Repeat([]byte{0}, 48-len(x.Bytes())), x.Bytes()...)
-	keyBytes := sha256.Sum256(append(r.Salt, sharedSecret...))
+	keyBytes := sha256.Sum256(append(r.Salt(), sharedSecret...))
 	// 为数据包传输启用加密
-	r.Encoder.EnableEncryption(keyBytes)
-	r.Decoder.EnableEncryption(keyBytes)
+	r.Encoder().EnableEncryption(keyBytes)
+	r.Decoder().EnableEncryption(keyBytes)
 	// 返回值
 	return nil
 }

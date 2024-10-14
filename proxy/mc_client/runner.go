@@ -78,7 +78,7 @@ func (m *MinecraftClient) WaitClientHandshakeDown() error {
 		}
 		// 检查连接状态
 		select {
-		case <-m.Context.Done():
+		case <-m.Context().Done():
 			return fmt.Errorf("WaitClientHandshakeDown: Minecraft closed its connection to eulogist")
 		default:
 		}
