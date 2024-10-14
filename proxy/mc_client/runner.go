@@ -23,7 +23,7 @@ func RunServer(persistenceData *persistence_data.PersistenceData) (
 	err error,
 ) {
 	// prepare
-	client = new(MinecraftClient)
+	client = &MinecraftClient{PersistenceData: persistenceData}
 	// start listening
 	err = client.CreateListener()
 	if err != nil {
