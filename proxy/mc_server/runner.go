@@ -44,8 +44,8 @@ func ConnectToServer(
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
 	// 向验证服务器请求信息
-	clientkey, _ := ecdsa.GenerateKey(elliptic.P384(), rand.Reader)
-	armoured_key, _ := x509.MarshalPKIXPublicKey(&clientkey.PublicKey)
+	clientKey, _ := ecdsa.GenerateKey(elliptic.P384(), rand.Reader)
+	armoured_key, _ := x509.MarshalPKIXPublicKey(&clientKey.PublicKey)
 	authResponse, err := authenticator.GetAccess(ctx, armoured_key)
 	if err != nil {
 		return nil, fmt.Errorf("ConnectToServer: %v", err)
@@ -68,7 +68,7 @@ func ConnectToServer(
 	mcServer.authResponse = authResponse
 	mcServer.Conn = raknet_connection.NewNetEaseRaknetWrapper()
 	// 设置底层连接并启动数据包解析
-	mcServer.Conn.SetConnection(connection, clientkey)
+	mcServer.Conn.SetConnection(connection, clientKey)
 	go mcServer.Conn.ProcessIncomingPackets()
 	// 返回值
 	return &mcServer, nil
