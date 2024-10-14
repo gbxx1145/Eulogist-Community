@@ -3,7 +3,6 @@ package mc_client
 import (
 	"Eulogist/core/minecraft/protocol/packet"
 	"Eulogist/core/raknet/handshake"
-	"Eulogist/proxy/persistence_data"
 	"fmt"
 )
 
@@ -49,13 +48,9 @@ func (m *MinecraftClient) WaitClientHandshakeDown() error {
 					panic(fmt.Sprintf("WaitClientHandshakeDown: %v", err))
 				}
 			case *packet.Login:
-				identityData, clientData, err := handshake.HandleLogin(m.Conn, p)
+				m.PersistenceData.LoginData.Client.IdentityData, m.PersistenceData.LoginData.Client.ClientData, err = handshake.HandleLogin(m.Conn, p)
 				if err != nil {
 					panic(fmt.Sprintf("WaitClientHandshakeDown: %v", err))
-				}
-				m.PersistenceData.LoginData.Client = persistence_data.LoginDataGeneral{
-					IdentityData: identityData,
-					ClientData:   clientData,
 				}
 			case *packet.ClientToServerHandshake:
 				// 连接已完成初始化，
