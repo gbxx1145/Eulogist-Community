@@ -104,15 +104,11 @@ func (m *MinecraftServer) FinishHandshake() error {
 			// 处理初始连接数据包
 			switch p := pk.Packet.(type) {
 			case *packet.NetworkSettings:
-				identityData, clientData, err := handshake.HandleNetworkSettings(
+				m.PersistenceData.LoginData.Server.IdentityData, m.PersistenceData.LoginData.Server.ClientData, err = handshake.HandleNetworkSettings(
 					m.Conn, p, m.authResponse, m.PersistenceData.SkinData.NeteaseSkin,
 				)
 				if err != nil {
 					return fmt.Errorf("FinishHandshake: %v", err)
-				}
-				m.PersistenceData.LoginData.Server = persistence_data.LoginDataServerSide{
-					IdentityData: identityData,
-					ClientData:   clientData,
 				}
 			case *packet.ServerToClientHandshake:
 				err = handshake.HandleServerToClientHandshake(m.Conn, p)
