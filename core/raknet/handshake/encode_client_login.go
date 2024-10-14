@@ -89,6 +89,9 @@ func defaultClientData(
 	d.SelfSignedID = uuid.New().String()
 
 	if skin != nil {
+		if len(skin.SkinUUID) == 0 {
+			skin.SkinUUID = uuid.NewString()
+		}
 		d.SkinID = skin.SkinUUID
 		d.SkinItemID = skin.SkinItemID
 		d.SkinData = base64.StdEncoding.EncodeToString(skin.SkinPixels)
