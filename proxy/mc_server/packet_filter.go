@@ -92,9 +92,17 @@ func (m *MinecraftServer) FiltePacketsAndSendCopy(
 			}
 			shouldSendCopy = false
 		case *neteasePacket.StartGame:
-			// 预处理
+			// 初始化变量
 			m.PersistenceData.LoginData.PlayerUniqueID, m.PersistenceData.LoginData.PlayerRuntimeID = handshake.HandleStartGame(m.Conn, pk)
+			m.PersistenceData.BotDimension = persistence_data.BotDimensionData{
+				Dimension:  pk.Dimension, // 保存当前的维度信息
+				ChangeDown: true,         // 玩家此时已经位于对应的维度，因此被认为已完成维度更改
+			}
 			playerSkin := m.PersistenceData.SkinData.NeteaseSkin
+			// 处理维度信息
+			if pk.Dimension > neteasePacket.DimensionEnd {
+				pk.Dimension = neteasePacket.DimensionOverworld
+			}
 			// 发送简要身份证明
 			m.Conn.WriteSinglePacket(raknet_wrapper.MinecraftPacket[neteasePacket.Packet]{
 				Packet: &neteasePacket.NeteaseJson{
@@ -180,6 +188,70 @@ func (m *MinecraftServer) FiltePacketsAndSendCopy(
 			}
 		case *neteasePacket.RemoveActor:
 			m.PersistenceData.DeleteWorldEntityByUniqueID(pk.EntityUniqueID)
+		case *neteasePacket.AddVolumeEntity:
+			if pk.Dimension > neteasePacket.DimensionEnd {
+				pk.Dimension = neteasePacket.DimensionOverworld
+			}
+		case *neteasePacket.RemoveVolumeEntity:
+			if pk.Dimension > neteasePacket.DimensionEnd {
+				pk.Dimension = neteasePacket.DimensionOverworld
+			}
+		case *neteasePacket.ChangeDimension:
+			// 同步维度数据
+			lastDimensionID := m.PersistenceData.BotDimension.Dimension
+			m.PersistenceData.BotDimension = persistence_data.BotDimensionData{
+				Dimension:  pk.Dimension,
+				Position:   pk.Position,
+				Respawn:    pk.Respawn,
+				ChangeDown: lastDimensionID <= neteasePacket.DimensionEnd && pk.Dimension <= neteasePacket.DimensionEnd,
+			}
+			// 如果目标维度和原本维度有一个不是原版维度，
+			// 则赞颂者需要进行额外处理
+			if !m.PersistenceData.BotDimension.ChangeDown {
+				writePacketsToClient([]raknet_wrapper.MinecraftPacket[standardPacket.Packet]{
+					{
+						Packet: &standardPacket.ChangeDimension{
+							Dimension: m.PersistenceData.BotDimension.GetTransferDimensionID(lastDimensionID, pk.Dimension),
+							Position:  pk.Position,
+							Respawn:   pk.Respawn,
+						},
+					},
+				})
+				shouldSendCopy = false
+			}
+		case *neteasePacket.PositionTrackingDBServerBroadcast:
+			fmt.Println("T")
+			if dimension, ok := pk.Payload["dim"].(int32); ok {
+				if dimension > neteasePacket.DimensionEnd {
+					pk.Payload["dim"] = int32(neteasePacket.DimensionOverworld)
+				}
+			}
+		case *neteasePacket.SpawnParticleEffect:
+			if pk.Dimension > neteasePacket.DimensionEnd {
+				pk.Dimension = neteasePacket.DimensionOverworld
+			}
+		case *neteasePacket.LevelChunk:
+			// 当赞颂者需要处理非主世界维度的特殊情况时，
+			// 需要暂存一部分生物群落数据。
+			// 这些数据将在用户最终抵达正确维度时由赞颂者发送，
+			// 随后赞颂者再清除暂存的这些数据
+			if !m.PersistenceData.BotDimension.ChangeDown {
+				m.PersistenceData.BotDimension.LevelChunkCache = append(
+					m.PersistenceData.BotDimension.LevelChunkCache,
+					standardPacket.LevelChunk{
+						Position:        standardProtocol.ChunkPos(pk.Position),
+						HighestSubChunk: pk.HighestSubChunk,
+						SubChunkCount:   pk.SubChunkCount,
+						CacheEnabled:    pk.CacheEnabled,
+						BlobHashes:      pk.BlobHashes,
+						RawPayload:      pk.RawPayload,
+					},
+				)
+			}
+		case *neteasePacket.SubChunk:
+			if pk.Dimension > neteasePacket.DimensionEnd {
+				pk.Dimension = neteasePacket.DimensionOverworld
+			}
 		case *neteasePacket.UpdatePlayerGameType:
 			if pk.PlayerUniqueID == m.PersistenceData.LoginData.PlayerUniqueID {
 				// 如果玩家的唯一 ID 与数据包中记录的值匹配，
@@ -328,6 +400,9 @@ func (m *MinecraftServer) FiltePacketsAndSendCopy(
 			if pk.Pixels.IsEmpty {
 				pk.Height = 0
 				pk.Width = 0
+			}
+			if pk.Dimension > neteasePacket.DimensionEnd {
+				pk.Dimension = neteasePacket.DimensionOverworld
 			}
 		case *neteasePacket.InventoryContent:
 			// 初始化

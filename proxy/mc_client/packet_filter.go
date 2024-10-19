@@ -84,6 +84,82 @@ func (m *MinecraftClient) FiltePacketsAndSendCopy(
 				{Packet: &neteasePacket.ClientCacheStatus{Enabled: false}},
 			})
 			shouldSendCopy = false
+		case *standardPacket.SubChunkRequest:
+			if !m.PersistenceData.BotDimension.ChangeDown {
+				/*
+					此时赞颂者正在处理非主世界维度的特殊情况，
+					且用户正位于中间人维度。
+
+					中间人维度并不是实际存在的，
+					并且由赞颂者维护。
+
+					故，无需将这些区块数据请求发送到服务器，
+					赞颂者将在此处代为处理，
+					即——返回请求的这些区块全为空气即可
+				*/
+				shouldSendCopy = false
+				subChunkFakeResponse := standardPacket.SubChunk{
+					CacheEnabled: false,
+					Dimension:    pk.Dimension,
+					Position:     pk.Position,
+				}
+				for _, value := range pk.Offsets {
+					subChunkFakeResponse.SubChunkEntries = append(
+						subChunkFakeResponse.SubChunkEntries,
+						standardProtocol.SubChunkEntry{
+							Offset: value,
+							Result: standardProtocol.SubChunkResultSuccessAllAir,
+						},
+					)
+				}
+				m.Conn.WriteSinglePacket(raknet_wrapper.MinecraftPacket[standardPacket.Packet]{
+					Packet: &subChunkFakeResponse,
+				})
+			} else {
+				pk.Dimension = m.PersistenceData.BotDimension.Dimension
+			}
+		case *standardPacket.PlayerAction:
+			/*
+				此处的代码只被用于解决非原版维度的情况。
+
+				即，如果下方的 break 未被执行，
+				则用户目前出于中间人维度，并且完成初始化。
+
+				此时，我们再将用户切换到其真正所在的维度，
+				同时发送之前缓存的生物群落数据
+			*/
+			packetsWaitingForSend := []raknet_wrapper.MinecraftPacket[standardPacket.Packet]{
+				{
+					Packet: &standardPacket.ChangeDimension{
+						Dimension: standardPacket.DimensionOverworld,
+						Position:  m.PersistenceData.BotDimension.Position,
+						Respawn:   m.PersistenceData.BotDimension.Respawn,
+					},
+				},
+			}
+			if pk.ActionType != standardProtocol.PlayerActionDimensionChangeDone {
+				break
+			}
+			if !m.PersistenceData.BotDimension.ChangeDown {
+				if m.PersistenceData.BotDimension.Dimension <= standardPacket.DimensionEnd {
+					packetsWaitingForSend[0].Packet.(*standardPacket.ChangeDimension).Dimension = m.PersistenceData.BotDimension.Dimension
+				}
+				for _, value := range m.PersistenceData.BotDimension.LevelChunkCache {
+					packetsWaitingForSend = append(packetsWaitingForSend, raknet_wrapper.MinecraftPacket[standardPacket.Packet]{
+						Packet: &value,
+					})
+				}
+				packetsWaitingForSend = append(packetsWaitingForSend, raknet_wrapper.MinecraftPacket[standardPacket.Packet]{
+					Packet: &standardPacket.PlayerAction{
+						EntityRuntimeID: m.PersistenceData.LoginData.PlayerRuntimeID,
+						ActionType:      standardProtocol.PlayerActionDimensionChangeDone,
+					},
+				})
+				m.Conn.WritePackets(packetsWaitingForSend)
+				m.PersistenceData.BotDimension.LevelChunkCache = nil
+				m.PersistenceData.BotDimension.ChangeDown = true
+				shouldSendCopy = false
+			}
 		case *standardPacket.InventoryTransaction:
 			data, ok := pk.TransactionData.(*standardProtocol.UseItemTransactionData)
 			if ok {
