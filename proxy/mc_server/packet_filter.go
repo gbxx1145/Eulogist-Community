@@ -220,7 +220,6 @@ func (m *MinecraftServer) FiltePacketsAndSendCopy(
 				shouldSendCopy = false
 			}
 		case *neteasePacket.PositionTrackingDBServerBroadcast:
-			fmt.Println("T")
 			if dimension, ok := pk.Payload["dim"].(int32); ok {
 				if dimension > neteasePacket.DimensionEnd {
 					pk.Payload["dim"] = int32(neteasePacket.DimensionOverworld)
