@@ -8,11 +8,19 @@ import (
 
 // 用户当前所处维度的数据
 type BotDimensionData struct {
-	Dimension       int32                       // 用户当前所处的维度 ID
-	Position        mgl32.Vec3                  // 用户在抵达目标维度后的位置
-	Respawn         bool                        // 当此维度交换是否因为重生而发生
-	LevelChunkCache []standardPacket.LevelChunk // 缓存的区块数据，用于二级维度交换
-	ChangeDown      bool                        // 用户是否已完成当此维度交换
+	Dimension  int32                // 用户当前所处的维度 ID
+	Position   mgl32.Vec3           // 用户在抵达目标维度后的位置
+	Respawn    bool                 // 当此维度交换是否因为重生而发生
+	DataCache  DimensionChangeCache // 缓存数据，用于二级维度交换
+	ChangeDown bool                 // 用户是否已完成当此维度交换
+}
+
+// 缓存数据，用于二级维度交换
+type DimensionChangeCache struct {
+	LevelChunk   []standardPacket.LevelChunk   // 缓存的区块数据
+	AddActor     []standardPacket.AddActor     // 缓存的实体数据
+	SetActorData []standardPacket.SetActorData // 缓存的实体设置数据
+	AddItemActor []standardPacket.AddItemActor // 缓存的掉落物数据
 }
 
 /*

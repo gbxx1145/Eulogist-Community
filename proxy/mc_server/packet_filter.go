@@ -161,6 +161,12 @@ func (m *MinecraftServer) FiltePacketsAndSendCopy(
 				EntityRuntimeID: pk.EntityRuntimeID,
 				EntityUniqueID:  pk.EntityUniqueID,
 			})
+			if !m.PersistenceData.BotDimension.ChangeDown {
+				m.PersistenceData.BotDimension.DataCache.AddActor = append(
+					m.PersistenceData.BotDimension.DataCache.AddActor,
+					*packet_translator.TranslatorPool[pk.ID()].ToStandardPacket(pk).(*standardPacket.AddActor),
+				)
+			}
 			if pk.EntityType == "minecraft:falling_block" {
 				if entityFlags, ok := pk.EntityMetadata[neteaseProtocol.EntityDataKeyFlags].(int64); ok {
 					pk.EntityMetadata[neteaseProtocol.EntityDataKeyFlags] = entityFlags ^ 0x1000000000000 // Ingore collision
@@ -173,6 +179,12 @@ func (m *MinecraftServer) FiltePacketsAndSendCopy(
 				}
 			}
 		case *neteasePacket.SetActorData:
+			if !m.PersistenceData.BotDimension.ChangeDown {
+				m.PersistenceData.BotDimension.DataCache.SetActorData = append(
+					m.PersistenceData.BotDimension.DataCache.SetActorData,
+					*packet_translator.TranslatorPool[pk.ID()].ToStandardPacket(pk).(*standardPacket.SetActorData),
+				)
+			}
 			entity := m.PersistenceData.GetWorldEntityByRuntimeID(pk.EntityRuntimeID)
 			if entity == nil || entity.EntityType != "minecraft:falling_block" {
 				break
@@ -188,6 +200,13 @@ func (m *MinecraftServer) FiltePacketsAndSendCopy(
 			}
 		case *neteasePacket.RemoveActor:
 			m.PersistenceData.DeleteWorldEntityByUniqueID(pk.EntityUniqueID)
+		case *neteasePacket.AddItemActor:
+			if !m.PersistenceData.BotDimension.ChangeDown {
+				m.PersistenceData.BotDimension.DataCache.AddItemActor = append(
+					m.PersistenceData.BotDimension.DataCache.AddItemActor,
+					*packet_translator.TranslatorPool[pk.ID()].ToStandardPacket(pk).(*standardPacket.AddItemActor),
+				)
+			}
 		case *neteasePacket.AddVolumeEntity:
 			if pk.Dimension > neteasePacket.DimensionEnd {
 				pk.Dimension = neteasePacket.DimensionOverworld
@@ -235,8 +254,8 @@ func (m *MinecraftServer) FiltePacketsAndSendCopy(
 			// 这些数据将在用户最终抵达正确维度时由赞颂者发送，
 			// 随后赞颂者再清除暂存的这些数据
 			if !m.PersistenceData.BotDimension.ChangeDown {
-				m.PersistenceData.BotDimension.LevelChunkCache = append(
-					m.PersistenceData.BotDimension.LevelChunkCache,
+				m.PersistenceData.BotDimension.DataCache.LevelChunk = append(
+					m.PersistenceData.BotDimension.DataCache.LevelChunk,
 					standardPacket.LevelChunk{
 						Position:        standardProtocol.ChunkPos(pk.Position),
 						HighestSubChunk: pk.HighestSubChunk,
