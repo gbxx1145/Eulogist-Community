@@ -235,13 +235,6 @@ func (m *MinecraftServer) FiltePacketsAndSendCopy(
 			if pk.Dimension > neteasePacket.DimensionEnd {
 				pk.Dimension = neteasePacket.DimensionOverworld
 			}
-		case *neteasePacket.PlayerFog:
-			if !m.PersistenceData.BotDimension.ChangeDown {
-				m.PersistenceData.BotDimension.DataCache.PlayerFog = append(
-					m.PersistenceData.BotDimension.DataCache.PlayerFog,
-					standardPacket.PlayerFog(*pk),
-				)
-			}
 		case *neteasePacket.ChangeDimension:
 			// 同步维度数据
 			lastDimensionID := m.PersistenceData.BotDimension.Dimension

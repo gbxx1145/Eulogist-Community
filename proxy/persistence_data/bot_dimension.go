@@ -25,7 +25,6 @@ type DimensionChangeCache struct {
 	AddPainting     []standardPacket.AddPainting     // 缓存的画的数据
 	AddVolumeEntity []standardPacket.AddVolumeEntity // 缓存的卷积实体数据
 	SetActorData    []standardPacket.SetActorData    // 缓存的实体设置数据
-	PlayerFog       []standardPacket.PlayerFog       // 缓存的迷雾数据
 }
 
 /*
@@ -100,11 +99,6 @@ func (d *DimensionChangeCache) ConvertCacheDataToPackets() []raknet_wrapper.Mine
 		})
 	}
 	for _, value := range d.SetActorData {
-		packets = append(packets, raknet_wrapper.MinecraftPacket[standardPacket.Packet]{
-			Packet: &value,
-		})
-	}
-	for _, value := range d.PlayerFog {
 		packets = append(packets, raknet_wrapper.MinecraftPacket[standardPacket.Packet]{
 			Packet: &value,
 		})
