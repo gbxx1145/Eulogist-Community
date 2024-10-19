@@ -2,6 +2,7 @@ package persistence_data
 
 import (
 	standardPacket "Eulogist/core/minecraft/standard/protocol/packet"
+	raknet_wrapper "Eulogist/core/raknet/wrapper"
 
 	"github.com/go-gl/mathgl/mgl32"
 )
@@ -17,10 +18,14 @@ type BotDimensionData struct {
 
 // 缓存数据，用于二级维度交换
 type DimensionChangeCache struct {
-	LevelChunk   []standardPacket.LevelChunk   // 缓存的区块数据
-	AddActor     []standardPacket.AddActor     // 缓存的实体数据
-	SetActorData []standardPacket.SetActorData // 缓存的实体设置数据
-	AddItemActor []standardPacket.AddItemActor // 缓存的掉落物数据
+	LevelChunk      []standardPacket.LevelChunk      // 缓存的区块数据
+	AddPlayer       []standardPacket.AddPlayer       // 缓存的玩家数据
+	AddActor        []standardPacket.AddActor        // 缓存的实体数据
+	AddItemActor    []standardPacket.AddItemActor    // 缓存的掉落物数据
+	AddPainting     []standardPacket.AddPainting     // 缓存的画的数据
+	AddVolumeEntity []standardPacket.AddVolumeEntity // 缓存的卷积实体数据
+	SetActorData    []standardPacket.SetActorData    // 缓存的实体设置数据
+	PlayerFog       []standardPacket.PlayerFog       // 缓存的迷雾数据
 }
 
 /*
@@ -58,4 +63,52 @@ func (b *BotDimensionData) GetTransferDimensionID(from int32, to int32) (dimensi
 	// 则中间人维度不妨选择末地，
 	// 然后，玩家会被传送到类似于主世界的维度
 	return standardPacket.DimensionEnd
+}
+
+// ...
+func (d *DimensionChangeCache) ConvertCacheDataToPackets() []raknet_wrapper.MinecraftPacket[standardPacket.Packet] {
+	packets := make([]raknet_wrapper.MinecraftPacket[standardPacket.Packet], 0)
+
+	for _, value := range d.LevelChunk {
+		packets = append(packets, raknet_wrapper.MinecraftPacket[standardPacket.Packet]{
+			Packet: &value,
+		})
+	}
+	for _, value := range d.AddPlayer {
+		packets = append(packets, raknet_wrapper.MinecraftPacket[standardPacket.Packet]{
+			Packet: &value,
+		})
+	}
+	for _, value := range d.AddActor {
+		packets = append(packets, raknet_wrapper.MinecraftPacket[standardPacket.Packet]{
+			Packet: &value,
+		})
+	}
+	for _, value := range d.AddItemActor {
+		packets = append(packets, raknet_wrapper.MinecraftPacket[standardPacket.Packet]{
+			Packet: &value,
+		})
+	}
+	for _, value := range d.AddPainting {
+		packets = append(packets, raknet_wrapper.MinecraftPacket[standardPacket.Packet]{
+			Packet: &value,
+		})
+	}
+	for _, value := range d.AddVolumeEntity {
+		packets = append(packets, raknet_wrapper.MinecraftPacket[standardPacket.Packet]{
+			Packet: &value,
+		})
+	}
+	for _, value := range d.SetActorData {
+		packets = append(packets, raknet_wrapper.MinecraftPacket[standardPacket.Packet]{
+			Packet: &value,
+		})
+	}
+	for _, value := range d.PlayerFog {
+		packets = append(packets, raknet_wrapper.MinecraftPacket[standardPacket.Packet]{
+			Packet: &value,
+		})
+	}
+
+	return packets
 }

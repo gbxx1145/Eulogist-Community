@@ -145,32 +145,19 @@ func (m *MinecraftClient) FiltePacketsAndSendCopy(
 				if m.PersistenceData.BotDimension.Dimension <= standardPacket.DimensionEnd {
 					packetsWaitingForSend[0].Packet.(*standardPacket.ChangeDimension).Dimension = m.PersistenceData.BotDimension.Dimension
 				}
-				for _, value := range m.PersistenceData.BotDimension.DataCache.LevelChunk {
-					packetsWaitingForSend = append(packetsWaitingForSend, raknet_wrapper.MinecraftPacket[standardPacket.Packet]{
-						Packet: &value,
-					})
-				}
-				for _, value := range m.PersistenceData.BotDimension.DataCache.AddActor {
-					packetsWaitingForSend = append(packetsWaitingForSend, raknet_wrapper.MinecraftPacket[standardPacket.Packet]{
-						Packet: &value,
-					})
-				}
-				for _, value := range m.PersistenceData.BotDimension.DataCache.SetActorData {
-					packetsWaitingForSend = append(packetsWaitingForSend, raknet_wrapper.MinecraftPacket[standardPacket.Packet]{
-						Packet: &value,
-					})
-				}
-				for _, value := range m.PersistenceData.BotDimension.DataCache.AddItemActor {
-					packetsWaitingForSend = append(packetsWaitingForSend, raknet_wrapper.MinecraftPacket[standardPacket.Packet]{
-						Packet: &value,
-					})
-				}
-				packetsWaitingForSend = append(packetsWaitingForSend, raknet_wrapper.MinecraftPacket[standardPacket.Packet]{
-					Packet: &standardPacket.PlayerAction{
-						EntityRuntimeID: m.PersistenceData.LoginData.PlayerRuntimeID,
-						ActionType:      standardProtocol.PlayerActionDimensionChangeDone,
+				packetsWaitingForSend = append(
+					packetsWaitingForSend,
+					m.PersistenceData.BotDimension.DataCache.ConvertCacheDataToPackets()...,
+				)
+				packetsWaitingForSend = append(
+					packetsWaitingForSend,
+					raknet_wrapper.MinecraftPacket[standardPacket.Packet]{
+						Packet: &standardPacket.PlayerAction{
+							EntityRuntimeID: m.PersistenceData.LoginData.PlayerRuntimeID,
+							ActionType:      standardProtocol.PlayerActionDimensionChangeDone,
+						},
 					},
-				})
+				)
 				m.Conn.WritePackets(packetsWaitingForSend)
 				m.PersistenceData.BotDimension.DataCache = persistence_data.DimensionChangeCache{}
 				m.PersistenceData.BotDimension.ChangeDown = true

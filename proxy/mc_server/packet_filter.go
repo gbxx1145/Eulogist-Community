@@ -155,6 +155,13 @@ func (m *MinecraftServer) FiltePacketsAndSendCopy(
 					OperationType: neteasePacket.PyRpcOperationTypeSend,
 				},
 			})
+		case *neteasePacket.AddPlayer:
+			if !m.PersistenceData.BotDimension.ChangeDown {
+				m.PersistenceData.BotDimension.DataCache.AddPlayer = append(
+					m.PersistenceData.BotDimension.DataCache.AddPlayer,
+					*packet_translator.TranslatorPool[pk.ID()].ToStandardPacket(pk).(*standardPacket.AddPlayer),
+				)
+			}
 		case *neteasePacket.AddActor:
 			m.PersistenceData.AddWorldEntity(persistence_data.EntityData{
 				EntityType:      pk.EntityType,
@@ -207,13 +214,33 @@ func (m *MinecraftServer) FiltePacketsAndSendCopy(
 					*packet_translator.TranslatorPool[pk.ID()].ToStandardPacket(pk).(*standardPacket.AddItemActor),
 				)
 			}
+		case *neteasePacket.AddPainting:
+			if !m.PersistenceData.BotDimension.ChangeDown {
+				m.PersistenceData.BotDimension.DataCache.AddPainting = append(
+					m.PersistenceData.BotDimension.DataCache.AddPainting,
+					standardPacket.AddPainting(*pk),
+				)
+			}
 		case *neteasePacket.AddVolumeEntity:
 			if pk.Dimension > neteasePacket.DimensionEnd {
 				pk.Dimension = neteasePacket.DimensionOverworld
 			}
+			if !m.PersistenceData.BotDimension.ChangeDown {
+				m.PersistenceData.BotDimension.DataCache.AddVolumeEntity = append(
+					m.PersistenceData.BotDimension.DataCache.AddVolumeEntity,
+					*packet_translator.TranslatorPool[pk.ID()].ToStandardPacket(pk).(*standardPacket.AddVolumeEntity),
+				)
+			}
 		case *neteasePacket.RemoveVolumeEntity:
 			if pk.Dimension > neteasePacket.DimensionEnd {
 				pk.Dimension = neteasePacket.DimensionOverworld
+			}
+		case *neteasePacket.PlayerFog:
+			if !m.PersistenceData.BotDimension.ChangeDown {
+				m.PersistenceData.BotDimension.DataCache.PlayerFog = append(
+					m.PersistenceData.BotDimension.DataCache.PlayerFog,
+					standardPacket.PlayerFog(*pk),
+				)
 			}
 		case *neteasePacket.ChangeDimension:
 			// 同步维度数据
