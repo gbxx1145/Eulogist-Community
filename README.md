@@ -1,8 +1,17 @@
-## 赞颂者
+# Eulogist
 
-赞颂者是一个用于网易我的世界中国版基岩版的代理程序，它允许您在 Windows PC 上进入网易我的世界基岩版租赁服。
-另，此程序依托 PhoenixBuilder 验证服务而存在。
 
-赞颂者会赞颂所有的诗歌与乐曲，因此几乎所有的数据包都将按原样进行转发和传递。
 
-尽管赞颂者的谱写者希望爱与美好可以永远传递下去，但您应该注意到赞颂者是闭源的，因此**请不要泄露赞颂者的任何细节和内容**。
+## Bedrock
+This is the bedrock version of Eulogist, which aims to provide support for standard bedrock Minecraft.<br/>
+To use this version in a correct way, you should install v1.20.10 of standard bedrock Minecraft in your computer.
+
+## Precondition
+It's necessary to notice that Eulogist is based on PhoenixBuilder Auth Service.<br/>
+So, you must have a account of PhoenixBuilder Auth Service or you can't use Eulogist smoothly.
+
+## Spirit
+**Eulogist** will forever sing the praises of the great dead, spreading their beauty and spreading harmony, love and light into the world.
+
+## License
+This branch is under **AGPL-v3.0**, you could see **LICENSE** file for more details.<br/>
