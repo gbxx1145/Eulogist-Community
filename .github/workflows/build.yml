@@ -4,12 +4,7 @@ permissions:
   contents: write
 
 on:
-  push:
-    
-
-env:
-  OUT_PUT_DIR: build/
-  PROG_NAME: eulogist
+  workflows_dispatch
 
 jobs:
   build:
@@ -22,4 +17,8 @@ jobs:
           go-version: '1.22'
       - name: build
         run: make all
+      - name: relase
+        uses: softprops/action-gh-release@v2
+        with:
+          files: build/*
 
