@@ -4,7 +4,8 @@ permissions:
   contents: write
 
 on:
-  workflows_dispatch
+  workflow_dispatch:
+    
 
 jobs:
   build:

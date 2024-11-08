@@ -1,4 +1,4 @@
-.PHONY: all windows-x86_64 windows-x86 linux-x86_64 linux-x86 android-aarch64 android-armreabi
+.PHONY: all windows-x86_64 windows-x86 linux-x86_64 linux-x86 android-aarch64
 
 name := eulogist
 output_suffix := build/$(name)
@@ -26,6 +26,5 @@ windows-x86: $(output_suffix)-windows-x86.exe
 linux-x86_64: $(output_suffix)-linux-x86_64
 linux-x86: $(output_suffix)-linux-x86
 android-aarch64: $(output_suffix)-android-aarch64
-android-armreabi: $(output_suffix)-android-armreabi
 
-all: windows-x86_64 windows-x86 linux-x86_64 linux-x86 android-aarch64 android-armreabi
+all: windows-x86_64 windows-x86 linux-x86_64 linux-x86 android-aarch64
